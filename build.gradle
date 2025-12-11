@@ -1,20 +1,18 @@
 plugins {
     id 'java'
+    alias libs.plugins.shadowJar
 }
 
-group = 'org.brain4j'
-version = '1.0-SNAPSHOT'
+group = 'org.compute4j'
+version = '1.0.0'
 
-repositories {
-    mavenCentral()
-}
+subprojects {
+    version = rootProject.version
+    group = rootProject.group
 
-dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+    apply plugin: 'java'
 
-test {
-    useJUnitPlatform()
+    repositories {
+        mavenCentral()
+    }
 }
