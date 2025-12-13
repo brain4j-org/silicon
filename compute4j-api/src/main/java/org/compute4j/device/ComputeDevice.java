@@ -6,6 +6,14 @@ public interface ComputeDevice {
     ComputeContext createContext() throws Throwable;
     String getName() throws Throwable;
     
+    default ComputeBuffer allocateArray(byte[] data) throws Throwable {
+        return allocateArray(data, data.length);
+    }
+    
+    default ComputeBuffer allocateArray(byte[] data, ComputeQueue queue) throws Throwable {
+        return allocateArray(data, data.length, queue);
+    }
+    
     default ComputeBuffer allocateArray(double[] data) throws Throwable {
         return allocateArray(data, data.length * 8L);
     }

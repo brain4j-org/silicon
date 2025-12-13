@@ -72,6 +72,12 @@ public record CudaBuffer(CudaDevice device, MemorySegment handle, long size) imp
     }
     
     @Override
+    public void free() throws Throwable {
+        int res = (int) CUDA_MEM_FREE.invoke(handle);
+        if (res != 0) throw new RuntimeException("cuMemFree failed: " + res);
+    }
+    
+    @Override
     public void get(byte[] data) throws Throwable {
         long size = bytesOf(data);
         try (Arena arena = Arena.ofConfined()) {
@@ -271,7 +277,7 @@ public record CudaBuffer(CudaDevice device, MemorySegment handle, long size) imp
         }
     }
     
-    public long devicePointer() throws Throwable {
+    public long getNativePointer() throws Throwable {
         return (long) CUDA_BUFFER_PTR.invoke(handle);
     }
 }

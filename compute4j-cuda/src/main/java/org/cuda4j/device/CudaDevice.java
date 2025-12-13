@@ -27,51 +27,6 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
         LOOKUP.find("cuda_mem_alloc").orElse(null),
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
     );
-    public static final MethodHandle CUDA_BUFFER_PTR = LINKER.downcallHandle(
-        LOOKUP.find("cuda_buffer_ptr").orElse(null),
-        FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS)
-    );
-    public static final MethodHandle CUDA_MEM_FREE = LINKER.downcallHandle(
-        LOOKUP.find("cuda_mem_free").orElse(null),
-        FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
-    );
-    public static final MethodHandle CUDA_MEMCPY_HTOD = LINKER.downcallHandle(
-        LOOKUP.find("cuda_memcpy_htod").orElse(null),
-        FunctionDescriptor.of(ValueLayout.JAVA_INT,
-            ValueLayout.ADDRESS, // buffer pointer
-            ValueLayout.ADDRESS, // host pointer
-            ValueLayout.JAVA_LONG) // size
-    );
-    public static final MethodHandle CUDA_MEMCPY_DTOH = LINKER.downcallHandle(
-        LOOKUP.find("cuda_memcpy_dtoh").orElse(null),
-        FunctionDescriptor.of(ValueLayout.JAVA_INT,
-            ValueLayout.ADDRESS, // host pointer
-            ValueLayout.ADDRESS, // buffer pointer
-            ValueLayout.JAVA_LONG) // size
-    );
-    public static final MethodHandle CUDA_MEMCPY_DTOD = LINKER.downcallHandle(
-        LOOKUP.find("cuda_memcpy_dtod").orElse(null),
-        FunctionDescriptor.of(ValueLayout.JAVA_INT,
-            ValueLayout.ADDRESS, // destination pointer
-            ValueLayout.ADDRESS, // source pointer
-            ValueLayout.JAVA_LONG) // size
-    );
-    public static final MethodHandle CUDA_MEMCPY_HTOD_ASYNC = LINKER.downcallHandle(
-        LOOKUP.find("cuda_memcpy_htod_async").orElse(null),
-        FunctionDescriptor.of(ValueLayout.JAVA_INT,
-            ValueLayout.ADDRESS, // buffer pointer
-            ValueLayout.ADDRESS, // host pointer
-            ValueLayout.JAVA_LONG, // size
-            ValueLayout.ADDRESS) // stream
-    );
-    public static final MethodHandle CUDA_MEMCPY_DTOH_ASYNC = LINKER.downcallHandle(
-        LOOKUP.find("cuda_memcpy_dtoh_async").orElse(null),
-        FunctionDescriptor.of(ValueLayout.JAVA_INT,
-            ValueLayout.ADDRESS, // host pointer
-            ValueLayout.ADDRESS, // buffer pointer
-            ValueLayout.JAVA_LONG, // size
-            ValueLayout.ADDRESS) // stream
-    );
     
     @Override
     public CudaContext createContext() throws Throwable {

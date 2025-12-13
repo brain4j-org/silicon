@@ -1,11 +1,11 @@
 package org.compute4j;
 
+import org.compute4j.computing.ComputeArgs;
 import org.compute4j.computing.ComputeQueue;
 import org.compute4j.computing.ComputeSize;
 import org.compute4j.device.ComputeBuffer;
 import org.compute4j.device.ComputeContext;
 import org.compute4j.device.ComputeDevice;
-import org.compute4j.computing.ComputeArgs;
 import org.compute4j.kernel.ComputeFunction;
 import org.compute4j.kernel.ComputeModule;
 

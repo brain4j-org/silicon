@@ -2,10 +2,7 @@ package org.cuda4j;
 
 import org.compute4j.BackendType;
 import org.compute4j.ComputeBackend;
-import org.cuda4j.buffer.CudaBuffer;
-import org.cuda4j.context.CudaStream;
 import org.cuda4j.device.CudaDevice;
-import org.cuda4j.device.CudaModule;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,10 +27,6 @@ public class CUDA implements ComputeBackend {
     public static final MethodHandle CUDA_CREATE_SYSTEM_DEVICE = LINKER.downcallHandle(
         LOOKUP.find("cuda_create_system_device").orElse(null),
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_INT)
-    );
-    public static final MethodHandle CUDA_MEM_ALLOC = LINKER.downcallHandle(
-        LOOKUP.find("cuda_mem_alloc").orElse(null),
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
     );
     
     static {

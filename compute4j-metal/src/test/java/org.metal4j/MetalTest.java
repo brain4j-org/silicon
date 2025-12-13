@@ -2,11 +2,11 @@ package org.metal4j;
 
 import org.metal4j.buffer.MetalBuffer;
 import org.metal4j.buffer.MetalCommandBuffer;
-import org.metal4j.state.MetalDevice;
 import org.metal4j.kernel.MetalFunction;
 import org.metal4j.kernel.MetalLibrary;
 import org.metal4j.kernel.MetalPipeline;
 import org.metal4j.state.MetalCommandQueue;
+import org.metal4j.state.MetalDevice;
 import org.metal4j.state.MetalEncoder;
 
 import java.nio.file.Files;

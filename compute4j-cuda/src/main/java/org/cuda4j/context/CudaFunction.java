@@ -24,14 +24,14 @@ public record CudaFunction(MemorySegment handle) implements CudaObject, ComputeF
         )
     );
     
-    public int launch(
+    public void launch(
         int gridX, int gridY, int gridZ,
         int blockX, int blockY, int blockZ,
         int sharedMemBytes,
         CudaStream stream,
         CudaPointer kernelParams
     ) throws Throwable {
-        return (int) CUDA_LAUNCH_KERNEL.invoke(
+        CUDA_LAUNCH_KERNEL.invoke(
             handle,
             gridX, gridY, gridZ,
             blockX, blockY, blockZ,
