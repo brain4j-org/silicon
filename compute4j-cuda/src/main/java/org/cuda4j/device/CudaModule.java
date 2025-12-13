@@ -1,5 +1,6 @@
 package org.cuda4j.device;
 
+import org.compute4j.kernel.ComputeModule;
 import org.cuda4j.CudaObject;
 import org.cuda4j.context.CudaFunction;
 
@@ -9,7 +10,7 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 
-public record CudaModule(MemorySegment handle) implements CudaObject {
+public record CudaModule(MemorySegment handle) implements CudaObject, ComputeModule {
     
     public static final MethodHandle CUDA_MODULE_UNLOAD = LINKER.downcallHandle(
         LOOKUP.find("cuda_module_unload").orElse(null),
@@ -20,6 +21,7 @@ public record CudaModule(MemorySegment handle) implements CudaObject {
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
     
+    @Override
     public CudaFunction getFunction(String name) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment cName = arena.allocateFrom(name);

@@ -13,7 +13,7 @@ import java.nio.file.Path;
 
 public class ComputeTest {
 
-    public static void main(String[] _args) {
+    public static void main(String[] _args) throws Throwable {
         Compute4J.chooseBackend(BackendType.OPENCL); // force the backend
         
         ComputeDevice device = Compute4J.createSystemDevice();
@@ -37,5 +37,10 @@ public class ComputeTest {
 
         queue.dispatch(function, globalSize, groupSize, args);
         queue.awaitCompletion();
+        
+        float[] result = new float[1024];
+        c.get(result);
+        
+        System.out.println(result);
     }
 }

@@ -53,11 +53,11 @@ public class Compute4J {
         return candidate.getType().getPriority() < current.getType().getPriority();
     }
 
-    public static ComputeDevice createSystemDevice() {
+    public static ComputeDevice createSystemDevice() throws Throwable {
         return createSystemDevice(0);
     }
 
-    public static ComputeDevice createSystemDevice(int index) {
+    public static ComputeDevice createSystemDevice(int index) throws Throwable {
         return backend.createSystemDevice(index);
     }
 

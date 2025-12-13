@@ -1,63 +1,63 @@
 package org.compute4j.device;
 
-import org.compute4j.computing.ComputeStream;
+import org.compute4j.computing.ComputeQueue;
 
 public interface ComputeDevice {
-    ComputeContext createContext();
+    ComputeContext createContext() throws Throwable;
+    String getName() throws Throwable;
     
-    ComputeBuffer allocateBytes(long size);
-    ComputeBuffer allocateBytes(long size, ComputeStream stream);
-    
-    // implicit array api
-    default ComputeBuffer allocateArray(double[] data) {
+    default ComputeBuffer allocateArray(double[] data) throws Throwable {
         return allocateArray(data, data.length * 8L);
     }
     
-    default ComputeBuffer allocateArray(double[] data, ComputeStream stream) {
-        return allocateArray(data, data.length * 8L, stream);
+    default ComputeBuffer allocateArray(double[] data, ComputeQueue queue) throws Throwable {
+        return allocateArray(data, data.length * 8L, queue);
     }
     
-    default ComputeBuffer allocateArray(float[] data) {
+    default ComputeBuffer allocateArray(float[] data) throws Throwable {
         return allocateArray(data, data.length * 4L);
     }
     
-    default ComputeBuffer allocateArray(float[] data, ComputeStream stream) {
-        return allocateArray(data, data.length * 4L, stream);
+    default ComputeBuffer allocateArray(float[] data, ComputeQueue queue) throws Throwable {
+        return allocateArray(data, data.length * 4L, queue);
     }
     
-    default ComputeBuffer allocateArray(long[] data) {
+    default ComputeBuffer allocateArray(long[] data) throws Throwable {
         return allocateArray(data, data.length * 8L);
     }
     
-    default ComputeBuffer allocateArray(long[] data, ComputeStream stream) {
-        return allocateArray(data, data.length * 8L, stream);
+    default ComputeBuffer allocateArray(long[] data, ComputeQueue queue) throws Throwable {
+        return allocateArray(data, data.length * 8L, queue);
     }
     
-    default ComputeBuffer allocateArray(int[] data) {
+    default ComputeBuffer allocateArray(int[] data) throws Throwable {
         return allocateArray(data, data.length * 4L);
     }
     
-    default ComputeBuffer allocateArray(int[] data, ComputeStream stream) {
-        return allocateArray(data, data.length * 4L, stream);
+    default ComputeBuffer allocateArray(int[] data, ComputeQueue queue) throws Throwable {
+        return allocateArray(data, data.length * 4L, queue);
     }
     
-    default ComputeBuffer allocateArray(short[] data) {
+    default ComputeBuffer allocateArray(short[] data) throws Throwable {
         return allocateArray(data, data.length * 2L);
     }
     
-    default ComputeBuffer allocateArray(short[] data, ComputeStream stream) {
-        return allocateArray(data, data.length * 2L, stream);
+    default ComputeBuffer allocateArray(short[] data, ComputeQueue queue) throws Throwable {
+        return allocateArray(data, data.length * 2L, queue);
     }
     
-    // explicit array api
-    ComputeBuffer allocateArray(double[] data, long size);
-    ComputeBuffer allocateArray(double[] data, long size, ComputeStream stream);
-    ComputeBuffer allocateArray(float[] data, long size);
-    ComputeBuffer allocateArray(float[] data, long size, ComputeStream stream);
-    ComputeBuffer allocateArray(long[] data, long size);
-    ComputeBuffer allocateArray(long[] data, long size, ComputeStream stream);
-    ComputeBuffer allocateArray(int[] data, long size);
-    ComputeBuffer allocateArray(int[] data, long size, ComputeStream stream);
-    ComputeBuffer allocateArray(short[] data, long size);
-    ComputeBuffer allocateArray(short[] data, long size, ComputeStream stream);
+    ComputeBuffer allocateBytes(long size) throws Throwable;
+    ComputeBuffer allocateBytes(long size, ComputeQueue queue) throws Throwable;
+    ComputeBuffer allocateArray(byte[] data, long size) throws Throwable;
+    ComputeBuffer allocateArray(byte[] data, long size, ComputeQueue queue) throws Throwable;
+    ComputeBuffer allocateArray(double[] data, long size) throws Throwable;
+    ComputeBuffer allocateArray(double[] data, long size, ComputeQueue queue) throws Throwable;
+    ComputeBuffer allocateArray(float[] data, long size) throws Throwable;
+    ComputeBuffer allocateArray(float[] data, long size, ComputeQueue queue) throws Throwable;
+    ComputeBuffer allocateArray(long[] data, long size) throws Throwable;
+    ComputeBuffer allocateArray(long[] data, long size, ComputeQueue queue) throws Throwable;
+    ComputeBuffer allocateArray(int[] data, long size) throws Throwable;
+    ComputeBuffer allocateArray(int[] data, long size, ComputeQueue queue) throws Throwable;
+    ComputeBuffer allocateArray(short[] data, long size) throws Throwable;
+    ComputeBuffer allocateArray(short[] data, long size, ComputeQueue queue) throws Throwable;
 }

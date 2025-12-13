@@ -23,15 +23,16 @@ public class CudaTest {
     }
     
     private static void benchmarkCuda() throws Throwable {
-        CudaDevice device = CUDA.createSystemDevice(0);
+        CUDA cuda = new CUDA();
+        CudaDevice device = cuda.createSystemDevice(0);
         
         System.out.println("CUDA Device name: " + device.getName());
-        System.out.println("CUDA Device count: " + CUDA.getDeviceCount());
+        System.out.println("CUDA Device count: " + cuda.getDeviceCount());
         
         CudaContext context = device.createContext().setCurrent();
 
-        CudaModule module = CUDA.loadModule("resources/vector_add.ptx");
-        CudaStream stream = CUDA.createStream();
+        CudaModule module = context.loadModule("resources/vector_add.ptx");
+        CudaStream stream = context.createQueue();
         
         CudaFunction function = module.getFunction("vecAdd");
         
@@ -59,7 +60,7 @@ public class CudaTest {
         
         long start = System.nanoTime();
         function.launch(gridSize, 1, 1, blockSize, 1, 1, 0, stream, kernelArgs);
-        stream.sync();
+        stream.awaitCompletion();
         long end = System.nanoTime();
         double took = (end - start) / 1e6;
         

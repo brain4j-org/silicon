@@ -16,16 +16,20 @@ public interface CudaObject {
         return array.length;
     }
     
-    default long bytesOf(int[] array) {
-        return (long) array.length * Integer.BYTES;
+    default long bytesOf(double[] array) {
+        return (long) array.length * Double.BYTES;
     }
     
     default long bytesOf(float[] array) {
         return (long) array.length * Float.BYTES;
     }
     
-    default long bytesOf(double[] array) {
-        return (long) array.length * Double.BYTES;
+    default long bytesOf(long[] array) {
+        return (long) array.length * Long.BYTES;
+    }
+    
+    default long bytesOf(int[] array) {
+        return (long) array.length * Integer.BYTES;
     }
     
     default long bytesOf(short[] array) {

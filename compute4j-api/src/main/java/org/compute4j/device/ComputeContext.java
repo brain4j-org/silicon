@@ -6,8 +6,8 @@ import org.compute4j.computing.ComputeQueue;
 import java.nio.file.Path;
 
 public interface ComputeContext {
-    ComputeQueue createQueue();
-    ComputeModule loadModule(Path path);
-    ComputeModule loadModule(byte[] rawSrc);
+    ComputeQueue createQueue() throws Throwable;
+    ComputeModule loadModule(Path path) throws Throwable;
+    ComputeModule loadModule(byte[] rawSrc) throws Throwable;
     ComputeModule loadModule(String source);
 }

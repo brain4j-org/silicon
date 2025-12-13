@@ -1,5 +1,6 @@
 package org.cuda4j.context;
 
+import org.compute4j.kernel.ComputeFunction;
 import org.cuda4j.CudaObject;
 import org.cuda4j.buffer.CudaPointer;
 
@@ -8,7 +9,7 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 
-public record CudaFunction(MemorySegment handle) implements CudaObject {
+public record CudaFunction(MemorySegment handle) implements CudaObject, ComputeFunction {
     
     private static final MethodHandle CUDA_LAUNCH_KERNEL = LINKER.downcallHandle(
         LOOKUP.find("cuda_launch_kernel").orElse(null),

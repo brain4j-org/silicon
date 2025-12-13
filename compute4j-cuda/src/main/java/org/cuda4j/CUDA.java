@@ -1,5 +1,7 @@
 package org.cuda4j;
 
+import org.compute4j.BackendType;
+import org.compute4j.ComputeBackend;
 import org.cuda4j.buffer.CudaBuffer;
 import org.cuda4j.context.CudaStream;
 import org.cuda4j.device.CudaDevice;
@@ -13,7 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-public class CUDA {
+public class CUDA implements ComputeBackend {
     
     public static final Linker LINKER = Linker.nativeLinker();
     public static final SymbolLookup LOOKUP = loadFromResources("/libcuda4j.dll");
@@ -29,18 +31,6 @@ public class CUDA {
         LOOKUP.find("cuda_create_system_device").orElse(null),
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_INT)
     );
-    public static final MethodHandle CUDA_STREAM_CREATE = LINKER.downcallHandle(
-        LOOKUP.find("cuda_stream_create").orElse(null),
-        FunctionDescriptor.of(ValueLayout.ADDRESS)
-    );
-    public static final MethodHandle CUDA_MODULE_LOAD = LINKER.downcallHandle(
-        LOOKUP.find("cuda_module_load").orElse(null),
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    public static final MethodHandle CUDA_MODULE_LOAD_DATA = LINKER.downcallHandle(
-        LOOKUP.find("cuda_module_load_data").orElse(null),
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
     public static final MethodHandle CUDA_MEM_ALLOC = LINKER.downcallHandle(
         LOOKUP.find("cuda_mem_alloc").orElse(null),
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
@@ -54,53 +44,29 @@ public class CUDA {
         }
     }
     
-    public static void init() throws Throwable {
-        CUDA_INIT.invokeExact();
-    }
-    
-    public static int getDeviceCount() throws Throwable {
+    @Override
+    public int getDeviceCount() throws Throwable {
         return (int) CUDA_DEVICE_COUNT.invokeExact();
     }
     
-    public static CudaDevice createSystemDevice(int index) throws Throwable {
+    @Override
+    public boolean isAvailable() {
+        return false;
+    }
+    
+    @Override
+    public BackendType getType() {
+        return BackendType.CUDA;
+    }
+    
+    @Override
+    public CudaDevice createSystemDevice(int index) throws Throwable {
         MemorySegment ptr = (MemorySegment) CUDA_CREATE_SYSTEM_DEVICE.invokeExact(index);
         return new CudaDevice(ptr, index);
     }
     
-    public static CudaStream createStream() throws Throwable {
-        MemorySegment ptr = (MemorySegment) CUDA_STREAM_CREATE.invoke();
-        
-        if (ptr == null || ptr.address() == 0) {
-            throw new RuntimeException("Failed to create CUDA stream");
-        }
-        
-        return new CudaStream(ptr);
-    }
-    
-    public static CudaModule loadModule(String path) throws Throwable {
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment cPath = arena.allocateFrom(path);
-            MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD.invoke(cPath);
-            
-            if (moduleHandle == null || moduleHandle.address() == 0) {
-                throw new RuntimeException("cuModuleLoad failed for: " + path);
-            }
-            
-            return new CudaModule(moduleHandle);
-        }
-    }
-    
-    public static CudaModule loadModule(byte[] ptx) throws Throwable {
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment data = arena.allocateFrom(ValueLayout.JAVA_BYTE, ptx);
-            MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD_DATA.invoke(data);
-            
-            if (moduleHandle == null || moduleHandle.address() == 0) {
-                throw new RuntimeException("cuModuleLoadData failed");
-            }
-            
-            return new CudaModule(moduleHandle);
-        }
+    public static void init() throws Throwable {
+        CUDA_INIT.invokeExact();
     }
     
     public static CudaBuffer allocateBytes(long size) throws Throwable {
