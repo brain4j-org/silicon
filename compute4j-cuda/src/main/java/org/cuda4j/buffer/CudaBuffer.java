@@ -63,7 +63,7 @@ public record CudaBuffer(CudaDevice device, MemorySegment handle, long size) imp
     public CudaBuffer copy() throws Throwable {
         CudaBuffer buffer = device.allocateBytes(size);
         
-        try (Arena arena = Arena.ofConfined()) {
+        try (Arena _ = Arena.ofConfined()) {
             int res = (int) CUDA_MEMCPY_DTOD.invoke(buffer.handle, handle, size);
             if (res != 0) throw new RuntimeException("cuMemcpyDtoD failed: " + res);
         }
