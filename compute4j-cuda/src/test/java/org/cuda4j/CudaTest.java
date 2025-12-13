@@ -31,7 +31,7 @@ public class CudaTest {
         
         CudaContext context = device.createContext().setCurrent();
 
-        CudaModule module = context.loadModule("resources/vector_add.ptx");
+        CudaModule module = context.loadModule(Path.of("resources/vector_add.ptx"));
         CudaStream stream = context.createQueue();
         
         CudaFunction function = module.getFunction("vecAdd");
@@ -66,7 +66,7 @@ public class CudaTest {
         
         System.out.println("Took " + took + " millis");
         float[] C = new float[E];
-        bufC.copyToHost(C);
+        bufC.get(C);
         
         System.out.println("Device: " + device.getName());
         System.out.println("Computed on GPU: " + Arrays.toString(C));

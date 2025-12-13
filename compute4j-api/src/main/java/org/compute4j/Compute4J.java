@@ -16,7 +16,7 @@ public class Compute4J {
         ServiceLoader<ComputeBackend> loader = ServiceLoader.load(ComputeBackend.class);
         
         for (ComputeBackend backend : loader) {
-            if (!backend.getType().equals(backend.getType())) continue;
+            if (!backend.getType().equals(backendType)) continue;
             
             Compute4J.backend = backend;
             return;
@@ -58,7 +58,7 @@ public class Compute4J {
     }
 
     public static ComputeDevice createSystemDevice(int index) throws Throwable {
-        return backend.createSystemDevice(index);
+        return getBackend().createSystemDevice(index);
     }
 
     public static ComputeBackend getBackend() {

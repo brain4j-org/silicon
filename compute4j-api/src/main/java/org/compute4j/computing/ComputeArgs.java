@@ -21,6 +21,10 @@ public class ComputeArgs {
         return new ComputeArgs(args);
     }
 
+    public int size() {
+        return args.size();
+    }
+    
     public List<Object> getArgs() {
         return args;
     }

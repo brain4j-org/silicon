@@ -4,6 +4,7 @@ import org.compute4j.device.ComputeContext;
 import org.cuda4j.CudaObject;
 import org.cuda4j.device.CudaModule;
 
+import java.io.File;
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
@@ -71,6 +72,10 @@ public record CudaContext(MemorySegment handle) implements CudaObject, ComputeCo
     
     @Override
     public CudaModule loadModule(Path path) throws Throwable {
+        if (!new File(path.toString()).exists()) {
+            throw new IllegalArgumentException(path + " does not exist!");
+        }
+        
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment cPath = arena.allocateFrom(path.toString());
             MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD.invoke(cPath);

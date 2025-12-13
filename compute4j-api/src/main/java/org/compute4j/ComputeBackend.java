@@ -7,4 +7,8 @@ public interface ComputeBackend {
     boolean isAvailable();
     BackendType getType();
     ComputeDevice createSystemDevice(int index) throws Throwable;
+
+    default String getName() {
+        return getType().getName();
+    }
 }

@@ -10,37 +10,40 @@ import org.compute4j.kernel.ComputeFunction;
 import org.compute4j.kernel.ComputeModule;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public class ComputeTest {
 
     public static void main(String[] _args) throws Throwable {
-        Compute4J.chooseBackend(BackendType.OPENCL); // force the backend
+        int N = 512 * 512 * 512;
+        
+        System.out.println("Chosen backend " + Compute4J.getBackend().getName());
         
         ComputeDevice device = Compute4J.createSystemDevice();
         ComputeContext context = device.createContext();
 
-        ComputeModule moduleFromPath = context.loadModule(Path.of("vector_add.metal"));
-        ComputeFunction function = moduleFromPath.getFunction("add");
+        ComputeModule moduleFromPath = context.loadModule(Path.of("resources/vector_add.ptx"));
+        ComputeFunction function = moduleFromPath.getFunction("vecAdd");
 
-        float[] dataA = new float[1024];
-        float[] dataB = new float[1024];
+        float[] dataA = new float[N];
+        float[] dataB = new float[N];
 
         ComputeBuffer a = device.allocateArray(dataA);
         ComputeBuffer b = device.allocateArray(dataB);
-        ComputeBuffer c = device.allocateBytes(dataA.length * 4L);
-
+        ComputeBuffer c = device.allocateBytes(N * 4L);
+        
         ComputeQueue queue = context.createQueue();
-        ComputeArgs args = ComputeArgs.of(a, b, c);
+        ComputeArgs args = ComputeArgs.of(a, b, c, N);
 
-        ComputeSize globalSize = new ComputeSize(1024, 1, 1);
-        ComputeSize groupSize = new ComputeSize(128, 1, 1);
-
+        ComputeSize globalSize = new ComputeSize(N, 1, 1);
+        ComputeSize groupSize = new ComputeSize(256, 1, 1);
+        
         queue.dispatch(function, globalSize, groupSize, args);
         queue.awaitCompletion();
         
-        float[] result = new float[1024];
+        float[] result = new float[10];
         c.get(result);
         
-        System.out.println(result);
+        System.out.println(Arrays.toString(result));
     }
 }

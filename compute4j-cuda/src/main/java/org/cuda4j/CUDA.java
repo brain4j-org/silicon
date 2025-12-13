@@ -51,7 +51,11 @@ public class CUDA implements ComputeBackend {
     
     @Override
     public boolean isAvailable() {
-        return false;
+        try {
+            return getDeviceCount() > 0;
+        } catch (Throwable e) {
+            return false;
+        }
     }
     
     @Override

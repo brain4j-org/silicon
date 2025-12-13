@@ -108,12 +108,16 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
     
     @Override
     public ComputeBuffer allocateArray(byte[] data, long size) throws Throwable {
-        return null;
+        CudaBuffer buffer = allocateBytes(size);
+        buffer.copyToDevice(data);
+        return buffer;
     }
     
     @Override
     public ComputeBuffer allocateArray(byte[] data, long size, ComputeQueue queue) throws Throwable {
-        return null;
+        CudaBuffer buffer = allocateBytes(size);
+        buffer.copyToDeviceAsync(data, (CudaStream) queue);
+        return buffer;
     }
     
     @Override
@@ -139,7 +143,9 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
     
     @Override
     public ComputeBuffer allocateArray(float[] data, long size, ComputeQueue queue) throws Throwable {
-        return null;
+        CudaBuffer buffer = allocateBytes(size);
+        buffer.copyToDeviceAsync(data, (CudaStream) queue);
+        return buffer;
     }
     
     @Override
@@ -151,7 +157,9 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
     
     @Override
     public ComputeBuffer allocateArray(long[] data, long size, ComputeQueue queue) throws Throwable {
-        return null;
+        CudaBuffer buffer = allocateBytes(size);
+        buffer.copyToDeviceAsync(data, (CudaStream) queue);
+        return buffer;
     }
     
     @Override
@@ -163,7 +171,9 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
     
     @Override
     public ComputeBuffer allocateArray(int[] data, long size, ComputeQueue queue) throws Throwable {
-        return null;
+        CudaBuffer buffer = allocateBytes(size);
+        buffer.copyToDeviceAsync(data, (CudaStream) queue);
+        return buffer;
     }
     
     @Override
@@ -175,6 +185,8 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
     
     @Override
     public ComputeBuffer allocateArray(short[] data, long size, ComputeQueue queue) throws Throwable {
-        return null;
+        CudaBuffer buffer = allocateBytes(size);
+        buffer.copyToDeviceAsync(data, (CudaStream) queue);
+        return buffer;
     }
 }

@@ -21,9 +21,15 @@ public record CudaPointer(MemorySegment segment) {
         return new CudaPointer(seg);
     }
     
-    public static CudaPointer fromInt(int value) {
-        MemorySegment seg = GLOBAL.allocate(JAVA_INT);
-        seg.set(JAVA_INT, 0, value);
+    public static CudaPointer fromByte(byte value) {
+        MemorySegment seg = GLOBAL.allocate(JAVA_BYTE);
+        seg.set(JAVA_BYTE, 0, value);
+        return new CudaPointer(seg);
+    }
+    
+    public static CudaPointer fromDouble(double value) {
+        MemorySegment seg = GLOBAL.allocate(JAVA_DOUBLE);
+        seg.set(JAVA_DOUBLE, 0, value);
         return new CudaPointer(seg);
     }
     
@@ -33,13 +39,28 @@ public record CudaPointer(MemorySegment segment) {
         return new CudaPointer(seg);
     }
     
+    public static CudaPointer fromLong(long value) {
+        MemorySegment seg = GLOBAL.allocate(JAVA_LONG);
+        seg.set(JAVA_LONG, 0, value);
+        return new CudaPointer(seg);
+    }
+    
+    public static CudaPointer fromInt(int value) {
+        MemorySegment seg = GLOBAL.allocate(JAVA_INT);
+        seg.set(JAVA_INT, 0, value);
+        return new CudaPointer(seg);
+    }
+    
+    public static CudaPointer fromShort(short value) {
+        MemorySegment seg = GLOBAL.allocate(JAVA_SHORT);
+        seg.set(JAVA_SHORT, 0, value);
+        return new CudaPointer(seg);
+    }
+    
     public static CudaPointer fromBuffer(CudaBuffer buf) throws Throwable {
         MemorySegment seg = GLOBAL.allocate(JAVA_LONG);
         seg.set(JAVA_LONG, 0, buf.devicePointer());
         return new CudaPointer(seg);
-//        MemorySegment seg = GLOBAL.allocate(ADDRESS);
-//        seg.set(ADDRESS, 0, buf.handle());
-//        return new CudaPointer(seg);
     }
     
     public static CudaPointer fromString(String value) {

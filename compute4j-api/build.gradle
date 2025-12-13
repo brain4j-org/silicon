@@ -2,3 +2,7 @@ plugins {
     id 'java'
     alias libs.plugins.shadowJar
 }
+
+dependencies {
+    runtimeOnly project(':compute4j-cuda')
+}
