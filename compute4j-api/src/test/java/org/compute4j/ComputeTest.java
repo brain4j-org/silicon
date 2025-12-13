@@ -27,6 +27,11 @@ public class ComputeTest {
 
         float[] dataA = new float[N];
         float[] dataB = new float[N];
+        
+        for (int i = 0; i < N; i++) {
+            dataA[i] = i;
+            dataB[i] = i + 1;
+        }
 
         ComputeBuffer a = device.allocateArray(dataA);
         ComputeBuffer b = device.allocateArray(dataB);
