@@ -1,0 +1,8 @@
+plugins {
+    id 'java'
+    alias libs.plugins.shadowJar
+}
+
+dependencies {
+    runtimeOnly project(':silicon-cuda')
+}

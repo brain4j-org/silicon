@@ -1,8 +1,0 @@
-plugins {
-    id 'java'
-    alias libs.plugins.shadowJar
-}
-
-dependencies {
-    implementation project(':compute4j-api')
-}

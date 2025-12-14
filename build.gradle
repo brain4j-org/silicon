@@ -3,7 +3,7 @@ plugins {
     alias libs.plugins.shadowJar
 }
 
-group = 'org.compute4j'
+group = 'org.silicon'
 version = '1.0.0'
 
 subprojects {
