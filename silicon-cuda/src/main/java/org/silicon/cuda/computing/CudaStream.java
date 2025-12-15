@@ -99,6 +99,7 @@ public record CudaStream(MemorySegment handle) implements CudaObject, ComputeQue
     public void release() throws Throwable {
         int res = (int) CUDA_STREAM_DESTROY.invoke(handle);
         if (res != 0) throw new RuntimeException("cuStreamDestroy failed: " + res);
+        CudaObject.super.release();
     }
     
     @Override

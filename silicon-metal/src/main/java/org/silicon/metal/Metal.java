@@ -1,6 +1,9 @@
 package org.silicon.metal;
 
-import org.silicon.metal.state.MetalDevice;
+import org.silicon.BackendType;
+import org.silicon.ComputeBackend;
+import org.silicon.device.ComputeDevice;
+import org.silicon.metal.device.MetalDevice;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,35 +13,67 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-public class Metal {
+public class Metal implements ComputeBackend {
     
     public static final Linker LINKER = Linker.nativeLinker();
-    public static final SymbolLookup LOOKUP = loadFromResources("/libmetal4j.dylib");
-    public static final MethodHandle METAL_CREATE_SYSTEM_DEVICE = LINKER.downcallHandle(
-        LOOKUP.find("metal_create_system_device").orElse(null),
-        FunctionDescriptor.of(ValueLayout.ADDRESS)
-    );
-    
-    public static MetalDevice createSystemDevice() throws Throwable {
+    public static final SymbolLookup LOOKUP;
+    public static final MethodHandle METAL_CREATE_SYSTEM_DEVICE;
+
+    static {
+        LOOKUP = loadFromResources("/libmetal4j.dylib");
+
+        if (LOOKUP != null) {
+            METAL_CREATE_SYSTEM_DEVICE = LINKER.downcallHandle(
+                LOOKUP.find("metal_create_system_device").orElse(null),
+                FunctionDescriptor.of(ValueLayout.ADDRESS)
+            );
+        } else {
+            METAL_CREATE_SYSTEM_DEVICE = null;
+        }
+    }
+
+    @Override
+    public int getDeviceCount() {
+        return 1; // TODO: proper device counting
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return getDeviceCount() > 0;
+    }
+
+    @Override
+    public BackendType getType() {
+        return BackendType.METAL;
+    }
+
+    @Override
+    public MetalDevice createSystemDevice(int index) throws Throwable {
+        if (index != 0) throw new IllegalArgumentException("Index should be equal to 0 when using Metal!");
         MemorySegment ptr = (MemorySegment) METAL_CREATE_SYSTEM_DEVICE.invokeExact();
         return new MetalDevice(ptr);
     }
-    
+
+    @Override
+    public MetalDevice createSystemDevice() throws Throwable {
+        return createSystemDevice(0);
+    }
+
     public static SymbolLookup loadFromResources(String resourceName) {
         try (InputStream in = MetalObject.class.getResourceAsStream(resourceName)) {
             if (in == null) {
                 throw new IllegalArgumentException("Resource not found: " + resourceName);
             }
-            
+
             String suffix = resourceName.substring(resourceName.lastIndexOf('.'));
             Path tempFile = Files.createTempFile("nativeLib", suffix);
-            
+
             Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
             tempFile.toFile().deleteOnExit();
-            
+
             return SymbolLookup.libraryLookup(tempFile.toString(), Arena.global());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException _) {
+            return null;
         }
     }
 }

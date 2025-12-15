@@ -15,8 +15,8 @@ import java.util.Arrays;
 public class ComputeTest {
 
     public static void main(String[] _args) throws Throwable {
-        int N = 1024;
-        Silicon.chooseBackend(BackendType.OPENCL);
+        int N = 512 * 512 * 512;
+         Silicon.chooseBackend(BackendType.OPENCL);
         
         System.out.println("Chosen backend " + Silicon.getBackend().getName());
         
@@ -39,15 +39,22 @@ public class ComputeTest {
         ComputeBuffer b = context.allocateArray(dataB);
         ComputeBuffer c = context.allocateBytes(N * 4L);
         
-        ComputeQueue queue = context.createQueue();
         ComputeArgs args = ComputeArgs.of(a, b, c, N);
 
         ComputeSize globalSize = new ComputeSize(N, 1, 1);
         ComputeSize groupSize = new ComputeSize(256, 1, 1);
-        
+
+        ComputeQueue queue = context.createQueue();
+
+        long start = System.nanoTime();
+
         queue.dispatch(function, globalSize, groupSize, args);
         queue.awaitCompletion();
-        
+
+        long end = System.nanoTime();
+        double took = (end - start) / 1e6;
+        System.out.println("Took: " + took + " ms");
+
         float[] result = new float[10];
         c.get(result);
         System.out.println(Arrays.toString(result));

@@ -1,7 +1,7 @@
-package org.silicon.metal.state;
+package org.silicon.metal.computing;
 
 import org.silicon.metal.MetalObject;
-import org.silicon.metal.buffer.MetalBuffer;
+import org.silicon.metal.device.MetalBuffer;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;

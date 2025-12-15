@@ -44,7 +44,7 @@ public class CUDA implements ComputeBackend {
 
         try {
             init();
-        } catch (Throwable ignored) {
+        } catch (Throwable _) {
             // ignore
         }
     }
@@ -58,7 +58,7 @@ public class CUDA implements ComputeBackend {
     public boolean isAvailable() {
         try {
             return getDeviceCount() > 0;
-        } catch (Throwable e) {
+        } catch (Throwable _) {
             return false;
         }
     }
@@ -91,7 +91,7 @@ public class CUDA implements ComputeBackend {
             tempFile.toFile().deleteOnExit();
             
             return SymbolLookup.libraryLookup(tempFile.toString(), Arena.global());
-        } catch (Exception e) {
+        } catch (Exception _) {
             return null;
         }
     }

@@ -1,13 +1,14 @@
 package org.silicon.metal;
 
-import org.silicon.metal.buffer.MetalBuffer;
+import org.silicon.metal.device.MetalBuffer;
 import org.silicon.metal.buffer.MetalCommandBuffer;
+import org.silicon.metal.device.MetalContext;
 import org.silicon.metal.kernel.MetalFunction;
 import org.silicon.metal.kernel.MetalLibrary;
 import org.silicon.metal.kernel.MetalPipeline;
-import org.silicon.metal.state.MetalCommandQueue;
-import org.silicon.metal.state.MetalDevice;
-import org.silicon.metal.state.MetalEncoder;
+import org.silicon.metal.computing.MetalCommandQueue;
+import org.silicon.metal.device.MetalDevice;
+import org.silicon.metal.computing.MetalEncoder;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,8 +29,11 @@ public class MetalTest {
         byte[] raw = Files.readAllBytes(Path.of("resources/vector_add.metal"));
         String src = new String(raw);
 
-        MetalDevice device = Metal.createSystemDevice();
+        Metal metal = new Metal();
+        MetalDevice device = metal.createSystemDevice();
 
+        MetalContext context = device.createContext();
+        MetalLibrary module = context.loadModule(src);
         MetalLibrary lib = device.makeLibrary(src);
         MetalFunction function = lib.makeFunction("add");
         MetalPipeline pipeline = function.makePipeline();

@@ -11,4 +11,8 @@ public interface ComputeBackend {
     default String getName() {
         return getType().getName();
     }
+
+    default ComputeDevice createSystemDevice() throws Throwable {
+        return createSystemDevice(0);
+    }
 }

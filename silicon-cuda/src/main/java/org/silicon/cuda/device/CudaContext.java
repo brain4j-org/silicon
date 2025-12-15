@@ -113,7 +113,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     
     @Override
     public CudaModule loadModule(String source) throws Throwable {
-        return loadModule(source.getBytes(StandardCharsets.UTF_8));
+        throw new UnsupportedOperationException("JIT kernel compilation is not supported yet!");
     }
     
     @Override
