@@ -16,6 +16,7 @@ public record MetalPipeline(MemorySegment handle) implements MetalObject {
 
     public static MetalPipeline makePipeline(MetalFunction function) throws Throwable {
         MemorySegment ptr = (MemorySegment) METAL_MAKE_PIPELINE.invokeExact(function.handle());
+        if (ptr == null) throw new IllegalArgumentException("metalMakePipeline failed!");
         return new MetalPipeline(ptr);
     }
 }

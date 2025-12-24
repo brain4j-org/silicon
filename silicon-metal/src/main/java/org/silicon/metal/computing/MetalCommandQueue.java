@@ -3,9 +3,11 @@ package org.silicon.metal.computing;
 import org.silicon.computing.ComputeArgs;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.computing.ComputeSize;
+import org.silicon.device.ComputeBuffer;
 import org.silicon.kernel.ComputeFunction;
 import org.silicon.metal.MetalObject;
 import org.silicon.metal.buffer.MetalCommandBuffer;
+import org.silicon.metal.device.MetalBuffer;
 import org.silicon.metal.device.MetalDevice;
 import org.silicon.metal.kernel.MetalFunction;
 import org.silicon.metal.kernel.MetalPipeline;
@@ -50,6 +52,7 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
                     case Long x -> encoder.setLong(x, i);
                     case Integer x -> encoder.setInt(x, i);
                     case Short x -> encoder.setShort(x, i);
+                    case MetalBuffer x -> encoder.setBuffer(x, i);
                     default -> throw new IllegalStateException("Unexpected value: " + argList.get(i));
                 }
             }
@@ -58,6 +61,7 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
         }
 
         commandBuffer.commit();
+        pipeline.release();
     }
 
     @Override

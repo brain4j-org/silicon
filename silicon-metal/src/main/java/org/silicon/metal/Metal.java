@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 public class Metal implements ComputeBackend {
     
     public static final Linker LINKER = Linker.nativeLinker();
+
     public static final SymbolLookup LOOKUP;
     public static final MethodHandle METAL_CREATE_SYSTEM_DEVICE;
 

@@ -1,4 +1,4 @@
-__kernel void vecAdd(
+__kernel void add(
     __global const float* A,
     __global const float* B,
     __global float* C,

@@ -20,7 +20,7 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
 
     public static final MethodHandle METAL_NEW_BUFFER = LINKER.downcallHandle(
         LOOKUP.find("metal_new_buffer").orElse(null),
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT)
+        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
     );
     public static final MethodHandle METAL_CREATE_COMMAND_QUEUE = LINKER.downcallHandle(
         LOOKUP.find("metal_create_command_queue").orElse(null),

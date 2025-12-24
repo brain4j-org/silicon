@@ -9,4 +9,5 @@ test {
 dependencies {
     testRuntimeOnly project(':silicon-cuda')
     testRuntimeOnly project(':silicon-opencl')
+    testRuntimeOnly project(':silicon-metal')
 }

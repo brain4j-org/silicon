@@ -22,10 +22,11 @@ public class ComputeTest {
         
         ComputeDevice device = Silicon.createSystemDevice();
         ComputeContext context = device.createContext();
-        
-//         ComputeModule moduleFromPath = context.loadModule(Path.of("resources/vector_add.ptx"));
-        ComputeModule moduleFromPath = context.loadModule(Path.of("resources/vector_add.cl"));
-        ComputeFunction function = moduleFromPath.getFunction("vecAdd");
+
+        // ComputeModule moduleFromPath = context.loadModule(Path.of("resources/vector_add.ptx"));
+        // ComputeModule moduleFromPath = context.loadModule(Path.of("resources/vector_add.cl"));
+        ComputeModule moduleFromPath = context.loadModule(Path.of("resources/vector_add.metal"));
+        ComputeFunction function = moduleFromPath.getFunction("add");
 
         float[] dataA = new float[N];
         float[] dataB = new float[N];
@@ -44,16 +45,23 @@ public class ComputeTest {
         ComputeSize globalSize = new ComputeSize(N, 1, 1);
         ComputeSize groupSize = new ComputeSize(256, 1, 1);
 
-        ComputeQueue queue = context.createQueue();
+        double sum = 0;
 
-        long start = System.nanoTime();
+        for (int i = 0; i < 100; i++) {
+            ComputeQueue queue = context.createQueue();
 
-        queue.dispatch(function, globalSize, groupSize, args);
-        queue.awaitCompletion();
+            long start = System.nanoTime();
 
-        long end = System.nanoTime();
-        double took = (end - start) / 1e6;
-        System.out.println("Took: " + took + " ms");
+            queue.dispatch(function, globalSize, groupSize, args);
+            queue.awaitCompletion();
+
+            long end = System.nanoTime();
+            double took = (end - start) / 1e6;
+            if (i > 5) sum += took;
+        }
+
+        double average = sum / 95;
+        System.out.printf("Average ms: %.2f ms%n", average);
 
         float[] result = new float[10];
         c.get(result);
