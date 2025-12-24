@@ -13,19 +13,8 @@ import org.silicon.opencl.kernel.CLKernel;
 import java.nio.IntBuffer;
 import java.util.List;
 
-public class CLCommandQueue implements ComputeQueue {
-    
-    private final long handle;
-    private volatile long lastEvent = 0L;
-    
-    public CLCommandQueue(long handle) {
-        this.handle = handle;
-    }
-    
-    public long handle() {
-        return handle;
-    }
-    
+public record CLCommandQueue(long handle) implements ComputeQueue {
+
     private PointerBuffer toBuffer(ComputeSize size, MemoryStack stack) {
         int dim = size.workDim();
         PointerBuffer buf = stack.mallocPointer(dim);
@@ -34,22 +23,13 @@ public class CLCommandQueue implements ComputeQueue {
         if (dim > 2) buf.put(2, size.z());
         return buf;
     }
-    
-    private void replaceLastEvent(long newEvent) {
-        long old = this.lastEvent;
-        this.lastEvent = newEvent;
-        
-        if (old != 0L) {
-            CL10.clReleaseEvent(old);
-        }
-    }
-    
+
     @Override
     public void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
         if (!(function instanceof CLKernel(long kernelHandle))) {
             throw new IllegalArgumentException("Compute function is not an OpenCL kernel!");
         }
-        
+
         try (MemoryStack stack = MemoryStack.stackPush()) {
             List<Object> computeArgs = args.getArgs();
             for (int i = 0; i < args.size(); i++) {
@@ -66,15 +46,13 @@ public class CLCommandQueue implements ComputeQueue {
                     default -> throw new IllegalStateException("Unexpected value: " + arg);
                 }
             }
-            
-            ComputeSize fixedLocal  = fixLocalSize(globalSize, groupSize);
+
+            ComputeSize fixedLocal = fixLocalSize(globalSize, groupSize);
             ComputeSize fixedGlobal = fixGlobalSize(globalSize, fixedLocal);
-            
+
             PointerBuffer globalBuf = toBuffer(fixedGlobal, stack);
-            PointerBuffer localBuf  = fixedLocal != null ? toBuffer(fixedLocal, stack) : null;
-            
-            PointerBuffer eventBuf = stack.mallocPointer(1);
-            
+            PointerBuffer localBuf = fixedLocal != null ? toBuffer(fixedLocal, stack) : null;
+
             int err = CL10.clEnqueueNDRangeKernel(
                 handle,
                 kernelHandle, // cl_kernel
@@ -83,60 +61,41 @@ public class CLCommandQueue implements ComputeQueue {
                 globalBuf, // global size
                 localBuf,
                 null, // wait list (in-order queue)
-                eventBuf // event out
+                null // event out
             );
             if (err != CL10.CL_SUCCESS) throw new IllegalStateException("clEnqueueNDRangeKernel failed: " + err);
-            
-            long kernelEvent = eventBuf.get(0);
-            replaceLastEvent(kernelEvent);
         }
     }
-    
+
     @Override
     public void awaitCompletion() {
-        long event = lastEvent;
-        if (event != 0L) CL10.clWaitForEvents(event);
+        CL10.clFinish(handle);
     }
-    
+
     @Override
     public void release() {
         CL10.clReleaseCommandQueue(handle);
     }
-    
-    @Override
-    public boolean isCompleted() {
-        long event = lastEvent;
-        if (event == 0L) return true;
-        
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer status = stack.mallocInt(1);
-            
-            int err = CL10.clGetEventInfo(event, CL10.CL_EVENT_COMMAND_EXECUTION_STATUS, status, null);
-            if (err != CL10.CL_SUCCESS) throw new IllegalStateException("clGetEventInfo failed: " + err);
-            
-            return status.get(0) == CL10.CL_COMPLETE;
-        }
-    }
-    
+
     private ComputeSize fixGlobalSize(ComputeSize global, ComputeSize local) {
         if (local == null) return global;
-        
+
         int x = global.x();
         int lx = local.x();
-        
+
         if (lx > x) lx = x;
-        
+
         int fixedX = ((x + lx - 1) / lx) * lx;
-        
+
         return new ComputeSize(fixedX, 1, 1);
     }
-    
+
     private ComputeSize fixLocalSize(ComputeSize global, ComputeSize local) {
         if (local == null) return null;
-        
+
         int lx = local.x();
         if (lx > global.x()) lx = global.x();
-        
+
         return new ComputeSize(lx, 1, 1);
     }
 }

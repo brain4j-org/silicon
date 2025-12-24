@@ -31,6 +31,17 @@ public func metal_encoder_set_buffer(
     encoder.setBuffer(buffer, offset: 0, index: index)
 }
 
+@_cdecl("metal_encoder_set_bytes")
+public func metal_encoder_set_bytes(
+    encPtr: UnsafeMutableRawPointer,
+    dataPtr: UnsafeRawPointer,
+    length: Int,
+    index: Int
+) {
+    let encoder: MTLComputeCommandEncoder = pointerToObject(encPtr)
+    encoder.setBytes(dataPtr, length: length, index: index)
+}
+
 @_cdecl("metal_dispatch")
 public func metal_dispatch(
     encPtr: UnsafeMutableRawPointer,

@@ -25,12 +25,4 @@ public record MetalDevice(MemorySegment handle) implements MetalObject, ComputeD
         MemorySegment nameHandle = (MemorySegment) METAL_DEVICE_NAME.invokeExact(handle);
         return nameHandle.reinterpret(Long.MAX_VALUE).getString(0);
     }
-
-    public MetalLibrary makeLibrary(String source) throws Throwable {
-        return MetalLibrary.makeLibrary(this, source);
-    }
-
-    public MetalBuffer makeBuffer(int length) throws Throwable {
-        return MetalBuffer.makeBuffer(this, length);
-    }
 }

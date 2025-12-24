@@ -16,7 +16,7 @@ public class ComputeTest {
 
     public static void main(String[] _args) throws Throwable {
         int N = 512 * 512 * 512;
-         Silicon.chooseBackend(BackendType.OPENCL);
+         Silicon.chooseBackend(BackendType.METAL);
         
         System.out.println("Chosen backend " + Silicon.getBackend().getName());
         

@@ -17,17 +17,13 @@ import java.lang.invoke.MethodHandle;
 import java.util.List;
 
 public record CudaStream(MemorySegment handle) implements CudaObject, ComputeQueue {
-    
+
     public static final MethodHandle CUDA_STREAM_DESTROY = LINKER.downcallHandle(
         LOOKUP.find("cuda_stream_destroy").orElse(null),
         FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
     );
     public static final MethodHandle CUDA_STREAM_SYNC = LINKER.downcallHandle(
         LOOKUP.find("cuda_stream_sync").orElse(null),
-        FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
-    );
-    public static final MethodHandle CUDA_STREAM_QUERY = LINKER.downcallHandle(
-        LOOKUP.find("cuda_stream_query").orElse(null),
         FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
     );
     private static final MethodHandle CUDA_LAUNCH_KERNEL = LINKER.downcallHandle(
@@ -42,22 +38,22 @@ public record CudaStream(MemorySegment handle) implements CudaObject, ComputeQue
             ValueLayout.ADDRESS // kernel params
         )
     );
-    
+
     @Override
     public void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) throws Throwable {
         if (!(function instanceof CudaFunction(MemorySegment funcHandle))) {
             throw new IllegalArgumentException("Compute function is not an CUDA stream!");
         }
-        
+
         if (groupSize == null) groupSize = new ComputeSize(128, 1, 1); // TODO: better handling
-        
+
         int gridX = globalSize.x() / groupSize.x();
         int gridY = globalSize.y() / groupSize.y();
         int gridZ = globalSize.z() / groupSize.z();
-        
+
         List<Object> computeArgs = args.getArgs();
         CudaPointer[] pointers = new CudaPointer[computeArgs.size()];
-        
+
         for (int i = 0; i < args.size(); i++) {
             Object arg = computeArgs.get(i);
             switch (arg) {
@@ -72,39 +68,32 @@ public record CudaStream(MemorySegment handle) implements CudaObject, ComputeQue
                 default -> throw new IllegalStateException("Unexpected value: " + arg);
             }
         }
-        
+
         CudaPointer parameters = CudaPointer.from(pointers);
-        
+
         int result = (int) CUDA_LAUNCH_KERNEL.invoke(
             funcHandle,
             gridX, gridY, gridZ,
             groupSize.x(), groupSize.y(), groupSize.z(),
-            0,
-            handle(),
+            0, handle(),
             args.size() == 0 ? MemorySegment.NULL : parameters.segment()
         );
-        
+
         if (result != 0) {
             throw new RuntimeException("cuLaunchKernel failed: " + result);
         }
     }
-    
+
     @Override
     public void awaitCompletion() throws Throwable {
         int res = (int) CUDA_STREAM_SYNC.invoke(handle);
         if (res != 0) throw new RuntimeException("cuStreamSynchronized failed: " + res);
     }
-    
+
     @Override
     public void release() throws Throwable {
         int res = (int) CUDA_STREAM_DESTROY.invoke(handle);
         if (res != 0) throw new RuntimeException("cuStreamDestroy failed: " + res);
         CudaObject.super.release();
-    }
-    
-    @Override
-    public boolean isCompleted() throws Throwable {
-        int res = (int) CUDA_STREAM_QUERY.invoke();
-        return res == 0;
     }
 }

@@ -12,10 +12,6 @@ import java.lang.invoke.MethodHandle;
 
 public record MetalCommandBuffer(MemorySegment handle) implements MetalObject {
 
-    public static final MethodHandle METAL_CREATE_COMMAND_BUFFER = LINKER.downcallHandle(
-        LOOKUP.find("metal_create_command_buffer").orElse(null),
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
     public static final MethodHandle METAL_MAKE_ENCODER = LINKER.downcallHandle(
         LOOKUP.find("metal_make_encoder").orElse(null),
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
@@ -29,13 +25,8 @@ public record MetalCommandBuffer(MemorySegment handle) implements MetalObject {
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
     );
 
-    public static MetalCommandBuffer make(MetalCommandQueue queue) throws Throwable {
-        MemorySegment ptr = (MemorySegment) METAL_CREATE_COMMAND_BUFFER.invokeExact(queue.handle());
-        return new MetalCommandBuffer(ptr);
-    }
-
     public MetalEncoder makeEncoder(MetalPipeline pipeline) throws Throwable {
-        MemorySegment ptr = (MemorySegment) METAL_MAKE_ENCODER.invokeExact(handle(), pipeline.handle());
+        MemorySegment ptr = (MemorySegment) METAL_MAKE_ENCODER.invokeExact(handle, pipeline.handle());
         return new MetalEncoder(ptr);
     }
 

@@ -37,7 +37,7 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     );
 
     @Override
-    public ComputeQueue createQueue() throws Throwable {
+    public MetalCommandQueue createQueue() throws Throwable {
         MemorySegment queuePtr = (MemorySegment) METAL_CREATE_COMMAND_QUEUE.invokeExact(device.handle());
 
         if (queuePtr == null) {
@@ -48,17 +48,17 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     }
 
     @Override
-    public ComputeModule loadModule(Path path) throws Throwable {
+    public MetalLibrary loadModule(Path path) throws Throwable {
         return loadModule(Files.readAllBytes(path));
     }
 
     @Override
-    public ComputeModule loadModule(byte[] rawSrc) throws Throwable {
+    public MetalLibrary loadModule(byte[] rawSrc) throws Throwable {
         return loadModule(new String(rawSrc));
     }
 
     @Override
-    public ComputeModule loadModule(String source) throws Throwable {
+    public MetalLibrary loadModule(String source) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment src = arena.allocateFrom(source);
             MemorySegment libPtr = (MemorySegment) METAL_CREATE_LIBRARY.invokeExact(device.handle(), src);
@@ -74,7 +74,7 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     @Override
     public MetalBuffer allocateBytes(long size) throws Throwable {
         MemorySegment ptr = (MemorySegment) METAL_NEW_BUFFER.invokeExact(device.handle(), size);
-        return new MetalBuffer(ptr, size);
+        return new MetalBuffer(ptr, this, size);
     }
 
     @Override
