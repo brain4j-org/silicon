@@ -75,6 +75,10 @@ public class CUDA implements ComputeBackend {
     
     @Override
     public CudaDevice createSystemDevice(int index) {
+        if (CUDA_CREATE_SYSTEM_DEVICE == null) {
+            throw new IllegalStateException("This backend is not available on this platform!");
+        }
+
         try {
             MemorySegment ptr = (MemorySegment) CUDA_CREATE_SYSTEM_DEVICE.invokeExact(index);
             return new CudaDevice(ptr, index);

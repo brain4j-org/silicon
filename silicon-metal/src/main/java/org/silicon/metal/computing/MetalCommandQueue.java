@@ -28,7 +28,7 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
     );
 
     private final MemorySegment handle;
-    private final MetalCommandBuffer commandBuffer;
+    private MetalCommandBuffer commandBuffer;
 
     public MetalCommandQueue(MemorySegment handle) {
         this.handle = handle;
@@ -38,7 +38,11 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
     @Override
     public void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
         MetalFunction metalFunction = (MetalFunction) function;
-        MetalPipeline pipeline = metalFunction.makePipeline();
+        MetalPipeline pipeline = metalFunction.getPipeline();
+
+        if (commandBuffer == null) {
+            commandBuffer = makeCommandBuffer();
+        }
 
         if (globalSize == null) throw new IllegalArgumentException("Global size cannot be null!");
         if (groupSize == null) throw new IllegalArgumentException("Group size cannot be null!");
@@ -60,14 +64,15 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
 
             encoder.dispatchThreads(globalSize.x(), globalSize.y(), globalSize.z(), groupSize.x(), groupSize.y(), groupSize.z());
         }
-
-        commandBuffer.commit();
-        pipeline.release();
     }
 
     @Override
     public void awaitCompletion() {
+        if (commandBuffer == null) return;
+
+        commandBuffer.commit();
         commandBuffer.waitUntilCompleted();
+        commandBuffer = null; // recreate it later
     }
 
     @Override

@@ -9,8 +9,9 @@ import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import java.util.Objects;
 
-public record MetalFunction(MemorySegment handle) implements MetalObject, ComputeFunction {
+public final class MetalFunction implements MetalObject, ComputeFunction {
 
     public static final MethodHandle METAL_CREATE_FUNCTION = LINKER.downcallHandle(
         LOOKUP.find("metal_create_function").orElse(null),
@@ -18,6 +19,13 @@ public record MetalFunction(MemorySegment handle) implements MetalObject, Comput
             ValueLayout.ADDRESS,                  // library (MTLLibrary*)
             ValueLayout.ADDRESS)                  // function name (char*)
     );
+    private final MemorySegment handle;
+    private final MetalPipeline pipeline;
+
+    public MetalFunction(MemorySegment handle) {
+        this.handle = handle;
+        this.pipeline = makePipeline();
+    }
 
     public static MetalFunction create(MetalLibrary library, String name) {
         try (Arena arena = Arena.ofConfined()) {
@@ -37,4 +45,33 @@ public record MetalFunction(MemorySegment handle) implements MetalObject, Comput
     public MetalPipeline makePipeline() {
         return MetalPipeline.makePipeline(this);
     }
+
+    @Override
+    public MemorySegment handle() {
+        return handle;
+    }
+
+    public MetalPipeline getPipeline() {
+        return pipeline;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (MetalFunction) obj;
+        return Objects.equals(this.handle, that.handle);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(handle);
+    }
+
+    @Override
+    public String toString() {
+        return "MetalFunction[" +
+            "handle=" + handle + ']';
+    }
+
 }
