@@ -9,10 +9,6 @@ public class ComputeArgs {
 
     private final List<Object> args;
 
-    public ComputeArgs() {
-        this.args = new ArrayList<>();
-    }
-
     private ComputeArgs(Object[] args) {
         this.args = new ArrayList<>(List.of(args));
     }

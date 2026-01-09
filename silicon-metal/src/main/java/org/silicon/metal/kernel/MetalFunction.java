@@ -1,5 +1,6 @@
 package org.silicon.metal.kernel;
 
+import org.silicon.SiliconException;
 import org.silicon.kernel.ComputeFunction;
 import org.silicon.metal.MetalObject;
 
@@ -18,7 +19,7 @@ public record MetalFunction(MemorySegment handle) implements MetalObject, Comput
             ValueLayout.ADDRESS)                  // function name (char*)
     );
 
-    public static MetalFunction create(MetalLibrary library, String name) throws Throwable {
+    public static MetalFunction create(MetalLibrary library, String name) {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment fnName = arena.allocateFrom(name);
             MemorySegment fnPtr = (MemorySegment) METAL_CREATE_FUNCTION.invokeExact(library.handle(), fnName);
@@ -28,10 +29,12 @@ public record MetalFunction(MemorySegment handle) implements MetalObject, Comput
             }
 
             return new MetalFunction(fnPtr);
+        } catch (Throwable e) {
+            throw new SiliconException("create(MetalLibrary, String) failed", e);
         }
     }
 
-    public MetalPipeline makePipeline() throws Throwable {
+    public MetalPipeline makePipeline() {
         return MetalPipeline.makePipeline(this);
     }
 }

@@ -1,8 +1,10 @@
 package org.silicon;
 
+import org.silicon.backend.BackendType;
 import org.silicon.computing.ComputeArgs;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.computing.ComputeSize;
+import org.silicon.device.ComputeArena;
 import org.silicon.device.ComputeBuffer;
 import org.silicon.device.ComputeContext;
 import org.silicon.device.ComputeDevice;
@@ -14,9 +16,9 @@ import java.util.Arrays;
 
 public class ComputeTest {
 
-    public static void main(String[] _args) throws Throwable {
+    public static void main(String[] _args) {
         int N = 512 * 512 * 512;
-         Silicon.chooseBackend(BackendType.METAL);
+        Silicon.chooseBackend(BackendType.METAL);
         
         System.out.println("Chosen backend " + Silicon.getBackend().getName());
         
@@ -36,10 +38,12 @@ public class ComputeTest {
             dataB[i] = i + 1;
         }
 
-        ComputeBuffer a = context.allocateArray(dataA);
-        ComputeBuffer b = context.allocateArray(dataB);
-        ComputeBuffer c = context.allocateBytes(N * 4L);
-        
+        ComputeArena arena = context.createArena();
+
+        ComputeBuffer a = arena.allocateArray(dataA);
+        ComputeBuffer b = arena.allocateArray(dataB);
+        ComputeBuffer c = arena.allocateBytes(N * 4L);
+
         ComputeArgs args = ComputeArgs.of(a, b, c, N);
 
         ComputeSize globalSize = new ComputeSize(N, 1, 1);
@@ -62,6 +66,8 @@ public class ComputeTest {
 
         double average = sum / 95;
         System.out.printf("Average ms: %.2f ms%n", average);
+
+        arena.close();
 
         float[] result = new float[10];
         c.get(result);

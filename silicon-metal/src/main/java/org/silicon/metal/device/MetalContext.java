@@ -1,5 +1,6 @@
 package org.silicon.metal.device;
 
+import org.silicon.SiliconException;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.device.ComputeBuffer;
 import org.silicon.device.ComputeContext;
@@ -8,6 +9,7 @@ import org.silicon.metal.MetalObject;
 import org.silicon.metal.computing.MetalCommandQueue;
 import org.silicon.metal.kernel.MetalLibrary;
 
+import java.io.IOException;
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
@@ -37,28 +39,36 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     );
 
     @Override
-    public MetalCommandQueue createQueue() throws Throwable {
-        MemorySegment queuePtr = (MemorySegment) METAL_CREATE_COMMAND_QUEUE.invokeExact(device.handle());
+    public MetalCommandQueue createQueue() {
+        try {
+            MemorySegment queuePtr = (MemorySegment) METAL_CREATE_COMMAND_QUEUE.invokeExact(device.handle());
 
-        if (queuePtr == null) {
-            throw new RuntimeException("Failed to create Metal command queue");
+            if (queuePtr == null) {
+                throw new RuntimeException("Failed to create Metal command queue");
+            }
+
+            return new MetalCommandQueue(queuePtr);
+        } catch (Throwable e) {
+            throw new SiliconException("createQueue() failed", e);
         }
-
-        return new MetalCommandQueue(queuePtr);
     }
 
     @Override
-    public MetalLibrary loadModule(Path path) throws Throwable {
-        return loadModule(Files.readAllBytes(path));
+    public MetalLibrary loadModule(Path path) {
+        try {
+            return loadModule(Files.readAllBytes(path));
+        } catch (Throwable e) {
+            throw new SiliconException("loadModule(Path) failed", e);
+        }
     }
 
     @Override
-    public MetalLibrary loadModule(byte[] rawSrc) throws Throwable {
+    public MetalLibrary loadModule(byte[] rawSrc) {
         return loadModule(new String(rawSrc));
     }
 
     @Override
-    public MetalLibrary loadModule(String source) throws Throwable {
+    public MetalLibrary loadModule(String source) {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment src = arena.allocateFrom(source);
             MemorySegment libPtr = (MemorySegment) METAL_CREATE_LIBRARY.invokeExact(device.handle(), src);
@@ -68,84 +78,90 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
             }
 
             return new MetalLibrary(libPtr);
+        } catch (Throwable e) {
+            throw new SiliconException("loadModule(String) failed", e);
         }
     }
 
     @Override
-    public MetalBuffer allocateBytes(long size) throws Throwable {
-        MemorySegment ptr = (MemorySegment) METAL_NEW_BUFFER.invokeExact(device.handle(), size);
-        return new MetalBuffer(ptr, this, size);
+    public MetalBuffer allocateBytes(long size) {
+        try {
+            MemorySegment ptr = (MemorySegment) METAL_NEW_BUFFER.invokeExact(device.handle(), size);
+            return new MetalBuffer(ptr, this, size);
+        } catch (Throwable e) {
+            throw new SiliconException("allocateBytes(long) failed", e);
+        }
     }
 
     @Override
-    public ComputeBuffer allocateArray(byte[] data, long size) throws Throwable {
+    public ComputeBuffer allocateArray(byte[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
         buffer.asByteBuffer().put(data);
         return buffer;
     }
 
     @Override
-    public ComputeBuffer allocateArray(byte[] data, long size, ComputeQueue queue) throws Throwable {
+    public ComputeBuffer allocateArray(byte[] data, long size, ComputeQueue queue) {
         return allocateArray(data, size);
     }
 
     @Override
-    public ComputeBuffer allocateArray(double[] data, long size) throws Throwable {
+    public ComputeBuffer allocateArray(double[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
         buffer.asByteBuffer().asDoubleBuffer().put(data);
         return buffer;
     }
 
     @Override
-    public ComputeBuffer allocateArray(double[] data, long size, ComputeQueue queue) throws Throwable {
+    public ComputeBuffer allocateArray(double[] data, long size, ComputeQueue queue) {
         return allocateArray(data, size);
     }
 
     @Override
-    public ComputeBuffer allocateArray(float[] data, long size) throws Throwable {
+    public ComputeBuffer allocateArray(float[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
         buffer.asByteBuffer().asFloatBuffer().put(data);
         return buffer;
     }
 
     @Override
-    public ComputeBuffer allocateArray(float[] data, long size, ComputeQueue queue) throws Throwable {
+    public ComputeBuffer allocateArray(float[] data, long size, ComputeQueue queue) {
         return allocateArray(data, size);
     }
 
     @Override
-    public ComputeBuffer allocateArray(long[] data, long size) throws Throwable {
+    public ComputeBuffer allocateArray(long[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
         buffer.asByteBuffer().asLongBuffer().put(data);
         return buffer;
     }
 
     @Override
-    public ComputeBuffer allocateArray(long[] data, long size, ComputeQueue queue) throws Throwable {
+    public ComputeBuffer allocateArray(long[] data, long size, ComputeQueue queue) {
         return allocateArray(data, size);
     }
 
     @Override
-    public ComputeBuffer allocateArray(int[] data, long size) throws Throwable {
+    public ComputeBuffer allocateArray(int[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
         buffer.asByteBuffer().asIntBuffer().put(data);
         return buffer;
     }
 
     @Override
-    public ComputeBuffer allocateArray(int[] data, long size, ComputeQueue queue) throws Throwable {
+    public ComputeBuffer allocateArray(int[] data, long size, ComputeQueue queue) {
         return allocateArray(data, size);
     }
 
     @Override
-    public ComputeBuffer allocateArray(short[] data, long size) throws Throwable {
+    public ComputeBuffer allocateArray(short[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
         buffer.asByteBuffer().asShortBuffer().put(data);
         return buffer;
     }
 
     @Override
-    public ComputeBuffer allocateArray(short[] data, long size, ComputeQueue queue) throws Throwable {
+    public ComputeBuffer allocateArray(short[] data, long size, ComputeQueue queue) {
         return allocateArray(data, size);
     }
 

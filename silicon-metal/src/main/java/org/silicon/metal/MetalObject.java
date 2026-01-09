@@ -1,5 +1,7 @@
 package org.silicon.metal;
 
+import org.silicon.SiliconException;
+
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 
@@ -12,8 +14,12 @@ public interface MetalObject {
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
     );
 
-    default void release() throws Throwable {
-        METAL_RELEASE_OBJECT.invokeExact(handle());
+    default void release() {
+        try {
+            METAL_RELEASE_OBJECT.invokeExact(handle());
+        } catch (Throwable e) {
+            throw new SiliconException("release() failed", e);
+        }
     }
     
     MemorySegment handle();

@@ -1,5 +1,7 @@
 package org.silicon.cuda;
 
+import org.silicon.SiliconException;
+
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 
@@ -36,8 +38,12 @@ public interface CudaObject {
         return (long) array.length * Short.BYTES;
     }
     
-    default void release() throws Throwable {
-        CUDA_RELEASE_OBJECT.invokeExact(handle());
+    default void release() {
+        try {
+            CUDA_RELEASE_OBJECT.invokeExact(handle());
+        } catch (Throwable e) {
+            throw new SiliconException("release() failed", e);
+        }
     }
 
     MemorySegment handle();

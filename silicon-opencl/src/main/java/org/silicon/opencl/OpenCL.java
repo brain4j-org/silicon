@@ -3,8 +3,8 @@ package org.silicon.opencl;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
 import org.lwjgl.system.MemoryStack;
-import org.silicon.BackendType;
-import org.silicon.ComputeBackend;
+import org.silicon.backend.BackendType;
+import org.silicon.backend.ComputeBackend;
 import org.silicon.device.ComputeDevice;
 import org.silicon.opencl.device.CLDevice;
 

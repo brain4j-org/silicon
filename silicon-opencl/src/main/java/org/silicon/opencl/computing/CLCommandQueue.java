@@ -10,7 +10,6 @@ import org.silicon.kernel.ComputeFunction;
 import org.silicon.opencl.device.CLBuffer;
 import org.silicon.opencl.kernel.CLKernel;
 
-import java.nio.IntBuffer;
 import java.util.List;
 
 public record CLCommandQueue(long handle) implements ComputeQueue {
@@ -42,7 +41,7 @@ public record CLCommandQueue(long handle) implements ComputeQueue {
                     case Long val -> CL10.clSetKernelArg(kernelHandle, i, stack.longs(val));
                     case Short val -> CL10.clSetKernelArg(kernelHandle, i, stack.shorts(val));
                     case String val -> CL10.clSetKernelArg(kernelHandle, i, stack.ASCII(val));
-                    case CLBuffer val -> CL10.clSetKernelArg(kernelHandle, i, stack.pointers(val.handle()));
+                    case CLBuffer val -> CL10.clSetKernelArg(kernelHandle, i, stack.pointers(val.getHandle()));
                     default -> throw new IllegalStateException("Unexpected value: " + arg);
                 }
             }

@@ -1,10 +1,10 @@
 package org.silicon.cuda;
 
-import org.silicon.BackendType;
-import org.silicon.ComputeBackend;
+import org.silicon.backend.BackendType;
+import org.silicon.backend.ComputeBackend;
+import org.silicon.SiliconException;
 import org.silicon.cuda.device.CudaDevice;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
@@ -37,22 +37,26 @@ public class CUDA implements ComputeBackend {
                 LOOKUP.find("cuda_create_system_device").orElse(null),
                 FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_INT)
             );
+
+            try {
+                init();
+            } catch (Throwable _) {
+                // ignore
+            }
         } else {
             CUDA_INIT = null;
             CUDA_DEVICE_COUNT = null;
             CUDA_CREATE_SYSTEM_DEVICE = null;
         }
-
-        try {
-            init();
-        } catch (Throwable _) {
-            // ignore
-        }
     }
     
     @Override
-    public int getDeviceCount() throws Throwable {
-        return (int) CUDA_DEVICE_COUNT.invokeExact();
+    public int getDeviceCount() {
+        try {
+            return (int) CUDA_DEVICE_COUNT.invokeExact();
+        } catch (Throwable e) {
+            throw new SiliconException("getDeviceCount() failed", e);
+        }
     }
     
     @Override
@@ -70,13 +74,21 @@ public class CUDA implements ComputeBackend {
     }
     
     @Override
-    public CudaDevice createSystemDevice(int index) throws Throwable {
-        MemorySegment ptr = (MemorySegment) CUDA_CREATE_SYSTEM_DEVICE.invokeExact(index);
-        return new CudaDevice(ptr, index);
+    public CudaDevice createSystemDevice(int index) {
+        try {
+            MemorySegment ptr = (MemorySegment) CUDA_CREATE_SYSTEM_DEVICE.invokeExact(index);
+            return new CudaDevice(ptr, index);
+        } catch (Throwable e) {
+            throw new SiliconException("createSystemDevice(int) failed", e);
+        }
     }
     
-    public static void init() throws Throwable {
-        CUDA_INIT.invokeExact();
+    public static void init() {
+        try {
+            CUDA_INIT.invokeExact();
+        } catch (Throwable e) {
+            throw new SiliconException("init() failed", e);
+        }
     }
     
     public static SymbolLookup loadFromResources(String resourceName) {

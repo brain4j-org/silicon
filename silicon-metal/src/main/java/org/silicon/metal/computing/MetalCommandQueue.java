@@ -1,5 +1,6 @@
 package org.silicon.metal.computing;
 
+import org.silicon.SiliconException;
 import org.silicon.computing.ComputeArgs;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.computing.ComputeSize;
@@ -29,13 +30,13 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
     private final MemorySegment handle;
     private final MetalCommandBuffer commandBuffer;
 
-    public MetalCommandQueue(MemorySegment handle) throws Throwable {
+    public MetalCommandQueue(MemorySegment handle) {
         this.handle = handle;
         this.commandBuffer = makeCommandBuffer();
     }
 
     @Override
-    public void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) throws Throwable {
+    public void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
         MetalFunction metalFunction = (MetalFunction) function;
         MetalPipeline pipeline = metalFunction.makePipeline();
 
@@ -65,18 +66,22 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
     }
 
     @Override
-    public void awaitCompletion() throws Throwable {
+    public void awaitCompletion() {
         commandBuffer.waitUntilCompleted();
     }
 
     @Override
-    public void release() throws Throwable {
+    public void release() {
         MetalObject.super.release();
     }
 
-    public MetalCommandBuffer makeCommandBuffer() throws Throwable {
-        MemorySegment ptr = (MemorySegment) METAL_CREATE_COMMAND_BUFFER.invokeExact(handle);
-        return new MetalCommandBuffer(ptr);
+    public MetalCommandBuffer makeCommandBuffer() {
+        try {
+            MemorySegment ptr = (MemorySegment) METAL_CREATE_COMMAND_BUFFER.invokeExact(handle);
+            return new MetalCommandBuffer(ptr);
+        } catch (Throwable e) {
+            throw new SiliconException("makeCommandBuffer() failed", e);
+        }
     }
 
     @Override

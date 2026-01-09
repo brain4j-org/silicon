@@ -1,5 +1,6 @@
 package org.silicon.cuda.kernel;
 
+import org.silicon.SiliconException;
 import org.silicon.kernel.ComputeModule;
 import org.silicon.cuda.CudaObject;
 
@@ -10,18 +11,14 @@ import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 
 public record CudaModule(MemorySegment handle) implements CudaObject, ComputeModule {
-    
-    public static final MethodHandle CUDA_MODULE_UNLOAD = LINKER.downcallHandle(
-        LOOKUP.find("cuda_module_unload").orElse(null),
-        FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
-    );
+
     private static final MethodHandle CUDA_MODULE_GET_FUNCTION = LINKER.downcallHandle(
         LOOKUP.find("cuda_module_get_function").orElse(null),
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
     
     @Override
-    public CudaFunction getFunction(String name) throws Throwable {
+    public CudaFunction getFunction(String name) {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment cName = arena.allocateFrom(name);
             MemorySegment funcHandle = (MemorySegment) CUDA_MODULE_GET_FUNCTION.invoke(handle, cName);
@@ -31,14 +28,8 @@ public record CudaModule(MemorySegment handle) implements CudaObject, ComputeMod
             }
             
             return new CudaFunction(funcHandle);
-        }
-    }
-    
-    public void unload() throws Throwable {
-        int result = (int) CUDA_MODULE_UNLOAD.invoke(handle);
-        
-        if (result != 0) {
-            throw new RuntimeException("Failed to unload CUDA module (error code " + result + ")");
+        } catch (Throwable e) {
+            throw new SiliconException("getFunction(String) failed", e);
         }
     }
 }

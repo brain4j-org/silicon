@@ -1,5 +1,6 @@
 package org.silicon.cuda.computing;
 
+import org.silicon.SiliconException;
 import org.silicon.computing.ComputeArgs;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.computing.ComputeSize;
@@ -40,7 +41,7 @@ public record CudaStream(MemorySegment handle) implements CudaObject, ComputeQue
     );
 
     @Override
-    public void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) throws Throwable {
+    public void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
         if (!(function instanceof CudaFunction(MemorySegment funcHandle))) {
             throw new IllegalArgumentException("Compute function is not an CUDA stream!");
         }
@@ -71,29 +72,41 @@ public record CudaStream(MemorySegment handle) implements CudaObject, ComputeQue
 
         CudaPointer parameters = CudaPointer.from(pointers);
 
-        int result = (int) CUDA_LAUNCH_KERNEL.invoke(
-            funcHandle,
-            gridX, gridY, gridZ,
-            groupSize.x(), groupSize.y(), groupSize.z(),
-            0, handle(),
-            args.size() == 0 ? MemorySegment.NULL : parameters.segment()
-        );
+        try {
+            int result = (int) CUDA_LAUNCH_KERNEL.invoke(
+                funcHandle,
+                gridX, gridY, gridZ,
+                groupSize.x(), groupSize.y(), groupSize.z(),
+                0, handle(),
+                args.size() == 0 ? MemorySegment.NULL : parameters.segment()
+            );
 
-        if (result != 0) {
-            throw new RuntimeException("cuLaunchKernel failed: " + result);
+            if (result != 0) {
+                throw new RuntimeException("cuLaunchKernel failed: " + result);
+            }
+        } catch (Throwable e) {
+            throw new SiliconException("dispatch(ComputeFunction, ComputeSize, ComputeSize, ComputeArgs) failed", e);
         }
     }
 
     @Override
-    public void awaitCompletion() throws Throwable {
-        int res = (int) CUDA_STREAM_SYNC.invoke(handle);
-        if (res != 0) throw new RuntimeException("cuStreamSynchronized failed: " + res);
+    public void awaitCompletion() {
+        try {
+            int res = (int) CUDA_STREAM_SYNC.invoke(handle);
+            if (res != 0) throw new RuntimeException("cuStreamSynchronized failed: " + res);
+        } catch (Throwable e) {
+            throw new SiliconException("awaitCompletion() failed", e);
+        }
     }
 
     @Override
-    public void release() throws Throwable {
-        int res = (int) CUDA_STREAM_DESTROY.invoke(handle);
-        if (res != 0) throw new RuntimeException("cuStreamDestroy failed: " + res);
-        CudaObject.super.release();
+    public void release() {
+        try {
+            int res = (int) CUDA_STREAM_DESTROY.invoke(handle);
+            if (res != 0) throw new RuntimeException("cuStreamDestroy failed: " + res);
+            CudaObject.super.release();
+        } catch (Throwable e) {
+            throw new SiliconException("release() failed", e);
+        }
     }
 }

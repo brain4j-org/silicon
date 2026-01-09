@@ -1,5 +1,7 @@
 package org.silicon.metal.device;
 
+import org.silicon.SiliconException;
+import org.silicon.backend.BufferState;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.device.ComputeBuffer;
 import org.silicon.metal.MetalObject;
@@ -10,27 +12,48 @@ import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Objects;
 
-public record MetalBuffer(MemorySegment handle, MetalContext context, long size) implements MetalObject, ComputeBuffer {
+public class MetalBuffer implements MetalObject, ComputeBuffer {
 
     public static final MethodHandle METAL_BUFFER_CONTENTS = LINKER.downcallHandle(
         LOOKUP.find("metal_buffer_contents").orElse(null),
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
+    private final MemorySegment handle;
+    private final MetalContext context;
+    private final long size;
+    private BufferState state;
 
-    public MemorySegment getContents() throws Throwable {
-        return (MemorySegment) METAL_BUFFER_CONTENTS.invokeExact(handle());
+    public MetalBuffer(MemorySegment handle, MetalContext context, long size) {
+        this.handle = handle;
+        this.context = context;
+        this.size = size;
+        this.state = BufferState.ALIVE;
     }
 
     @Override
-    public MetalBuffer copy() throws Throwable {
+    public BufferState getState() {
+        return state;
+    }
+
+    @Override
+    public MetalBuffer copy() {
+        if (state != BufferState.ALIVE) {
+            throw new IllegalStateException("Buffer is not ALIVE and cannot be copied! Current buffer state: " + state);
+        }
+
         MetalBuffer buffer = context.allocateBytes(size);
         copyInto(buffer);
         return buffer;
     }
 
     @Override
-    public MetalBuffer copyInto(ComputeBuffer other) throws Throwable {
+    public MetalBuffer copyInto(ComputeBuffer other) {
+        if (state != BufferState.ALIVE) {
+            throw new IllegalStateException("Buffer is not ALIVE! Current buffer state: " + state);
+        }
+
         if (!(other instanceof MetalBuffer dst)) {
             throw new IllegalArgumentException("Both buffers must be Metal buffers!");
         }
@@ -50,54 +73,94 @@ public record MetalBuffer(MemorySegment handle, MetalContext context, long size)
     }
 
     @Override
-    public MetalBuffer copyAsync(ComputeQueue queue) throws Throwable {
+    public MetalBuffer copyAsync(ComputeQueue queue) {
         return copy();
     }
 
     @Override
-    public MetalBuffer copyIntoAsync(ComputeBuffer other, ComputeQueue queue) throws Throwable {
+    public MetalBuffer copyIntoAsync(ComputeBuffer other, ComputeQueue queue) {
         return copyInto(other);
     }
 
     @Override
-    public void free() throws Throwable {
+    public void free() {
+        if (state != BufferState.ALIVE) {
+            throw new IllegalStateException("Buffer is not ALIVE and cannot be freed! Current buffer state: " + state);
+        }
+
+        this.state = BufferState.PENDING_FREE;
         release();
+        this.state = BufferState.FREE;
     }
 
     @Override
-    public void get(byte[] data) throws Throwable {
+    public void get(byte[] data) {
         asByteBuffer().get(data);
     }
 
     @Override
-    public void get(double[] data) throws Throwable {
+    public void get(double[] data) {
         asByteBuffer().asDoubleBuffer().get(data);
     }
 
     @Override
-    public void get(float[] data) throws Throwable {
+    public void get(float[] data) {
         asByteBuffer().asFloatBuffer().get(data);
     }
 
     @Override
-    public void get(long[] data) throws Throwable {
+    public void get(long[] data) {
         asByteBuffer().asLongBuffer().get(data);
     }
 
     @Override
-    public void get(int[] data) throws Throwable {
+    public void get(int[] data) {
         asByteBuffer().asIntBuffer().get(data);
     }
 
     @Override
-    public void get(short[] data) throws Throwable {
+    public void get(short[] data) {
         asByteBuffer().asShortBuffer().get(data);
     }
 
-    public ByteBuffer asByteBuffer() throws Throwable {
+    public ByteBuffer asByteBuffer() {
+        if (state != BufferState.ALIVE) {
+            throw new IllegalStateException("Buffer is not ALIVE! Current buffer state: " + state);
+        }
+
         return getContents()
             .reinterpret(size)
             .asByteBuffer()
             .order(ByteOrder.nativeOrder());
     }
+
+    @Override
+    public MemorySegment handle() {
+        return handle;
+    }
+
+    public MetalContext getContext() {
+        return context;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public MemorySegment getContents() {
+        try {
+            return (MemorySegment) METAL_BUFFER_CONTENTS.invokeExact(handle());
+        } catch (Throwable e) {
+            throw new SiliconException("getContents() failed", e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "MetalBuffer[" +
+            "handle=" + handle + ", " +
+            "context=" + context + ", " +
+            "size=" + size + ']';
+    }
+
 }

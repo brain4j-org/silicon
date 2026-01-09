@@ -1,5 +1,7 @@
 package org.silicon.metal.computing;
 
+import org.silicon.Silicon;
+import org.silicon.SiliconException;
 import org.silicon.metal.MetalObject;
 import org.silicon.metal.device.MetalBuffer;
 
@@ -46,59 +48,75 @@ public final class MetalEncoder implements MetalObject, AutoCloseable {
         this.handle = handle;
     }
 
-    public void setBuffer(MetalBuffer buf, int index) throws Throwable {
-        METAL_ENCODER_SET_BUFFER.invokeExact(handle, buf.handle(), index);
+    public void setBuffer(MetalBuffer buf, int index) {
+        try {
+            METAL_ENCODER_SET_BUFFER.invokeExact(handle, buf.handle(), index);
+        } catch (Throwable e) {
+            throw new SiliconException("setBuffer(MetalBuffer, int) failed", e);
+        }
     }
 
-    public void setBytesRaw(MemorySegment data, long byteSize, int index) throws Throwable {
-        METAL_ENCODER_SET_BYTES.invoke(handle, data, (int) byteSize, index);
+    public void setBytesRaw(MemorySegment data, long byteSize, int index) {
+        try {
+            METAL_ENCODER_SET_BYTES.invoke(handle, data, (int) byteSize, index);
+        } catch (Throwable e) {
+            throw new SiliconException("setBytesRaw(MemorySegment, long, int) failed", e);
+        }
     }
 
-    public void dispatchThreads(int globalX, int globalY, int globalZ, int groupX, int groupY, int groupZ) throws Throwable {
-        METAL_DISPATCH.invokeExact(handle, globalX, globalY, globalZ, groupX, groupY, groupZ);
+    public void dispatchThreads(int globalX, int globalY, int globalZ, int groupX, int groupY, int groupZ) {
+        try {
+            METAL_DISPATCH.invokeExact(handle, globalX, globalY, globalZ, groupX, groupY, groupZ);
+        } catch (Throwable e) {
+            throw new SiliconException("dispatchThreads(int, int, int, int, int, int) failed", e);
+        }
     }
 
-    public void endEncoding() throws Throwable {
-        METAL_END_ENCODING.invokeExact(handle);
+    public void endEncoding() {
+        try {
+            METAL_END_ENCODING.invokeExact(handle);
+        } catch (Throwable e) {
+            throw new SiliconException("endEncoding() failed", e);
+        }
     }
 
-    public void setBytes(byte[] data, int index) throws Throwable {
+    public void setBytes(byte[] data, int index) {
         MemorySegment seg = arena.allocate(data.length);
         seg.copyFrom(MemorySegment.ofArray(data));
         setBytesRaw(seg, data.length, index);
     }
 
-    public void setInt(int value, int index) throws Throwable {
+    public void setInt(int value, int index) {
         MemorySegment seg = arena.allocate(ValueLayout.JAVA_INT);
         seg.set(ValueLayout.JAVA_INT, 0, value);
         setBytesRaw(seg, ValueLayout.JAVA_INT.byteSize(), index);
     }
 
-    public void setLong(long value, int index) throws Throwable {
+    public void setLong(long value, int index) {
         MemorySegment seg = arena.allocate(ValueLayout.JAVA_LONG);
         seg.set(ValueLayout.JAVA_LONG, 0, value);
         setBytesRaw(seg, ValueLayout.JAVA_LONG.byteSize(), index);
     }
 
-    public void setFloat(float value, int index) throws Throwable {
+    public void setFloat(float value, int index) {
         MemorySegment seg = arena.allocate(ValueLayout.JAVA_FLOAT);
         seg.set(ValueLayout.JAVA_FLOAT, 0, value);
         setBytesRaw(seg, ValueLayout.JAVA_FLOAT.byteSize(), index);
     }
 
-    public void setDouble(double value, int index) throws Throwable {
+    public void setDouble(double value, int index) {
         MemorySegment seg = arena.allocate(ValueLayout.JAVA_DOUBLE);
         seg.set(ValueLayout.JAVA_DOUBLE, 0, value);
         setBytesRaw(seg, ValueLayout.JAVA_DOUBLE.byteSize(), index);
     }
 
-    public void setShort(short value, int index) throws Throwable {
+    public void setShort(short value, int index) {
         MemorySegment seg = arena.allocate(ValueLayout.JAVA_SHORT);
         seg.set(ValueLayout.JAVA_SHORT, 0, value);
         setBytesRaw(seg, ValueLayout.JAVA_SHORT.byteSize(), index);
     }
 
-    public void setStruct(MemoryLayout layout, Consumer<MemorySegment> writer, int index) throws Throwable {
+    public void setStruct(MemoryLayout layout, Consumer<MemorySegment> writer, int index) {
         MemorySegment seg = arena.allocate(layout);
         writer.accept(seg);
         setBytesRaw(seg, layout.byteSize(), index);

@@ -1,8 +1,9 @@
 package org.silicon;
 
+import org.silicon.backend.BackendType;
+import org.silicon.backend.ComputeBackend;
 import org.silicon.device.ComputeDevice;
 
-import java.util.Iterator;
 import java.util.ServiceLoader;
 
 public class Silicon {
@@ -54,11 +55,11 @@ public class Silicon {
         return candidate.getType().getPriority() < current.getType().getPriority();
     }
 
-    public static ComputeDevice createSystemDevice() throws Throwable {
+    public static ComputeDevice createSystemDevice() {
         return createSystemDevice(0);
     }
 
-    public static ComputeDevice createSystemDevice(int index) throws Throwable {
+    public static ComputeDevice createSystemDevice(int index) {
         return getBackend().createSystemDevice(index);
     }
 

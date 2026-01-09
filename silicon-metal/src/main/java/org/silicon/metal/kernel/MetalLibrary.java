@@ -8,7 +8,7 @@ import java.lang.foreign.MemorySegment;
 public record MetalLibrary(MemorySegment handle) implements MetalObject, ComputeModule {
 
     @Override
-    public MetalFunction getFunction(String name) throws Throwable {
+    public MetalFunction getFunction(String name) {
         return MetalFunction.create(this, name);
     }
 }

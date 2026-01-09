@@ -1,4 +1,4 @@
-package org.silicon;
+package org.silicon.backend;
 
 public enum BackendType {
     CUDA("CUDA", 0),

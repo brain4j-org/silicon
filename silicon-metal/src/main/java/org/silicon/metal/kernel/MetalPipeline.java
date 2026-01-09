@@ -1,5 +1,6 @@
 package org.silicon.metal.kernel;
 
+import org.silicon.SiliconException;
 import org.silicon.metal.MetalObject;
 
 import java.lang.foreign.FunctionDescriptor;
@@ -14,9 +15,17 @@ public record MetalPipeline(MemorySegment handle) implements MetalObject {
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
 
-    public static MetalPipeline makePipeline(MetalFunction function) throws Throwable {
-        MemorySegment ptr = (MemorySegment) METAL_MAKE_PIPELINE.invokeExact(function.handle());
-        if (ptr == null) throw new IllegalArgumentException("metalMakePipeline failed!");
-        return new MetalPipeline(ptr);
+    public static MetalPipeline makePipeline(MetalFunction function) {
+        try {
+            MemorySegment ptr = (MemorySegment) METAL_MAKE_PIPELINE.invokeExact(function.handle());
+
+            if (ptr == null) {
+                throw new IllegalArgumentException("metalMakePipeline failed!");
+            }
+
+            return new MetalPipeline(ptr);
+        } catch (Throwable e) {
+            throw new SiliconException("makePipeline(MetalFunction) failed", e);
+        }
     }
 }

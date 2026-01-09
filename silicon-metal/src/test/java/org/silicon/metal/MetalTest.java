@@ -28,11 +28,11 @@ public class MetalTest {
     public static final int N = 64;
     public static final int E = 16;
 
-    public static void main(String[] args) throws Throwable {
+    public static void main(String[] args) {
        benchmarkMetal();
     }
 
-    private static void benchmarkMetal() throws Throwable {
+    private static void benchmarkMetal() {
         System.out.println("========= Benchmark for: Metal =========");
 
         byte[] raw = Files.readAllBytes(Path.of("resources/vector_add.metal"));

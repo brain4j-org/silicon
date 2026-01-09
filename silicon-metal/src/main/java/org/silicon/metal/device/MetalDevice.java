@@ -1,5 +1,6 @@
 package org.silicon.metal.device;
 
+import org.silicon.SiliconException;
 import org.silicon.device.ComputeDevice;
 import org.silicon.metal.MetalObject;
 import org.silicon.metal.kernel.MetalLibrary;
@@ -21,8 +22,12 @@ public record MetalDevice(MemorySegment handle) implements MetalObject, ComputeD
         return new MetalContext(this);
     }
 
-    public String getName() throws Throwable {
-        MemorySegment nameHandle = (MemorySegment) METAL_DEVICE_NAME.invokeExact(handle);
-        return nameHandle.reinterpret(Long.MAX_VALUE).getString(0);
+    public String getName() {
+        try {
+            MemorySegment nameHandle = (MemorySegment) METAL_DEVICE_NAME.invokeExact(handle);
+            return nameHandle.reinterpret(Long.MAX_VALUE).getString(0);
+        } catch (Throwable e) {
+            throw new SiliconException("getName() failed", e);
+        }
     }
 }

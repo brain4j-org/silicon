@@ -1,5 +1,6 @@
 package org.silicon.cuda.device;
 
+import org.silicon.SiliconException;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.cuda.computing.CudaStream;
 import org.silicon.cuda.kernel.CudaModule;
@@ -48,39 +49,46 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
     );
     
-    public CudaContext setCurrent() throws Throwable {
-        int res = (int) CUDA_CONTEXT_SET_CURRENT.invoke(handle);
-        
-        if (res != 0) {
-            throw new RuntimeException("cuCtxSetCurrent failed: " + res);
+    public CudaContext setCurrent() {
+        try {
+            int res = (int) CUDA_CONTEXT_SET_CURRENT.invoke(handle);
+            if (res != 0) throw new RuntimeException("cuCtxSetCurrent failed: " + res);
+
+            return this;
+        } catch (Throwable e) {
+            throw new SiliconException("setCurrent() failed", e);
         }
-        
-        return this;
     }
     
-    public CudaContext synchronize() throws Throwable {
-        int res = (int) CUDA_SYNC_CONTEXT.invoke();
-        
-        if (res != 0) {
-            throw new RuntimeException("cuCtxSynchronize failed, error " + res);
+    public CudaContext synchronize() {
+        try {
+            int res = (int) CUDA_SYNC_CONTEXT.invoke();
+
+            if (res != 0) throw new RuntimeException("cuCtxSynchronize failed: " + res);
+
+            return this;
+        } catch (Throwable e) {
+            throw new SiliconException("synchronize() failed", e);
         }
-        
-        return this;
-    }
-    
-    @Override
-    public CudaStream createQueue() throws Throwable {
-        MemorySegment ptr = (MemorySegment) CUDA_STREAM_CREATE.invoke();
-        
-        if (ptr == null || ptr.address() == 0) {
-            throw new RuntimeException("Failed to create CUDA stream");
-        }
-        
-        return new CudaStream(ptr);
     }
     
     @Override
-    public CudaModule loadModule(Path path) throws Throwable {
+    public CudaStream createQueue() {
+        try {
+            MemorySegment ptr = (MemorySegment) CUDA_STREAM_CREATE.invoke();
+
+            if (ptr == null || ptr.address() == 0) {
+                throw new RuntimeException("Failed to create CUDA stream");
+            }
+
+            return new CudaStream(ptr);
+        } catch (Throwable e) {
+            throw new SiliconException("createQueue() failed", e);
+        }
+    }
+    
+    @Override
+    public CudaModule loadModule(Path path) {
         if (!new File(path.toString()).exists()) {
             throw new IllegalArgumentException(path + " does not exist!");
         }
@@ -94,11 +102,13 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             }
             
             return new CudaModule(moduleHandle);
+        } catch (Throwable e) {
+            throw new SiliconException("loadModule(Path) failed", e);
         }
     }
     
     @Override
-    public CudaModule loadModule(byte[] rawSrc) throws Throwable {
+    public CudaModule loadModule(byte[] rawSrc) {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment data = arena.allocateFrom(ValueLayout.JAVA_BYTE, rawSrc);
             MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD_DATA.invoke(data);
@@ -108,110 +118,120 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             }
             
             return new CudaModule(moduleHandle);
+        } catch (Throwable e) {
+            throw new SiliconException("loadModule(byte[]) failed", e);
         }
     }
     
     @Override
-    public CudaModule loadModule(String source) throws Throwable {
+    public CudaModule loadModule(String source) {
         throw new UnsupportedOperationException("JIT kernel compilation is not supported yet!");
     }
     
     @Override
-    public void release() throws Throwable {
-        CUDA_DESTROY_CONTEXT.invoke(handle);
-        CudaObject.super.release();
-    }
-    
-    @Override
-    public CudaBuffer allocateBytes(long size) throws Throwable {
-        MemorySegment ptr = (MemorySegment) CUDA_MEM_ALLOC.invoke(size);
-        
-        if (ptr == null || ptr.address() == 0) {
-            throw new OutOfMemoryError("cuMemAlloc failed: " + ptr);
+    public void release() {
+        try {
+            CUDA_DESTROY_CONTEXT.invoke(handle);
+            CudaObject.super.release();
+        } catch (Throwable e) {
+            throw new SiliconException("release() failed", e);
         }
-        
-        return new CudaBuffer(this, ptr, size);
     }
     
     @Override
-    public CudaBuffer allocateArray(byte[] data, long size) throws Throwable {
+    public CudaBuffer allocateBytes(long size) {
+        try {
+            MemorySegment ptr = (MemorySegment) CUDA_MEM_ALLOC.invoke(size);
+
+            if (ptr == null || ptr.address() == 0) {
+                throw new RuntimeException("cuMemAlloc failed: " + ptr);
+            }
+
+            return new CudaBuffer(this, ptr, size);
+        } catch (Throwable e) {
+            throw new SiliconException("allocateBytes(long) failed", e);
+        }
+    }
+    
+    @Override
+    public CudaBuffer allocateArray(byte[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(byte[] data, long size, ComputeQueue queue) throws Throwable {
+    public CudaBuffer allocateArray(byte[] data, long size, ComputeQueue queue) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDeviceAsync(data, (CudaStream) queue);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(double[] data, long size) throws Throwable {
+    public CudaBuffer allocateArray(double[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(double[] data, long size, ComputeQueue queue) throws Throwable {
+    public CudaBuffer allocateArray(double[] data, long size, ComputeQueue queue) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDeviceAsync(data, (CudaStream) queue);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(float[] data, long size) throws Throwable {
+    public CudaBuffer allocateArray(float[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(float[] data, long size, ComputeQueue queue) throws Throwable {
+    public CudaBuffer allocateArray(float[] data, long size, ComputeQueue queue) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDeviceAsync(data, (CudaStream) queue);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(long[] data, long size) throws Throwable {
+    public CudaBuffer allocateArray(long[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(long[] data, long size, ComputeQueue queue) throws Throwable {
+    public CudaBuffer allocateArray(long[] data, long size, ComputeQueue queue) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDeviceAsync(data, (CudaStream) queue);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(int[] data, long size) throws Throwable {
+    public CudaBuffer allocateArray(int[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(int[] data, long size, ComputeQueue queue) throws Throwable {
+    public CudaBuffer allocateArray(int[] data, long size, ComputeQueue queue) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDeviceAsync(data, (CudaStream) queue);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(short[] data, long size) throws Throwable {
+    public CudaBuffer allocateArray(short[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(short[] data, long size, ComputeQueue queue) throws Throwable {
+    public CudaBuffer allocateArray(short[] data, long size, ComputeQueue queue) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDeviceAsync(data, (CudaStream) queue);
         return buffer;

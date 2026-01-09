@@ -1,8 +1,8 @@
 package org.silicon.metal;
 
-import org.silicon.BackendType;
-import org.silicon.ComputeBackend;
-import org.silicon.device.ComputeDevice;
+import org.silicon.backend.BackendType;
+import org.silicon.backend.ComputeBackend;
+import org.silicon.SiliconException;
 import org.silicon.metal.device.MetalDevice;
 
 import java.io.IOException;
@@ -49,14 +49,21 @@ public class Metal implements ComputeBackend {
     }
 
     @Override
-    public MetalDevice createSystemDevice(int index) throws Throwable {
-        if (index != 0) throw new IllegalArgumentException("Index should be equal to 0 when using Metal!");
-        MemorySegment ptr = (MemorySegment) METAL_CREATE_SYSTEM_DEVICE.invokeExact();
-        return new MetalDevice(ptr);
+    public MetalDevice createSystemDevice(int index) {
+        try {
+            if (index != 0) {
+                throw new IllegalArgumentException("Index should be equal to 0 when using Metal!");
+            }
+
+            MemorySegment ptr = (MemorySegment) METAL_CREATE_SYSTEM_DEVICE.invokeExact();
+            return new MetalDevice(ptr);
+        } catch (Throwable e) {
+            throw new SiliconException("createSystemDevice(int) failed", e);
+        }
     }
 
     @Override
-    public MetalDevice createSystemDevice() throws Throwable {
+    public MetalDevice createSystemDevice() {
         return createSystemDevice(0);
     }
 
