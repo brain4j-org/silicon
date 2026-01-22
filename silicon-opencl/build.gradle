@@ -1,9 +1,4 @@
-plugins {
-    id 'java'
-    alias libs.plugins.shadowJar
-}
-
-project.ext.lwjglVersion = libs.versions.lwjglVersion.get()
+project.ext.lwjglVersion = '3.3.6'
 
 configurations {
     lwjglNatives
@@ -24,4 +19,13 @@ dependencies {
 shadowJar {
     archiveClassifier.set("")
     relocate "org.lwjgl", "org.silicon.shaded.lwjgl"
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }

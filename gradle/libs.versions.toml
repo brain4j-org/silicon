@@ -1,6 +1,0 @@
-[versions]
-shadowJar = "9.3.0"
-lwjglVersion = "3.3.6"
-
-[plugins]
-shadowJar = { id = "com.gradleup.shadow", version.ref = "shadowJar" }

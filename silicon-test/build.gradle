@@ -1,0 +1,19 @@
+test {
+    failOnNoDiscoveredTests = false
+}
+
+dependencies {
+    testImplementation project(':silicon-api')
+    testImplementation project(':silicon-cuda')
+    testImplementation project(':silicon-opencl')
+    testImplementation project(':silicon-metal')
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(22))
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_22
+    targetCompatibility = JavaVersion.VERSION_22
+}

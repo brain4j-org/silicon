@@ -2,7 +2,6 @@ package org.silicon;
 
 import org.silicon.device.ComputeDevice;
 
-import java.util.Iterator;
 import java.util.ServiceLoader;
 
 public class Silicon {

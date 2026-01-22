@@ -73,7 +73,7 @@ public class Metal implements ComputeBackend {
             tempFile.toFile().deleteOnExit();
 
             return SymbolLookup.libraryLookup(tempFile.toString(), Arena.global());
-        } catch (IOException _) {
+        } catch (Exception _) {
             return null;
         }
     }

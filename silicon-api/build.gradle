@@ -1,13 +1,8 @@
-plugins {
-    id 'java'
-}
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 
-test {
-    failOnNoDiscoveredTests = false
-}
-
-dependencies {
-    testRuntimeOnly project(':silicon-cuda')
-    testRuntimeOnly project(':silicon-opencl')
-    testRuntimeOnly project(':silicon-metal')
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }

@@ -1,6 +1,7 @@
 plugins {
     id 'java'
-    alias libs.plugins.shadowJar
+    id 'maven-publish'
+    id 'com.gradleup.shadow' version '9.3.0'
 }
 
 group = 'org.silicon'
@@ -11,24 +12,47 @@ subprojects {
     group = rootProject.group
 
     apply plugin: 'java'
+    apply plugin: 'com.gradleup.shadow'
 
     repositories {
         mavenCentral()
-    }
-
-    java {
-        toolchain {
-            version
+        maven {
+            name "brain4jReleases"
+            url "https://repo.brain4j.org/releases"
         }
     }
-}
 
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+    shadowJar {
+        archiveClassifier.set("")
     }
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    publishing {
+        repositories {
+            maven {
+                name = "silicon"
+
+                def releasesRepo = uri("https://repo.brain4j.org/releases")
+                def snapshotsRepo = uri("https://repo.brain4j.org/snapshots")
+
+                url = version.endsWith("SNAPSHOT") ? snapshotsRepo : releasesRepo
+
+                credentials {
+                    username = findProperty("BRAIN4J_USERNAME")
+                    password = findProperty("BRAIN4J_TOKEN")
+                }
+
+                authentication {
+                    basic(BasicAuthentication)
+                }
+            }
+        }
+
+        publications {
+            gpr(MavenPublication) {
+                groupId = project.group
+                artifactId = project.name
+                version = project.version
+            }
+        }
+    }
 }

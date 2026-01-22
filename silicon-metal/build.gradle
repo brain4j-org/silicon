@@ -1,12 +1,12 @@
-plugins {
-    id 'java'
-    alias libs.plugins.shadowJar
-}
-
 dependencies {
     implementation project(':silicon-api')
 }
 
-shadowJar {
-    archiveClassifier.set("")
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(22))
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_22
+    targetCompatibility = JavaVersion.VERSION_22
 }

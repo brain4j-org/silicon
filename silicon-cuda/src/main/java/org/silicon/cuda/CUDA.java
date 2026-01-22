@@ -22,8 +22,7 @@ public class CUDA implements ComputeBackend {
     
     static {
         LOOKUP = loadFromResources("/libcuda4j.dll");
-
-
+        
         if (LOOKUP != null) {
             CUDA_INIT = LINKER.downcallHandle(
                 LOOKUP.find("cuda_init").orElse(null),
