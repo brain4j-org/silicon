@@ -15,8 +15,8 @@ import java.util.Arrays;
 
 public class ComputeTest {
     
-    public static void main(String[] _args) throws Throwable {
-        int N = 2048;
+    public static void main(String[] _args) {
+        int N = 2048 * 2048;
         
         System.out.println("Chosen backend " + Silicon.getBackend().getName());
         
@@ -24,8 +24,8 @@ public class ComputeTest {
         ComputeContext context = device.createContext();
         
         SlangCompiler compiler = new SlangCompiler(context, Silicon.getBackend().getType());
+
         ComputeModule module = compiler.compile(Path.of("resources/vector_add.slang"));
-        
         ComputeFunction function = module.getFunction("add");
         
         float[] dataA = new float[N];
@@ -40,7 +40,7 @@ public class ComputeTest {
         ComputeBuffer b = context.allocateArray(dataB);
         ComputeBuffer c = context.allocateBytes(N * 4L);
         
-        ComputeArgs args = ComputeArgs.of(a, b, c);
+        ComputeArgs args = ComputeArgs.of(a, b, c, N);
         
         ComputeSize globalSize = new ComputeSize(N, 1, 1);
         ComputeSize groupSize = new ComputeSize(16, 1, 1);
@@ -50,7 +50,7 @@ public class ComputeTest {
         queue.dispatch(function, globalSize, groupSize, args);
         queue.awaitCompletion();
         
-        float[] result = new float[10];
+        float[] result = new float[64];
         c.get(result);
         System.out.println(Arrays.toString(result));
     }
