@@ -16,16 +16,6 @@ dependencies {
     implementation "org.lwjgl:lwjgl::natives-macos-arm64"
 }
 
-shadowJar {
-    archiveClassifier.set("")
-    relocate "org.lwjgl", "org.silicon.shaded.lwjgl"
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+tasks.named("compileJava") {
+    dependsOn(":silicon-api:shadowJar")
 }

@@ -12,6 +12,7 @@ subprojects {
     group = rootProject.group
 
     apply plugin: 'java'
+    apply plugin: 'maven-publish'
     apply plugin: 'com.gradleup.shadow'
 
     repositories {
@@ -22,46 +23,58 @@ subprojects {
         }
     }
 
-    def publishedProjects = [
-        "silicon-cuda",
-        "silicon-api",
-        "silicon-metal",
-        "silicon-opencl"
-    ]
-
     shadowJar {
         archiveClassifier.set("")
     }
 
-    if (project.name in publishedProjects) {
-        publishing {
-            repositories {
-                maven {
-                    name = "silicon"
+    publishing {
+        repositories {
+            maven {
+                name = "silicon"
 
-                    def releasesRepo = uri("https://repo.brain4j.org/releases")
-                    def snapshotsRepo = uri("https://repo.brain4j.org/snapshots")
+                def releasesRepo = uri("https://repo.brain4j.org/releases")
+                def snapshotsRepo = uri("https://repo.brain4j.org/snapshots")
 
-                    url = version.endsWith("SNAPSHOT") ? snapshotsRepo : releasesRepo
+                url = version.endsWith("SNAPSHOT") ? snapshotsRepo : releasesRepo
 
-                    credentials {
-                        username = findProperty("BRAIN4J_USERNAME")
-                        password = findProperty("BRAIN4J_TOKEN")
-                    }
-
-                    authentication {
-                        basic(BasicAuthentication)
-                    }
+                credentials {
+                    username = findProperty("BRAIN4J_USERNAME")
+                    password = findProperty("BRAIN4J_TOKEN")
                 }
-            }
 
-            publications {
-                gpr(MavenPublication) {
-                    groupId = project.group
-                    artifactId = project.name
-                    version = project.version
+                authentication {
+                    basic(BasicAuthentication)
                 }
             }
         }
+
+        publications {
+            gpr(MavenPublication) {
+                from components.java
+                groupId = project.group
+                artifactId = project.name
+                version = project.version
+            }
+        }
+    }
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
+
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+}
+
+tasks.register('publishAll') {
+    dependsOn ':silicon-api:publish',
+              ':silicon-cuda:publish',
+              ':silicon-metal:publish',
+              ':silicon-opencl:publish'
+
+    doLast {
+        println 'Published all modules to the main repository.'
     }
 }
