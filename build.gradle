@@ -22,36 +22,45 @@ subprojects {
         }
     }
 
+    def publishedProjects = [
+        "silicon-cuda",
+        "silicon-api",
+        "silicon-metal",
+        "silicon-opencl"
+    ]
+
     shadowJar {
         archiveClassifier.set("")
     }
 
-    publishing {
-        repositories {
-            maven {
-                name = "silicon"
+    if (project.name in publishedProjects) {
+        publishing {
+            repositories {
+                maven {
+                    name = "silicon"
 
-                def releasesRepo = uri("https://repo.brain4j.org/releases")
-                def snapshotsRepo = uri("https://repo.brain4j.org/snapshots")
+                    def releasesRepo = uri("https://repo.brain4j.org/releases")
+                    def snapshotsRepo = uri("https://repo.brain4j.org/snapshots")
 
-                url = version.endsWith("SNAPSHOT") ? snapshotsRepo : releasesRepo
+                    url = version.endsWith("SNAPSHOT") ? snapshotsRepo : releasesRepo
 
-                credentials {
-                    username = findProperty("BRAIN4J_USERNAME")
-                    password = findProperty("BRAIN4J_TOKEN")
-                }
+                    credentials {
+                        username = findProperty("BRAIN4J_USERNAME")
+                        password = findProperty("BRAIN4J_TOKEN")
+                    }
 
-                authentication {
-                    basic(BasicAuthentication)
+                    authentication {
+                        basic(BasicAuthentication)
+                    }
                 }
             }
-        }
 
-        publications {
-            gpr(MavenPublication) {
-                groupId = project.group
-                artifactId = project.name
-                version = project.version
+            publications {
+                gpr(MavenPublication) {
+                    groupId = project.group
+                    artifactId = project.name
+                    version = project.version
+                }
             }
         }
     }
