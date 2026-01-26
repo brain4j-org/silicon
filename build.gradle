@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'org.silicon'
-version = '1.0.0'
+version = '1.1.0'
 
 subprojects {
     version = rootProject.version
