@@ -28,6 +28,11 @@ public record MetalCommandBuffer(MemorySegment handle) implements MetalObject {
     public MetalEncoder makeEncoder(MetalPipeline pipeline) {
         try {
             MemorySegment ptr = (MemorySegment) METAL_MAKE_ENCODER.invokeExact(handle, pipeline.handle());
+           
+            if (ptr == null || ptr.address() == 0) {
+                throw new RuntimeException("makeComputeCommandEncoder failed!");
+            }
+            
             return new MetalEncoder(ptr);
         } catch (Throwable e) {
             throw new SiliconException("makeEncoder(MetalPipeline) failed", e);
@@ -50,4 +55,3 @@ public record MetalCommandBuffer(MemorySegment handle) implements MetalObject {
         }
     }
 }
-

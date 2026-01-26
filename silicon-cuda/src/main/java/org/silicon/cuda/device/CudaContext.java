@@ -76,7 +76,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             MemorySegment ptr = (MemorySegment) CUDA_STREAM_CREATE.invoke();
 
             if (ptr == null || ptr.address() == 0) {
-                throw new RuntimeException("Failed to create CUDA stream");
+                throw new RuntimeException("cuStreamCreate failed!");
             }
 
             return new CudaStream(ptr);

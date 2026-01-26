@@ -56,6 +56,11 @@ public class Metal implements ComputeBackend {
             }
 
             MemorySegment ptr = (MemorySegment) METAL_CREATE_SYSTEM_DEVICE.invokeExact();
+            
+            if (ptr == null || ptr.address() == 0) {
+                throw new RuntimeException("metalCreateSystemDevice failed!");
+            }
+            
             return new MetalDevice(ptr);
         } catch (Throwable e) {
             throw new SiliconException("createSystemDevice(int) failed", e);

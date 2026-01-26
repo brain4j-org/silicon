@@ -74,12 +74,23 @@ public class CUDA implements ComputeBackend {
     
     @Override
     public CudaDevice createSystemDevice(int index) {
-        if (CUDA_CREATE_SYSTEM_DEVICE == null) {
+        if (CUDA_CREATE_SYSTEM_DEVICE == null || !isAvailable()) {
             throw new IllegalStateException("This backend is not available on this platform!");
+        }
+        
+        int count = getDeviceCount();
+        
+        if (index < 0 || index >= count) {
+            throw new IllegalArgumentException("Index " + index + " out of range! Device count: " + count);
         }
 
         try {
             MemorySegment ptr = (MemorySegment) CUDA_CREATE_SYSTEM_DEVICE.invokeExact(index);
+            
+            if (ptr == null || ptr.address() == 0) {
+                throw new RuntimeException("cuDeviceGet failed!");
+            }
+            
             return new CudaDevice(ptr, index);
         } catch (Throwable e) {
             throw new SiliconException("createSystemDevice(int) failed", e);

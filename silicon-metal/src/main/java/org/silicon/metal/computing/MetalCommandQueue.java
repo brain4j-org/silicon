@@ -80,6 +80,11 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
     public MetalCommandBuffer makeCommandBuffer() {
         try {
             MemorySegment ptr = (MemorySegment) METAL_CREATE_COMMAND_BUFFER.invokeExact(handle);
+            
+            if (ptr == null || ptr.address() == 0) {
+                throw new RuntimeException("metalMakeCommandBuffer failed!");
+            }
+            
             return new MetalCommandBuffer(ptr);
         } catch (Throwable e) {
             throw new SiliconException("makeCommandBuffer() failed", e);

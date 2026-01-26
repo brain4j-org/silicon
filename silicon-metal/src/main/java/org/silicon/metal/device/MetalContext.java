@@ -85,6 +85,11 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     public MetalBuffer allocateBytes(long size) {
         try {
             MemorySegment ptr = (MemorySegment) METAL_NEW_BUFFER.invokeExact(device.handle(), size);
+            
+            if (ptr == null || ptr.address() == 0) {
+                throw new RuntimeException("metalMakeBuffer failed!");
+            }
+            
             return new MetalBuffer(ptr, this, size);
         } catch (Throwable e) {
             throw new SiliconException("allocateBytes(long) failed", e);
