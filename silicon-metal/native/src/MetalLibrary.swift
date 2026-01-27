@@ -15,7 +15,10 @@ public func metal_create_library(
     do {
         let library = try device.makeLibrary(source: source, options: nil)
         return objectToPointer(library)
-    } catch {
+    } catch let error as NSError {
+        print("Metal compile error:")
+        print(error.localizedDescription)
+
         return nil
     }
 }
