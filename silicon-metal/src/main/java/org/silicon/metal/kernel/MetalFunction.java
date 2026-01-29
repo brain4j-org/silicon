@@ -24,7 +24,12 @@ public final class MetalFunction implements MetalObject, ComputeFunction {
         return handle;
     }
 
-    public MetalPipeline getPipeline() {
+    public MetalPipeline pipeline() {
         return pipeline;
+    }
+
+    @Override
+    public int maxWorkGroupSize() {
+        return 0; // TODO
     }
 }

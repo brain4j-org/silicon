@@ -15,8 +15,8 @@ import java.nio.ByteOrder;
 
 public class MetalBuffer implements MetalObject, ComputeBuffer {
 
-    public static final MethodHandle METAL_BUFFER_CONTENTS = LINKER.downcallHandle(
-        LOOKUP.find("metal_buffer_contents").orElse(null),
+    public static final MethodHandle METAL_BUFFER_CONTENTS = MetalObject.find(
+        "metal_buffer_contents",
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
     private final MemorySegment handle;
@@ -83,7 +83,7 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
 
         this.state = BufferState.PENDING_FREE;
         try {
-            this.free();
+            MetalObject.super.free();
         } finally {
             this.state = BufferState.FREE;
         }

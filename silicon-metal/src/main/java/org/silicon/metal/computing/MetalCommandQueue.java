@@ -19,27 +19,25 @@ import java.util.List;
 
 public final class MetalCommandQueue implements MetalObject, ComputeQueue {
 
-    public static final MethodHandle METAL_CREATE_COMMAND_BUFFER = LINKER.downcallHandle(
-        LOOKUP.find("metal_create_command_buffer").orElse(null),
+    public static final MethodHandle METAL_CREATE_COMMAND_BUFFER = MetalObject.find(
+        "metal_create_command_buffer",
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
 
     private final MemorySegment handle;
-    private MetalCommandBuffer commandBuffer;
+    private MetalCommandBuffer lastCommandBuf;
 
     public MetalCommandQueue(MemorySegment handle) {
         this.handle = handle;
-        this.commandBuffer = makeCommandBuffer();
+        this.lastCommandBuf = makeCommandBuffer();
     }
 
     @Override
     public void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
         MetalFunction metalFunction = (MetalFunction) function;
-        MetalPipeline pipeline = metalFunction.getPipeline();
+        MetalPipeline pipeline = metalFunction.pipeline();
 
-        if (commandBuffer == null) {
-            commandBuffer = makeCommandBuffer();
-        }
+        MetalCommandBuffer commandBuffer = makeCommandBuffer();
 
         if (globalSize == null) throw new IllegalArgumentException("Global size cannot be null!");
         if (groupSize == null) throw new IllegalArgumentException("Group size cannot be null!");
@@ -61,20 +59,17 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
 
             encoder.dispatchThreads(globalSize.x(), globalSize.y(), globalSize.z(), groupSize.x(), groupSize.y(), groupSize.z());
         }
+
+        commandBuffer.commit();
+        lastCommandBuf = commandBuffer;
     }
 
     @Override
     public void awaitCompletion() {
-        if (commandBuffer == null) return;
+        if (lastCommandBuf == null) return;
 
-        commandBuffer.commit();
-        commandBuffer.waitUntilCompleted();
-        commandBuffer = null; // recreate it later
-    }
-
-    @Override
-    public void free() {
-        MetalObject.super.free();
+        lastCommandBuf.waitUntilCompleted();
+        lastCommandBuf = null; // recreate it later
     }
 
     public MetalCommandBuffer makeCommandBuffer() {

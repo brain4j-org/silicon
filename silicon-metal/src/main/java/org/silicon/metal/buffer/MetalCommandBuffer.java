@@ -12,16 +12,16 @@ import java.lang.invoke.MethodHandle;
 
 public record MetalCommandBuffer(MemorySegment handle) implements MetalObject {
 
-    public static final MethodHandle METAL_MAKE_ENCODER = LINKER.downcallHandle(
-        LOOKUP.find("metal_make_encoder").orElse(null),
+    public static final MethodHandle METAL_MAKE_ENCODER = MetalObject.find(
+        "metal_make_encoder",
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
-    public static final MethodHandle METAL_COMMIT = LINKER.downcallHandle(
-        LOOKUP.find("metal_commit").orElse(null),
+    public static final MethodHandle METAL_COMMIT = MetalObject.find(
+        "metal_commit",
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
     );
-    public static final MethodHandle METAL_WAIT_UNTIL_COMPLETED = LINKER.downcallHandle(
-        LOOKUP.find("metal_wait_until_completed").orElse(null),
+    public static final MethodHandle METAL_WAIT_UNTIL_COMPLETED = MetalObject.find(
+        "metal_wait_until_completed",
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
     );
 

@@ -18,13 +18,13 @@ public class Silicon {
         ServiceLoader<ComputeBackend> loader = ServiceLoader.load(ComputeBackend.class);
 
         for (ComputeBackend backend : loader) {
-            if (!backend.getType().equals(backendType)) continue;
+            if (!backend.type().equals(backendType)) continue;
 
             Silicon.backend = backend;
             return;
         }
         
-        throw new IllegalStateException("No backend with name '" + backendType.getName() + "' was found on this system!");
+        throw new IllegalStateException("No backend with name '" + backendType.formalName() + "' was found on this system!");
     }
     
     private static ComputeBackend loadBackend() {
@@ -52,18 +52,18 @@ public class Silicon {
     }
     
     private static boolean isBetter(ComputeBackend candidate, ComputeBackend current) {
-        return candidate.getType().getPriority() < current.getType().getPriority();
+        return candidate.type().priority() < current.type().priority();
     }
 
-    public static ComputeDevice createSystemDevice() {
-        return createSystemDevice(0);
+    public static ComputeDevice createDevice() {
+        return createDevice(0);
     }
 
-    public static ComputeDevice createSystemDevice(int index) {
-        return getBackend().createSystemDevice(index);
+    public static ComputeDevice createDevice(int index) {
+        return backend().createDevice(index);
     }
 
-    public static ComputeBackend getBackend() {
+    public static ComputeBackend backend() {
         if (backend == null) {
             backend = loadBackend();
         }

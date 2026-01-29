@@ -12,3 +12,14 @@ public func metal_device_name(ptr: UnsafeMutableRawPointer) -> UnsafeMutablePoin
     let device: MTLDevice = pointerToObject(ptr)
     return strdup(device.name)
 }
+
+@_cdecl("metal_free_native")
+public func metal_free_native(ptr: UnsafeMutableRawPointer) {
+    free(ptr)
+}
+
+@_cdecl("metal_memory_size")
+public func metal_memory_size(ptr: UnsafeMutableRawPointer) -> UInt64 {
+    let device: MTLDevice = pointerToObject(ptr)
+    return device.recommendedMaxWorkingSetSize
+}

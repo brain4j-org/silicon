@@ -5,7 +5,6 @@ import org.silicon.backend.BackendType;
 import org.silicon.backend.ComputeBackend;
 import org.silicon.metal.device.MetalDevice;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
@@ -24,8 +23,8 @@ public class Metal implements ComputeBackend {
         LOOKUP = loadFromResources("/libmetal4j.dylib");
 
         if (LOOKUP != null) {
-            METAL_CREATE_SYSTEM_DEVICE = LINKER.downcallHandle(
-                LOOKUP.find("metal_create_system_device").orElse(null),
+            METAL_CREATE_SYSTEM_DEVICE = MetalObject.find(
+                "metal_create_system_device",
                 FunctionDescriptor.of(ValueLayout.ADDRESS)
             );
         } else {
@@ -34,22 +33,22 @@ public class Metal implements ComputeBackend {
     }
 
     @Override
-    public int getDeviceCount() {
+    public int deviceCount() {
         return 1; // TODO: proper device counting
     }
 
     @Override
     public boolean isAvailable() {
-        return getDeviceCount() > 0;
+        return deviceCount() > 0;
     }
 
     @Override
-    public BackendType getType() {
+    public BackendType type() {
         return BackendType.METAL;
     }
 
     @Override
-    public MetalDevice createSystemDevice(int index) {
+    public MetalDevice createDevice(int index) {
         try {
             if (index != 0) {
                 throw new IllegalArgumentException("Index should be equal to 0 when using Metal!");
@@ -68,8 +67,8 @@ public class Metal implements ComputeBackend {
     }
 
     @Override
-    public MetalDevice createSystemDevice() {
-        return createSystemDevice(0);
+    public MetalDevice createDevice() {
+        return createDevice(0);
     }
 
     public static SymbolLookup loadFromResources(String resourceName) {

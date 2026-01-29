@@ -1,7 +1,7 @@
 #!/bin/bash
 
 LIB_NAME="libmetal4j.dylib"
-SOURCES="src/**" # MetalBuffer.swift MetalCommandQueue.swift
+SOURCES="src/**"
 swiftc -emit-library -o $LIB_NAME $SOURCES -framework Metal -framework Foundation
 
 if [ $? -eq 0 ]; then

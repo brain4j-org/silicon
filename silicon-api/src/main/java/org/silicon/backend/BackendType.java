@@ -12,12 +12,12 @@ public enum BackendType {
         this.name = name;
         this.priority = priority;
     }
-    
-    public String getName() {
+
+    public String formalName() {
         return name;
     }
     
-    public int getPriority() {
+    public int priority() {
         return priority;
     }
 }

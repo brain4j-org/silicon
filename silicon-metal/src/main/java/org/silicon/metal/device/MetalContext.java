@@ -19,19 +19,19 @@ import java.nio.file.Path;
 
 public record MetalContext(MetalDevice device) implements MetalObject, ComputeContext {
 
-    public static final MethodHandle METAL_NEW_BUFFER = LINKER.downcallHandle(
-        LOOKUP.find("metal_new_buffer").orElse(null),
+    public static final MethodHandle METAL_NEW_BUFFER = MetalObject.find(
+        "metal_new_buffer",
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
     );
-    public static final MethodHandle METAL_CREATE_COMMAND_QUEUE = LINKER.downcallHandle(
-        LOOKUP.find("metal_create_command_queue").orElse(null),
+    public static final MethodHandle METAL_CREATE_COMMAND_QUEUE = MetalObject.find(
+        "metal_create_command_queue",
         FunctionDescriptor.of(
             ValueLayout.ADDRESS, // MTLCommandQueue*
             ValueLayout.ADDRESS  // device (MTLDevice*)
         )
     );
-    public static final MethodHandle METAL_CREATE_LIBRARY = LINKER.downcallHandle(
-        LOOKUP.find("metal_create_library").orElse(null),
+    public static final MethodHandle METAL_CREATE_LIBRARY = MetalObject.find(
+        "metal_create_library",
         FunctionDescriptor.of(ValueLayout.ADDRESS,  // return MTLLibrary*
             ValueLayout.ADDRESS,                    // device (MTLDevice*)
             ValueLayout.ADDRESS)                    // kernel source (char*)

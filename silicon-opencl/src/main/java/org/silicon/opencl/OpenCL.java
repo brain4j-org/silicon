@@ -39,7 +39,7 @@ public class OpenCL implements ComputeBackend {
     }
     
     @Override
-    public int getDeviceCount() {
+    public int deviceCount() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             int platformCount = getPlatformCount();
             long platform = getPlatform(platformCount);
@@ -61,13 +61,13 @@ public class OpenCL implements ComputeBackend {
     }
     
     @Override
-    public BackendType getType() {
+    public BackendType type() {
         return BackendType.OPENCL;
     }
     
     @Override
-    public ComputeDevice createSystemDevice(int index) {
-        int deviceCount = getDeviceCount();
+    public ComputeDevice createDevice(int index) {
+        int deviceCount = deviceCount();
         
         if (index < 0) throw new IllegalArgumentException("Device index must be greater than 0!");
         if (index >= deviceCount) {

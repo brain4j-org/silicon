@@ -50,7 +50,7 @@ public class CUDA implements ComputeBackend {
     }
     
     @Override
-    public int getDeviceCount() {
+    public int deviceCount() {
         try {
             return (int) CUDA_DEVICE_COUNT.invokeExact();
         } catch (Throwable e) {
@@ -61,24 +61,24 @@ public class CUDA implements ComputeBackend {
     @Override
     public boolean isAvailable() {
         try {
-            return getDeviceCount() > 0;
+            return deviceCount() > 0;
         } catch (Throwable _) {
             return false;
         }
     }
     
     @Override
-    public BackendType getType() {
+    public BackendType type() {
         return BackendType.CUDA;
     }
     
     @Override
-    public CudaDevice createSystemDevice(int index) {
+    public CudaDevice createDevice(int index) {
         if (CUDA_CREATE_SYSTEM_DEVICE == null || !isAvailable()) {
             throw new IllegalStateException("This backend is not available on this platform!");
         }
         
-        int count = getDeviceCount();
+        int count = deviceCount();
         
         if (index < 0 || index >= count) {
             throw new IllegalArgumentException("Index " + index + " out of range! Device count: " + count);

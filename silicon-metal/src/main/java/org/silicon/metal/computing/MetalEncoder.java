@@ -10,16 +10,16 @@ import java.util.function.Consumer;
 
 public final class MetalEncoder implements MetalObject, AutoCloseable {
 
-    public static final MethodHandle METAL_ENCODER_SET_BUFFER = LINKER.downcallHandle(
-        LOOKUP.find("metal_encoder_set_buffer").orElse(null),
+    public static final MethodHandle METAL_ENCODER_SET_BUFFER = MetalObject.find(
+        "metal_encoder_set_buffer",
         FunctionDescriptor.ofVoid(
             ValueLayout.ADDRESS, // encoder
             ValueLayout.ADDRESS, // buffer pointer
             ValueLayout.JAVA_INT // index
         )
     );
-    public static final MethodHandle METAL_ENCODER_SET_BYTES = LINKER.downcallHandle(
-        LOOKUP.find("metal_encoder_set_bytes").orElse(null),
+    public static final MethodHandle METAL_ENCODER_SET_BYTES = MetalObject.find(
+        "metal_encoder_set_bytes",
         FunctionDescriptor.ofVoid(
             ValueLayout.ADDRESS, // encoder
             ValueLayout.ADDRESS, // value
@@ -27,15 +27,15 @@ public final class MetalEncoder implements MetalObject, AutoCloseable {
             ValueLayout.JAVA_INT // index
         )
     );
-    public static final MethodHandle METAL_DISPATCH = LINKER.downcallHandle(
-        LOOKUP.find("metal_dispatch").orElse(null),
+    public static final MethodHandle METAL_DISPATCH = MetalObject.find(
+        "metal_dispatch",
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS,
             ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, // grid X, grid Y, grid Z
             ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT // blockX, blockY, blockZ
         )
     );
-    public static final MethodHandle METAL_END_ENCODING = LINKER.downcallHandle(
-        LOOKUP.find("metal_end_encoding").orElse(null),
+    public static final MethodHandle METAL_END_ENCODING = MetalObject.find(
+        "metal_end_encoding",
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
     );
 

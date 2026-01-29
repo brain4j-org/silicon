@@ -3,6 +3,7 @@ package org.silicon.cuda.device;
 import org.silicon.SiliconException;
 import org.silicon.cuda.CudaObject;
 import org.silicon.device.ComputeDevice;
+import org.silicon.device.DeviceFeature;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
@@ -36,7 +37,7 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
     }
     
     @Override
-    public String getName() {
+    public String name() {
         try {
             MemorySegment nameHandle = (MemorySegment) CUDA_DEVICE_NAME.invokeExact(handle);
             return nameHandle.reinterpret(Long.MAX_VALUE).getString(0);
@@ -44,4 +45,20 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
             throw new SiliconException("getName() failed", e);
         }
     }
+
+    @Override
+    public String vendor() {
+        return ""; // TODO
+    }
+
+    @Override
+    public long memorySize() {
+        return 0; // TODO
+    }
+
+    @Override
+    public boolean supports(DeviceFeature feature) {
+        return false; // TODO
+    }
+
 }

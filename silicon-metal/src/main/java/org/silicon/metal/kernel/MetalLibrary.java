@@ -12,8 +12,8 @@ import java.lang.invoke.MethodHandle;
 
 public record MetalLibrary(MemorySegment handle) implements MetalObject, ComputeModule {
 
-    public static final MethodHandle METAL_CREATE_FUNCTION = LINKER.downcallHandle(
-        LOOKUP.find("metal_create_function").orElse(null),
+    public static final MethodHandle METAL_CREATE_FUNCTION = MetalObject.find(
+        "metal_create_function",
         FunctionDescriptor.of(ValueLayout.ADDRESS, // return MTLFunction*
             ValueLayout.ADDRESS,                  // library (MTLLibrary*)
             ValueLayout.ADDRESS)                  // function name (char*)

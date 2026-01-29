@@ -3,16 +3,19 @@ package org.silicon.backend;
 import org.silicon.device.ComputeDevice;
 
 public interface ComputeBackend {
-    int getDeviceCount();
-    boolean isAvailable();
-    BackendType getType();
-    ComputeDevice createSystemDevice(int index);
+    int deviceCount();
 
-    default String getName() {
-        return getType().getName();
+    boolean isAvailable();
+
+    BackendType type();
+
+    ComputeDevice createDevice(int index);
+
+    default String name() {
+        return type().formalName();
     }
 
-    default ComputeDevice createSystemDevice() {
-        return createSystemDevice(0);
+    default ComputeDevice createDevice() {
+        return createDevice(0);
     }
 }
