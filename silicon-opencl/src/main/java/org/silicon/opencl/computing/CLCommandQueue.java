@@ -72,7 +72,7 @@ public record CLCommandQueue(long handle) implements ComputeQueue {
     }
 
     @Override
-    public void release() {
+    public void free() {
         CL10.clReleaseCommandQueue(handle);
     }
 

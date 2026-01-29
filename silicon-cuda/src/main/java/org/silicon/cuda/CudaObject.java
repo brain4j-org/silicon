@@ -1,11 +1,12 @@
 package org.silicon.cuda;
 
 import org.silicon.SiliconException;
+import org.silicon.memory.Freeable;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 
-public interface CudaObject {
+public interface CudaObject extends Freeable {
     
     Linker LINKER = CUDA.LINKER;
     SymbolLookup LOOKUP = CUDA.LOOKUP;
@@ -38,11 +39,11 @@ public interface CudaObject {
         return (long) array.length * Short.BYTES;
     }
     
-    default void release() {
+    default void free() {
         try {
             CUDA_RELEASE_OBJECT.invokeExact(handle());
         } catch (Throwable e) {
-            throw new SiliconException("release() failed", e);
+            throw new SiliconException("free() failed", e);
         }
     }
 

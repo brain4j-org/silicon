@@ -1,6 +1,7 @@
 package org.silicon.metal.device;
 
 import org.silicon.SiliconException;
+import org.silicon.backend.BackendType;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.device.ComputeBuffer;
 import org.silicon.device.ComputeContext;
@@ -35,7 +36,12 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
             ValueLayout.ADDRESS,                    // device (MTLDevice*)
             ValueLayout.ADDRESS)                    // kernel source (char*)
     );
-
+    
+    @Override
+    public BackendType getBackendType() {
+        return BackendType.METAL;
+    }
+    
     @Override
     public MetalCommandQueue createQueue() {
         try {

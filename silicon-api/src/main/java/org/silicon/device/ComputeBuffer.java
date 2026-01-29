@@ -1,15 +1,15 @@
 package org.silicon.device;
 
-import org.silicon.backend.BufferState;
+import org.silicon.memory.BufferState;
 import org.silicon.computing.ComputeQueue;
+import org.silicon.memory.Freeable;
 
-public interface ComputeBuffer {
+public interface ComputeBuffer extends Freeable {
     BufferState getState();
     ComputeBuffer copy();
     ComputeBuffer copyInto(ComputeBuffer other);
     ComputeBuffer copyAsync(ComputeQueue queue);
     ComputeBuffer copyIntoAsync(ComputeBuffer other, ComputeQueue queue);
-    void free();
     void get(byte[] data);
     void get(double[] data);
     void get(float[] data);

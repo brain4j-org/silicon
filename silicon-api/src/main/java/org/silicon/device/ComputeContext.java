@@ -1,5 +1,6 @@
 package org.silicon.device;
 
+import org.silicon.backend.BackendType;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.kernel.ComputeModule;
 
@@ -21,6 +22,7 @@ public interface ComputeContext {
         }
     }
     
+    BackendType getBackendType();
     ComputeQueue createQueue();
     ComputeModule loadModule(Path path);
     ComputeModule loadModule(byte[] rawSrc);

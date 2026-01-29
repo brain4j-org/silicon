@@ -18,14 +18,13 @@ import java.security.MessageDigest;
 public class SlangCompiler {
 
     private final ComputeContext context;
-    private final BackendType backendType;
 
-    public SlangCompiler(ComputeContext context, BackendType backendType) {
+    public SlangCompiler(ComputeContext context) {
         this.context = context;
-        this.backendType = backendType;
     }
 
     public ComputeModule compile(Path path) {
+        BackendType backendType = context.getBackendType();
         String target = switch (backendType) {
             case CUDA -> "ptx";
             case METAL -> "metal";
@@ -74,6 +73,8 @@ public class SlangCompiler {
     }
     
     public ComputeModule compileFromResource(String resourcePath) {
+        BackendType backendType = context.getBackendType();
+        
         if (resourcePath.startsWith("/")) {
             throw new IllegalArgumentException("Resource path must be relative (no leading '/')");
         }

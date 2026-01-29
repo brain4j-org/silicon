@@ -1,4 +1,4 @@
-package org.silicon.backend;
+package org.silicon.memory;
 
 public enum BufferState {
     ALIVE,

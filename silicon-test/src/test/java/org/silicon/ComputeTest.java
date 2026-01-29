@@ -3,6 +3,7 @@ package org.silicon;
 import org.silicon.computing.ComputeArgs;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.computing.ComputeSize;
+import org.silicon.device.ComputeArena;
 import org.silicon.device.ComputeBuffer;
 import org.silicon.device.ComputeContext;
 import org.silicon.device.ComputeDevice;
@@ -23,35 +24,38 @@ public class ComputeTest {
         ComputeDevice device = Silicon.createSystemDevice();
         ComputeContext context = device.createContext();
         
-        SlangCompiler compiler = new SlangCompiler(context, Silicon.getBackend().getType());
+        SlangCompiler compiler = new SlangCompiler(context);
         
         ComputeModule module = compiler.compileFromResource("vector_add.slang");
         ComputeFunction function = module.getFunction("add");
         
-        float[] dataA = new float[N];
-        float[] dataB = new float[N];
+        float[] dataA = generateData(N);
+        float[] dataB = generateData(N);
         
-        for (int i = 0; i < N; i++) {
-            dataA[i] = i;
-            dataB[i] = i + 1;
+        try (ComputeArena arena = context.createArena()) {
+            ComputeBuffer a = arena.allocateArray(dataA);
+            ComputeBuffer b = arena.allocateArray(dataB);
+            ComputeBuffer c = arena.allocateBytes(N * 4L);
+            
+            ComputeArgs args = ComputeArgs.of(a, b, c, N);
+            
+            ComputeSize globalSize = new ComputeSize(N, 1, 1);
+            ComputeSize groupSize = new ComputeSize(16, 1, 1);
+            
+            ComputeQueue queue = arena.createQueue();
+            
+            queue.dispatch(function, globalSize, groupSize, args);
+            queue.awaitCompletion();
+            
+            float[] result = new float[64];
+            c.get(result);
+            System.out.println(Arrays.toString(result));
         }
-        
-        ComputeBuffer a = context.allocateArray(dataA);
-        ComputeBuffer b = context.allocateArray(dataB);
-        ComputeBuffer c = context.allocateBytes(N * 4L);
-        
-        ComputeArgs args = ComputeArgs.of(a, b, c, N);
-        
-        ComputeSize globalSize = new ComputeSize(N, 1, 1);
-        ComputeSize groupSize = new ComputeSize(16, 1, 1);
-        
-        ComputeQueue queue = context.createQueue();
-        
-        queue.dispatch(function, globalSize, groupSize, args);
-        queue.awaitCompletion();
-        
-        float[] result = new float[64];
-        c.get(result);
-        System.out.println(Arrays.toString(result));
+    }
+    
+    private static float[] generateData(int length) {
+        float[] data = new float[length];
+        for (int i = 0; i < length; i++) data[i] = i;
+        return data;
     }
 }

@@ -124,7 +124,7 @@ public final class MetalEncoder implements MetalObject, AutoCloseable {
     public void close() {
         try {
             endEncoding();
-            release();
+            free();
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

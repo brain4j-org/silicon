@@ -1,6 +1,7 @@
 package org.silicon.cuda.device;
 
 import org.silicon.SiliconException;
+import org.silicon.backend.BackendType;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.cuda.CudaObject;
 import org.silicon.cuda.computing.CudaStream;
@@ -71,6 +72,11 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     }
     
     @Override
+    public BackendType getBackendType() {
+        return BackendType.CUDA;
+    }
+    
+    @Override
     public CudaStream createQueue() {
         try {
             MemorySegment ptr = (MemorySegment) CUDA_STREAM_CREATE.invoke();
@@ -127,12 +133,12 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     }
     
     @Override
-    public void release() {
+    public void free() {
         try {
             CUDA_DESTROY_CONTEXT.invoke(handle);
-            CudaObject.super.release();
+            CudaObject.super.free();
         } catch (Throwable e) {
-            throw new SiliconException("release() failed", e);
+            throw new SiliconException("free() failed", e);
         }
     }
     

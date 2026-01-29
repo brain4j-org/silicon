@@ -73,8 +73,8 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue {
     }
 
     @Override
-    public void release() {
-        MetalObject.super.release();
+    public void free() {
+        MetalObject.super.free();
     }
 
     public MetalCommandBuffer makeCommandBuffer() {

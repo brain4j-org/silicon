@@ -1,6 +1,7 @@
 package org.silicon.device;
 
 import org.silicon.computing.ComputeQueue;
+import org.silicon.memory.Freeable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,23 +9,27 @@ import java.util.List;
 public class ComputeArena implements AutoCloseable {
     
     private final ComputeContext context;
-    private final List<ComputeBuffer> retainedBuffers;
+    private final List<Freeable> retained;
 
     public ComputeArena(ComputeContext context) {
         this.context = context;
-        this.retainedBuffers = new ArrayList<>();
+        this.retained = new ArrayList<>();
     }
 
     @Override
     public void close() {
-        for (ComputeBuffer buffer : retainedBuffers) {
-            buffer.free();
+        for (Freeable object : retained) {
+            object.free();
         }
     }
 
-    public ComputeBuffer retain(ComputeBuffer buffer) {
-        retainedBuffers.add(buffer);
+    public <T extends Freeable> T retain(T buffer) {
+        retained.add(buffer);
         return buffer;
+    }
+    
+    public ComputeQueue createQueue() {
+        return retain(context.createQueue());
     }
 
     public ComputeBuffer allocateBytes(long size) {

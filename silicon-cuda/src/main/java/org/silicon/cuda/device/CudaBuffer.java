@@ -1,7 +1,7 @@
 package org.silicon.cuda.device;
 
 import org.silicon.SiliconException;
-import org.silicon.backend.BufferState;
+import org.silicon.memory.BufferState;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.cuda.CudaObject;
 import org.silicon.cuda.computing.CudaStream;

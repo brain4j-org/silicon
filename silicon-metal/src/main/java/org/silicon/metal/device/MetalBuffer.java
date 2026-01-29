@@ -1,7 +1,7 @@
 package org.silicon.metal.device;
 
 import org.silicon.SiliconException;
-import org.silicon.backend.BufferState;
+import org.silicon.memory.BufferState;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.device.ComputeBuffer;
 import org.silicon.metal.MetalObject;
@@ -83,7 +83,7 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
 
         this.state = BufferState.PENDING_FREE;
         try {
-            release();
+            this.free();
         } finally {
             this.state = BufferState.FREE;
         }

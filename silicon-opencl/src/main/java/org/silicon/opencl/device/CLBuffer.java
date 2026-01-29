@@ -1,7 +1,7 @@
 package org.silicon.opencl.device;
 
 import org.lwjgl.opencl.CL10;
-import org.silicon.backend.BufferState;
+import org.silicon.memory.BufferState;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.device.ComputeBuffer;
 import org.silicon.opencl.computing.CLCommandQueue;
@@ -35,7 +35,22 @@ public class CLBuffer implements ComputeBuffer {
 
     @Override
     public CLBuffer copyInto(ComputeBuffer other) {
-        return copyIntoAsync(other, null);
+        if (!(other instanceof CLBuffer buffer)) {
+            throw new IllegalArgumentException("Other buffer must be an OpenCL buffer!");
+        }
+        
+        CLCommandQueue queue = context.createQueue();
+        
+        int res = CL10.clEnqueueCopyBuffer(
+            queue.handle(), buffer.getHandle(), handle,
+            0, 0, size, null, null
+        );
+        if (res != 0) throw new RuntimeException("clEnqueueCopyBuffer failed: " + res);
+        
+        queue.awaitCompletion();
+        queue.free();
+        
+        return buffer;
     }
 
     @Override
@@ -49,9 +64,10 @@ public class CLBuffer implements ComputeBuffer {
         if (!(other instanceof CLBuffer buffer)) {
             throw new IllegalArgumentException("Other buffer must be an OpenCL buffer!");
         }
-
-        boolean newQueue = queue == null;
-        if (newQueue) queue = context.createQueue();
+        
+        if (queue == null) {
+            throw new IllegalArgumentException("Queue cannot be null!");
+        }
 
         CLCommandQueue clQueue = (CLCommandQueue) queue;
 
@@ -60,12 +76,7 @@ public class CLBuffer implements ComputeBuffer {
             0, 0, size, null, null
         );
         if (res != 0) throw new RuntimeException("clEnqueueCopyBuffer failed: " + res);
-
-        if (newQueue) {
-            clQueue.awaitCompletion();
-            clQueue.release();
-        }
-
+        
         return buffer;
     }
 
@@ -91,7 +102,7 @@ public class CLBuffer implements ComputeBuffer {
         result.buffer().get(data);
 
         result.queue().awaitCompletion();
-        result.queue().release();
+        result.queue().free();
     }
 
     @Override
@@ -102,7 +113,7 @@ public class CLBuffer implements ComputeBuffer {
         result.buffer().asDoubleBuffer().get(data);
 
         result.queue().awaitCompletion();
-        result.queue().release();
+        result.queue().free();
     }
 
     @Override
@@ -113,7 +124,7 @@ public class CLBuffer implements ComputeBuffer {
         result.buffer().asFloatBuffer().get(data);
 
         result.queue().awaitCompletion();
-        result.queue().release();
+        result.queue().free();
     }
 
     @Override
@@ -124,7 +135,7 @@ public class CLBuffer implements ComputeBuffer {
         result.buffer().asLongBuffer().get(data);
 
         result.queue().awaitCompletion();
-        result.queue().release();
+        result.queue().free();
     }
 
     @Override
@@ -135,7 +146,7 @@ public class CLBuffer implements ComputeBuffer {
         result.buffer().asIntBuffer().get(data);
 
         result.queue().awaitCompletion();
-        result.queue().release();
+        result.queue().free();
     }
 
     @Override
@@ -146,7 +157,7 @@ public class CLBuffer implements ComputeBuffer {
         result.buffer().asShortBuffer().get(data);
 
         result.queue().awaitCompletion();
-        result.queue().release();
+        result.queue().free();
     }
 
     private Result readBuffer(long required) {
@@ -182,13 +193,5 @@ public class CLBuffer implements ComputeBuffer {
 
     public long getSize() {
         return size;
-    }
-
-    @Override
-    public String toString() {
-        return "CLBuffer[" +
-            "handle=" + handle + ", " +
-            "context=" + context + ", " +
-            "size=" + size + ']';
     }
 }

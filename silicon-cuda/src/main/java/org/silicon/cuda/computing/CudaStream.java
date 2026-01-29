@@ -100,13 +100,13 @@ public record CudaStream(MemorySegment handle) implements CudaObject, ComputeQue
     }
 
     @Override
-    public void release() {
+    public void free() {
         try {
             int res = (int) CUDA_STREAM_DESTROY.invoke(handle);
             if (res != 0) throw new RuntimeException("cuStreamDestroy failed: " + res);
-            CudaObject.super.release();
+            CudaObject.super.free();
         } catch (Throwable e) {
-            throw new SiliconException("release() failed", e);
+            throw new SiliconException("free() failed", e);
         }
     }
 }

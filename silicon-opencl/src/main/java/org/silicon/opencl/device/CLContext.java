@@ -3,6 +3,7 @@ package org.silicon.opencl.device;
 import org.lwjgl.opencl.CL10;
 import org.lwjgl.system.MemoryStack;
 import org.silicon.SiliconException;
+import org.silicon.backend.BackendType;
 import org.silicon.computing.ComputeQueue;
 import org.silicon.device.ComputeContext;
 import org.silicon.kernel.ComputeModule;
@@ -30,8 +31,13 @@ public record CLContext(long handle, long device) implements ComputeContext {
         if (err != CL10.CL_SUCCESS) throw new IllegalStateException("clEnqueueWriteBuffer failed: " + err);
         if (blocking) {
             queue.awaitCompletion();
-            queue.release();
+            queue.free();
         }
+    }
+    
+    @Override
+    public BackendType getBackendType() {
+        return BackendType.OPENCL;
     }
     
     @Override
