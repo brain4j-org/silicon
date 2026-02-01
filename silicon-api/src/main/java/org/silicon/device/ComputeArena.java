@@ -41,64 +41,32 @@ public class ComputeArena implements AutoCloseable {
         return retain(context.allocateArray(data, size));
     }
 
-    public ComputeBuffer allocateArray(byte[] data, long size, ComputeQueue queue) {
-        return retain(context.allocateArray(data, size, queue));
-    }
-
     public ComputeBuffer allocateArray(double[] data, long size) {
         return retain(context.allocateArray(data, size));
     }
-
-    public ComputeBuffer allocateArray(double[] data, long size, ComputeQueue queue) {
-        return retain(context.allocateArray(data, size, queue));
-    }
-
+    
     public ComputeBuffer allocateArray(float[] data, long size) {
         return retain(context.allocateArray(data, size));
-    }
-
-    public ComputeBuffer allocateArray(float[] data, long size, ComputeQueue queue) {
-        return retain(context.allocateArray(data, size, queue));
     }
 
     public ComputeBuffer allocateArray(long[] data, long size) {
         return retain(context.allocateArray(data, size));
     }
 
-    public ComputeBuffer allocateArray(long[] data, long size, ComputeQueue queue) {
-        return retain(context.allocateArray(data, size, queue));
-    }
-
     public ComputeBuffer allocateArray(int[] data, long size) {
         return retain(context.allocateArray(data, size));
-    }
-
-    public ComputeBuffer allocateArray(int[] data, long size, ComputeQueue queue) {
-        return retain(context.allocateArray(data, size, queue));
     }
 
     public ComputeBuffer allocateArray(short[] data, long size) {
         return retain(context.allocateArray(data, size));
     }
 
-    public ComputeBuffer allocateArray(short[] data, long size, ComputeQueue queue) {
-        return retain(context.allocateArray(data, size, queue));
-    }
-
     public ComputeBuffer allocateArray(byte[] data) {
         return allocateArray(data, data.length);
     }
-
-    public ComputeBuffer allocateArray(byte[] data, ComputeQueue queue) {
-        return allocateArray(data, data.length, queue);
-    }
-
+    
     public ComputeBuffer allocateArray(double[] data) {
         return allocateArray(data, data.length * 8L);
-    }
-
-    public ComputeBuffer allocateArray(double[] data, ComputeQueue queue) {
-        return allocateArray(data, data.length * 8L, queue);
     }
     
     public ComputeBuffer allocateHalf(float[] data) {
@@ -110,32 +78,16 @@ public class ComputeArena implements AutoCloseable {
     public ComputeBuffer allocateArray(float[] data) {
         return allocateArray(data, data.length * 4L);
     }
-
-    public ComputeBuffer allocateArray(float[] data, ComputeQueue queue) {
-        return allocateArray(data, data.length * 4L, queue);
-    }
-
+    
     public ComputeBuffer allocateArray(long[] data) {
         return allocateArray(data, data.length * 8L);
-    }
-
-    public ComputeBuffer allocateArray(long[] data, ComputeQueue queue) {
-        return allocateArray(data, data.length * 8L, queue);
     }
 
     public ComputeBuffer allocateArray(int[] data) {
         return allocateArray(data, data.length * 4L);
     }
 
-    public ComputeBuffer allocateArray(int[] data, ComputeQueue queue) {
-        return allocateArray(data, data.length * 4L, queue);
-    }
-
     public ComputeBuffer allocateArray(short[] data) {
         return allocateArray(data, data.length * 2L);
-    }
-
-    public ComputeBuffer allocateArray(short[] data, ComputeQueue queue) {
-        return allocateArray(data, data.length * 2L, queue);
     }
 }

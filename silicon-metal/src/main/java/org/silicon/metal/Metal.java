@@ -34,7 +34,7 @@ public class Metal implements ComputeBackend {
 
     @Override
     public int deviceCount() {
-        return 1; // TODO: proper device counting
+        return 1;
     }
 
     @Override

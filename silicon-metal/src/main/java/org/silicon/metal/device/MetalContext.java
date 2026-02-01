@@ -116,20 +116,10 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     }
 
     @Override
-    public ComputeBuffer allocateArray(byte[] data, long size, ComputeQueue queue) {
-        return allocateArray(data, size);
-    }
-
-    @Override
     public ComputeBuffer allocateArray(double[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
         buffer.asByteBuffer().asDoubleBuffer().put(data);
         return buffer;
-    }
-
-    @Override
-    public ComputeBuffer allocateArray(double[] data, long size, ComputeQueue queue) {
-        return allocateArray(data, size);
     }
 
     @Override
@@ -140,22 +130,12 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     }
 
     @Override
-    public ComputeBuffer allocateArray(float[] data, long size, ComputeQueue queue) {
-        return allocateArray(data, size);
-    }
-
-    @Override
     public ComputeBuffer allocateArray(long[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
         buffer.asByteBuffer().asLongBuffer().put(data);
         return buffer;
     }
-
-    @Override
-    public ComputeBuffer allocateArray(long[] data, long size, ComputeQueue queue) {
-        return allocateArray(data, size);
-    }
-
+    
     @Override
     public ComputeBuffer allocateArray(int[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
@@ -164,20 +144,10 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     }
 
     @Override
-    public ComputeBuffer allocateArray(int[] data, long size, ComputeQueue queue) {
-        return allocateArray(data, size);
-    }
-
-    @Override
     public ComputeBuffer allocateArray(short[] data, long size) {
         MetalBuffer buffer = allocateBytes(size);
         buffer.asByteBuffer().asShortBuffer().put(data);
         return buffer;
-    }
-
-    @Override
-    public ComputeBuffer allocateArray(short[] data, long size, ComputeQueue queue) {
-        return allocateArray(data, size);
     }
 
     @Override

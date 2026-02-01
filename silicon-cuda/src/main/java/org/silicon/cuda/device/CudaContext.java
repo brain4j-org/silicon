@@ -157,23 +157,9 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     }
 
     @Override
-    public CudaBuffer allocateArray(byte[] data, long size, ComputeQueue queue) {
-        CudaBuffer buffer = allocateBytes(size);
-        buffer.copyToDeviceAsync(data, (CudaStream) queue);
-        return buffer;
-    }
-
-    @Override
     public CudaBuffer allocateArray(double[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
-        return buffer;
-    }
-
-    @Override
-    public CudaBuffer allocateArray(double[] data, long size, ComputeQueue queue) {
-        CudaBuffer buffer = allocateBytes(size);
-        buffer.copyToDeviceAsync(data, (CudaStream) queue);
         return buffer;
     }
 
@@ -183,28 +169,14 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
         buffer.copyToDevice(data);
         return buffer;
     }
-
-    @Override
-    public CudaBuffer allocateArray(float[] data, long size, ComputeQueue queue) {
-        CudaBuffer buffer = allocateBytes(size);
-        buffer.copyToDeviceAsync(data, (CudaStream) queue);
-        return buffer;
-    }
-
+    
     @Override
     public CudaBuffer allocateArray(long[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
         return buffer;
     }
-
-    @Override
-    public CudaBuffer allocateArray(long[] data, long size, ComputeQueue queue) {
-        CudaBuffer buffer = allocateBytes(size);
-        buffer.copyToDeviceAsync(data, (CudaStream) queue);
-        return buffer;
-    }
-
+    
     @Override
     public CudaBuffer allocateArray(int[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
@@ -213,23 +185,9 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     }
 
     @Override
-    public CudaBuffer allocateArray(int[] data, long size, ComputeQueue queue) {
-        CudaBuffer buffer = allocateBytes(size);
-        buffer.copyToDeviceAsync(data, (CudaStream) queue);
-        return buffer;
-    }
-
-    @Override
     public CudaBuffer allocateArray(short[] data, long size) {
         CudaBuffer buffer = allocateBytes(size);
         buffer.copyToDevice(data);
-        return buffer;
-    }
-
-    @Override
-    public CudaBuffer allocateArray(short[] data, long size, ComputeQueue queue) {
-        CudaBuffer buffer = allocateBytes(size);
-        buffer.copyToDeviceAsync(data, (CudaStream) queue);
         return buffer;
     }
 }

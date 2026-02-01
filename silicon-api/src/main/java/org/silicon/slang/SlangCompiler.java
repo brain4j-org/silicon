@@ -28,7 +28,7 @@ public class SlangCompiler {
         String target = switch (backendType) {
             case CUDA -> "ptx";
             case METAL -> "metal";
-            case OPENCL -> throw new IllegalStateException("OpenCL is not yet supported"); // TODO: spirv
+            case OPENCL -> throw new IllegalStateException("OpenCL is not yet supported");
         };
 
         String fileName = path.getFileName().toString();

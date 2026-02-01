@@ -19,21 +19,18 @@ import java.nio.file.Path;
 
 public record CLContext(long handle, long device) implements ComputeContext {
     
-    private void writeBuffer(CLBuffer buffer, ByteBuffer data, ComputeQueue queue) {
-        boolean blocking = queue == null;
-        if (queue == null) queue = createQueue();
+    private void writeBuffer(CLBuffer buffer, ByteBuffer data) {
+        CLCommandQueue clQueue = createQueue();
         
-        CLCommandQueue clQueue = (CLCommandQueue) queue;
         int err = CL10.clEnqueueWriteBuffer(
-            clQueue.handle(), buffer.getHandle(), blocking, 0L,
+            clQueue.handle(), buffer.getHandle(), true, 0L,
             data, null, null
         );
         
         if (err != CL10.CL_SUCCESS) throw new IllegalStateException("clEnqueueWriteBuffer failed: " + err);
-        if (blocking) {
-            queue.awaitCompletion();
-            queue.free();
-        }
+        
+        clQueue.awaitCompletion();
+        clQueue.free();
     }
     
     @Override
@@ -105,11 +102,6 @@ public record CLContext(long handle, long device) implements ComputeContext {
     
     @Override
     public CLBuffer allocateArray(byte[] data, long size) {
-        return allocateArray(data, size, null);
-    }
-    
-    @Override
-    public CLBuffer allocateArray(byte[] data, long size, ComputeQueue queue) {
         if (data.length > size) {
             throw new IllegalArgumentException(
                 "byte[] requires " + data.length + " bytes, but buffer size is " + size
@@ -123,17 +115,12 @@ public record CLContext(long handle, long device) implements ComputeContext {
         
         buf.put(data).flip();
         
-        writeBuffer(buffer, buf, queue);
+        writeBuffer(buffer, buf);
         return buffer;
     }
     
     @Override
     public CLBuffer allocateArray(double[] data, long size) {
-        return allocateArray(data, size, null);
-    }
-    
-    @Override
-    public CLBuffer allocateArray(double[] data, long size, ComputeQueue queue) {
         long required = (long) data.length * Double.BYTES;
         if (required > size) {
             throw new IllegalArgumentException(
@@ -148,17 +135,12 @@ public record CLContext(long handle, long device) implements ComputeContext {
         
         buf.asDoubleBuffer().put(data).flip();
         
-        writeBuffer(buffer, buf, queue);
+        writeBuffer(buffer, buf);
         return buffer;
     }
     
     @Override
     public CLBuffer allocateArray(float[] data, long size) {
-        return allocateArray(data, size, null);
-    }
-    
-    @Override
-    public CLBuffer allocateArray(float[] data, long size, ComputeQueue queue) {
         long required = (long) data.length * Float.BYTES;
         if (required > size) {
             throw new IllegalArgumentException(
@@ -173,17 +155,12 @@ public record CLContext(long handle, long device) implements ComputeContext {
         
         buf.asFloatBuffer().put(data);
         
-        writeBuffer(buffer, buf, queue);
+        writeBuffer(buffer, buf);
         return buffer;
     }
     
     @Override
     public CLBuffer allocateArray(long[] data, long size) {
-        return allocateArray(data, size, null);
-    }
-    
-    @Override
-    public CLBuffer allocateArray(long[] data, long size, ComputeQueue queue) {
         long required = (long) data.length * Long.BYTES;
         if (required > size) {
             throw new IllegalArgumentException(
@@ -198,17 +175,12 @@ public record CLContext(long handle, long device) implements ComputeContext {
         
         buf.asLongBuffer().put(data).flip();
         
-        writeBuffer(buffer, buf, queue);
+        writeBuffer(buffer, buf);
         return buffer;
     }
     
     @Override
     public CLBuffer allocateArray(int[] data, long size) {
-        return allocateArray(data, size, null);
-    }
-    
-    @Override
-    public CLBuffer allocateArray(int[] data, long size, ComputeQueue queue) {
         long required = (long) data.length * Integer.BYTES;
         if (required > size) {
             throw new IllegalArgumentException(
@@ -223,17 +195,12 @@ public record CLContext(long handle, long device) implements ComputeContext {
         
         buf.asIntBuffer().put(data).flip();
         
-        writeBuffer(buffer, buf, queue);
+        writeBuffer(buffer, buf);
         return buffer;
     }
     
     @Override
     public CLBuffer allocateArray(short[] data, long size) {
-        return allocateArray(data, size, null);
-    }
-    
-    @Override
-    public CLBuffer allocateArray(short[] data, long size, ComputeQueue queue) {
         long required = (long) data.length * Short.BYTES;
         if (required > size) {
             throw new IllegalArgumentException(
@@ -248,7 +215,7 @@ public record CLContext(long handle, long device) implements ComputeContext {
         
         buf.asShortBuffer().put(data).flip();
         
-        writeBuffer(buffer, buf, queue);
+        writeBuffer(buffer, buf);
         return buffer;
     }
 }
