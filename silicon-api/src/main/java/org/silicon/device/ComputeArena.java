@@ -103,12 +103,7 @@ public class ComputeArena implements AutoCloseable {
     
     public ComputeBuffer allocateHalf(float[] data) {
         short[] result = new short[data.length];
-        
-        for (int i = 0; i < data.length; i++) {
-            short h = BitUtils.floatToHalf(data[i]);
-            result[i] = h;
-        }
-        
+        BitUtils.float2Half(data, result);
         return allocateArray(result);
     }
     

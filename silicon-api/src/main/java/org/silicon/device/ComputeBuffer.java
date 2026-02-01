@@ -28,9 +28,6 @@ public interface ComputeBuffer extends Freeable {
     default void getHalf(float[] data) {
         short[] tmp = new short[data.length];
         get(tmp);
-        
-        for (int i = 0; i < data.length; i++) {
-            data[i] = BitUtils.halfToFloat(tmp[i]);
-        }
+        BitUtils.half2Float(tmp, data);
     }
 }

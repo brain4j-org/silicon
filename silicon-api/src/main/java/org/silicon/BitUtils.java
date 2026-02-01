@@ -1,7 +1,7 @@
 package org.silicon;
 
 public class BitUtils {
-    public static float halfToFloat(short h) {
+    public static float half2Float(short h) {
         int bits = h & 0xFFFF;
         
         int sign = (bits & 0x8000) << 16;
@@ -31,7 +31,7 @@ public class BitUtils {
         return Float.intBitsToFloat(sign | (exp << 23) | mant);
     }
     
-    public static short floatToHalf(float f) {
+    public static short float2Half(float f) {
         int bits = Float.floatToIntBits(f);
         
         int sign = (bits >>> 16) & 0x8000;
@@ -49,5 +49,33 @@ public class BitUtils {
         }
         
         return (short) (sign | (exp << 10) | (mant >> 13));
+    }
+    
+    public static void half2Float(short[] input, float[] output) {
+        for (int i = 0; i < input.length; i++) {
+            output[i] = BitUtils.half2Float(input[i]);
+        }
+    }
+    
+    public static float[] half2Float(short[] values) {
+        float[] result = new float[values.length];
+        for (int i = 0; i < values.length; i++) {
+            result[i] = BitUtils.half2Float(values[i]);
+        }
+        return result;
+    }
+    
+    public static void float2Half(float[] input, short[] output) {
+        for (int i = 0; i < input.length; i++) {
+            output[i] = BitUtils.float2Half(input[i]);
+        }
+    }
+    
+    public static short[] float2Half(float[] values) {
+        short[] result = new short[values.length];
+        for (int i = 0; i < values.length; i++) {
+            result[i] = BitUtils.float2Half(values[i]);
+        }
+        return result;
     }
 }
