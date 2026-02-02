@@ -101,14 +101,8 @@ public record CLContext(long handle, long device) implements ComputeContext {
     }
     
     @Override
-    public CLBuffer allocateArray(byte[] data, long size) {
-        if (data.length > size) {
-            throw new IllegalArgumentException(
-                "byte[] requires " + data.length + " bytes, but buffer size is " + size
-            );
-        }
-        
-        CLBuffer buffer = allocateBytes(size);
+    public CLBuffer allocateArray(byte[] data) {
+        CLBuffer buffer = allocateBytes(data.length);
         ByteBuffer buf = ByteBuffer
             .allocateDirect(data.length)
             .order(ByteOrder.nativeOrder());
@@ -120,15 +114,10 @@ public record CLContext(long handle, long device) implements ComputeContext {
     }
     
     @Override
-    public CLBuffer allocateArray(double[] data, long size) {
+    public CLBuffer allocateArray(double[] data) {
         long required = (long) data.length * Double.BYTES;
-        if (required > size) {
-            throw new IllegalArgumentException(
-                "double[] requires " + required + " bytes, but buffer size is " + size
-            );
-        }
         
-        CLBuffer buffer = allocateBytes(size);
+        CLBuffer buffer = allocateBytes(required);
         ByteBuffer buf = ByteBuffer
             .allocateDirect(data.length * Double.BYTES)
             .order(ByteOrder.nativeOrder());
@@ -140,15 +129,10 @@ public record CLContext(long handle, long device) implements ComputeContext {
     }
     
     @Override
-    public CLBuffer allocateArray(float[] data, long size) {
+    public CLBuffer allocateArray(float[] data) {
         long required = (long) data.length * Float.BYTES;
-        if (required > size) {
-            throw new IllegalArgumentException(
-                "float[] requires " + required + " bytes, but buffer size is " + size
-            );
-        }
-        
-        CLBuffer buffer = allocateBytes(size);
+
+        CLBuffer buffer = allocateBytes(required);
         ByteBuffer buf = ByteBuffer
             .allocateDirect(data.length * Float.BYTES)
             .order(ByteOrder.nativeOrder());
@@ -160,15 +144,10 @@ public record CLContext(long handle, long device) implements ComputeContext {
     }
     
     @Override
-    public CLBuffer allocateArray(long[] data, long size) {
+    public CLBuffer allocateArray(long[] data) {
         long required = (long) data.length * Long.BYTES;
-        if (required > size) {
-            throw new IllegalArgumentException(
-                "long[] requires " + required + " bytes, but buffer size is " + size
-            );
-        }
         
-        CLBuffer buffer = allocateBytes(size);
+        CLBuffer buffer = allocateBytes(required);
         ByteBuffer buf = ByteBuffer
             .allocateDirect((int) required)
             .order(ByteOrder.nativeOrder());
@@ -180,15 +159,10 @@ public record CLContext(long handle, long device) implements ComputeContext {
     }
     
     @Override
-    public CLBuffer allocateArray(int[] data, long size) {
+    public CLBuffer allocateArray(int[] data) {
         long required = (long) data.length * Integer.BYTES;
-        if (required > size) {
-            throw new IllegalArgumentException(
-                "int[] requires " + required + " bytes, but buffer size is " + size
-            );
-        }
-        
-        CLBuffer buffer = allocateBytes(size);
+
+        CLBuffer buffer = allocateBytes(required);
         ByteBuffer buf = ByteBuffer
             .allocateDirect((int) required)
             .order(ByteOrder.nativeOrder());
@@ -200,15 +174,10 @@ public record CLContext(long handle, long device) implements ComputeContext {
     }
     
     @Override
-    public CLBuffer allocateArray(short[] data, long size) {
+    public CLBuffer allocateArray(short[] data) {
         long required = (long) data.length * Short.BYTES;
-        if (required > size) {
-            throw new IllegalArgumentException(
-                "short[] requires " + required + " bytes, but buffer size is " + size
-            );
-        }
-        
-        CLBuffer buffer = allocateBytes(size);
+
+        CLBuffer buffer = allocateBytes(required);
         ByteBuffer buf = ByteBuffer
             .allocateDirect((int) required)
             .order(ByteOrder.nativeOrder());

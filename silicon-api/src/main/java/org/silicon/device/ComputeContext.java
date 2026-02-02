@@ -36,41 +36,17 @@ public interface ComputeContext {
 
     ComputeBuffer allocateBytes(long size);
 
-    ComputeBuffer allocateArray(byte[] data, long size);
+    ComputeBuffer allocateArray(byte[] data);
     
-    ComputeBuffer allocateArray(double[] data, long size);
+    ComputeBuffer allocateArray(double[] data);
 
-    ComputeBuffer allocateArray(float[] data, long size);
+    ComputeBuffer allocateArray(float[] data);
 
-    ComputeBuffer allocateArray(long[] data, long size);
+    ComputeBuffer allocateArray(long[] data);
 
-    ComputeBuffer allocateArray(int[] data, long size);
+    ComputeBuffer allocateArray(int[] data);
 
-    ComputeBuffer allocateArray(short[] data, long size);
-
-    default ComputeBuffer allocateArray(byte[] data) {
-        return allocateArray(data, data.length);
-    }
-
-    default ComputeBuffer allocateArray(double[] data) {
-        return allocateArray(data, data.length * 8L);
-    }
-
-    default ComputeBuffer allocateArray(float[] data) {
-        return allocateArray(data, data.length * 4L);
-    }
-
-    default ComputeBuffer allocateArray(long[] data) {
-        return allocateArray(data, data.length * 8L);
-    }
-
-    default ComputeBuffer allocateArray(int[] data) {
-        return allocateArray(data, data.length * 4L);
-    }
-
-    default ComputeBuffer allocateArray(short[] data) {
-        return allocateArray(data, data.length * 2L);
-    }
+    ComputeBuffer allocateArray(short[] data);
 
     default ComputeArena createArena() {
         return new ComputeArena(this);

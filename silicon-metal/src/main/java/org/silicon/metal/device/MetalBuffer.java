@@ -88,32 +88,57 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
 
     @Override
     public void get(byte[] data) {
-        asByteBuffer().get(data);
+        long bytes = data.length;
+        checkData(bytes);
+        get(MemorySegment.ofArray(data), bytes);
     }
 
     @Override
     public void get(double[] data) {
-        asByteBuffer().asDoubleBuffer().get(data);
+        long bytes = data.length * 8L;
+        checkData(bytes);
+        get(MemorySegment.ofArray(data), bytes);
     }
 
     @Override
     public void get(float[] data) {
-        asByteBuffer().asFloatBuffer().get(data);
+        long bytes = data.length * 4L;
+        checkData(bytes);
+        get(MemorySegment.ofArray(data), bytes);
     }
 
     @Override
     public void get(long[] data) {
-        asByteBuffer().asLongBuffer().get(data);
+        long bytes = data.length * 8L;
+        checkData(bytes);
+        get(MemorySegment.ofArray(data), bytes);
     }
 
     @Override
     public void get(int[] data) {
-        asByteBuffer().asIntBuffer().get(data);
+        long bytes = data.length * 4L;
+        checkData(bytes);
+        get(MemorySegment.ofArray(data), bytes);
     }
 
     @Override
     public void get(short[] data) {
-        asByteBuffer().asShortBuffer().get(data);
+        long bytes = data.length * 2L;
+        checkData(bytes);
+        get(MemorySegment.ofArray(data), bytes);
+    }
+
+    private void checkData(long bytes) {
+        ensureAlive();
+
+        if (bytes > size) {
+            throw new IllegalArgumentException("Destination array too large");
+        }
+    }
+
+    private void get(MemorySegment dst, long bytes) {
+        MemorySegment src = getContents().reinterpret(size);
+        MemorySegment.copy(src, 0, dst, 0, bytes);
     }
 
     public ByteBuffer asByteBuffer() {

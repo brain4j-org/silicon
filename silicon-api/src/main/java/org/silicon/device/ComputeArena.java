@@ -37,36 +37,12 @@ public class ComputeArena implements AutoCloseable {
         return retain(context.allocateBytes(size));
     }
 
-    public ComputeBuffer allocateArray(byte[] data, long size) {
-        return retain(context.allocateArray(data, size));
-    }
-
-    public ComputeBuffer allocateArray(double[] data, long size) {
-        return retain(context.allocateArray(data, size));
-    }
-    
-    public ComputeBuffer allocateArray(float[] data, long size) {
-        return retain(context.allocateArray(data, size));
-    }
-
-    public ComputeBuffer allocateArray(long[] data, long size) {
-        return retain(context.allocateArray(data, size));
-    }
-
-    public ComputeBuffer allocateArray(int[] data, long size) {
-        return retain(context.allocateArray(data, size));
-    }
-
-    public ComputeBuffer allocateArray(short[] data, long size) {
-        return retain(context.allocateArray(data, size));
-    }
-
     public ComputeBuffer allocateArray(byte[] data) {
-        return allocateArray(data, data.length);
+        return retain(context.allocateArray(data));
     }
     
     public ComputeBuffer allocateArray(double[] data) {
-        return allocateArray(data, data.length * 8L);
+        return retain(context.allocateArray(data));
     }
     
     public ComputeBuffer allocateHalf(float[] data) {
@@ -76,18 +52,18 @@ public class ComputeArena implements AutoCloseable {
     }
     
     public ComputeBuffer allocateArray(float[] data) {
-        return allocateArray(data, data.length * 4L);
+        return retain(context.allocateArray(data));
     }
     
     public ComputeBuffer allocateArray(long[] data) {
-        return allocateArray(data, data.length * 8L);
+        return retain(context.allocateArray(data));
     }
 
     public ComputeBuffer allocateArray(int[] data) {
-        return allocateArray(data, data.length * 4L);
+        return retain(context.allocateArray(data));
     }
 
     public ComputeBuffer allocateArray(short[] data) {
-        return allocateArray(data, data.length * 2L);
+        return retain(context.allocateArray(data));
     }
 }

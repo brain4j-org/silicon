@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 public class ComputeTest {
     
-    private static final int N = 1_073_741_824;
+    private static final int N = 536870912;
     
     public static void main(String[] args) {
         System.err.println("Warning: This test needs a big amount of RAM!");
@@ -68,8 +68,8 @@ public class ComputeTest {
         try (ComputeArena arena = context.createArena()) {
             ComputeBuffer a = arena.allocateArray(aHost);
             ComputeBuffer b = arena.allocateArray(bHost);
-            ComputeBuffer c = arena.allocateArray(new float[N]);
-            
+            ComputeBuffer c = arena.allocateBytes((long) N * 4);
+
             dispatch(function, arena, a, b, c);
             
             float[] preview = new float[16];

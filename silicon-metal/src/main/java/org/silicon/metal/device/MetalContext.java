@@ -109,49 +109,58 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     }
 
     @Override
-    public ComputeBuffer allocateArray(byte[] data, long size) {
-        MetalBuffer buffer = allocateBytes(size);
-        buffer.asByteBuffer().put(data);
-        return buffer;
+    public ComputeBuffer allocateArray(byte[] data) {
+        long size = data.length;
+        MemorySegment srcSeg = MemorySegment.ofArray(data);
+        return allocateFromArray(srcSeg, size);
     }
 
     @Override
-    public ComputeBuffer allocateArray(double[] data, long size) {
-        MetalBuffer buffer = allocateBytes(size);
-        buffer.asByteBuffer().asDoubleBuffer().put(data);
-        return buffer;
+    public ComputeBuffer allocateArray(double[] data) {
+        long size = data.length * 8L;
+        MemorySegment srcSeg = MemorySegment.ofArray(data);
+        return allocateFromArray(srcSeg, size);
     }
 
     @Override
-    public ComputeBuffer allocateArray(float[] data, long size) {
-        MetalBuffer buffer = allocateBytes(size);
-        buffer.asByteBuffer().asFloatBuffer().put(data);
-        return buffer;
+    public ComputeBuffer allocateArray(float[] data) {
+        long size = data.length * 4L;
+        MemorySegment srcSeg = MemorySegment.ofArray(data);
+        return allocateFromArray(srcSeg, size);
     }
 
     @Override
-    public ComputeBuffer allocateArray(long[] data, long size) {
-        MetalBuffer buffer = allocateBytes(size);
-        buffer.asByteBuffer().asLongBuffer().put(data);
-        return buffer;
+    public ComputeBuffer allocateArray(long[] data) {
+        long size = data.length * 8L;
+        MemorySegment srcSeg = MemorySegment.ofArray(data);
+        return allocateFromArray(srcSeg, size);
     }
     
     @Override
-    public ComputeBuffer allocateArray(int[] data, long size) {
-        MetalBuffer buffer = allocateBytes(size);
-        buffer.asByteBuffer().asIntBuffer().put(data);
-        return buffer;
+    public ComputeBuffer allocateArray(int[] data) {
+        long size = data.length * 4L;
+        MemorySegment srcSeg = MemorySegment.ofArray(data);
+        return allocateFromArray(srcSeg, size);
     }
 
     @Override
-    public ComputeBuffer allocateArray(short[] data, long size) {
-        MetalBuffer buffer = allocateBytes(size);
-        buffer.asByteBuffer().asShortBuffer().put(data);
-        return buffer;
+    public ComputeBuffer allocateArray(short[] data) {
+        long size = data.length * 2L;
+        MemorySegment srcSeg = MemorySegment.ofArray(data);
+        return allocateFromArray(srcSeg, size);
     }
 
     @Override
     public MemorySegment handle() {
         return device.handle();
+    }
+
+    private MetalBuffer allocateFromArray(MemorySegment src, long size) {
+        MetalBuffer buffer = allocateBytes(size);
+
+        MemorySegment dstSeg = buffer.getContents().reinterpret(size);
+        MemorySegment.copy(src, 0, dstSeg, 0, size);
+
+        return buffer;
     }
 }

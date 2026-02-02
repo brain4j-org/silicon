@@ -30,6 +30,6 @@ public final class MetalFunction implements MetalObject, ComputeFunction {
 
     @Override
     public int maxWorkGroupSize() {
-        return 0; // TODO
+        return 1024; // TODO
     }
 }

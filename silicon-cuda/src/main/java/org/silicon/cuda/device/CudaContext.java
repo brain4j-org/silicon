@@ -150,43 +150,43 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     }
 
     @Override
-    public CudaBuffer allocateArray(byte[] data, long size) {
-        CudaBuffer buffer = allocateBytes(size);
+    public CudaBuffer allocateArray(byte[] data) {
+        CudaBuffer buffer = allocateBytes(data.length);
         buffer.copyToDevice(data);
         return buffer;
     }
 
     @Override
-    public CudaBuffer allocateArray(double[] data, long size) {
-        CudaBuffer buffer = allocateBytes(size);
+    public CudaBuffer allocateArray(double[] data) {
+        CudaBuffer buffer = allocateBytes(data.length * 8L);
         buffer.copyToDevice(data);
         return buffer;
     }
 
     @Override
-    public CudaBuffer allocateArray(float[] data, long size) {
-        CudaBuffer buffer = allocateBytes(size);
+    public CudaBuffer allocateArray(float[] data) {
+        CudaBuffer buffer = allocateBytes(data.length * 4L);
         buffer.copyToDevice(data);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(long[] data, long size) {
-        CudaBuffer buffer = allocateBytes(size);
+    public CudaBuffer allocateArray(long[] data) {
+        CudaBuffer buffer = allocateBytes(data.length * 8L);
         buffer.copyToDevice(data);
         return buffer;
     }
     
     @Override
-    public CudaBuffer allocateArray(int[] data, long size) {
-        CudaBuffer buffer = allocateBytes(size);
+    public CudaBuffer allocateArray(int[] data) {
+        CudaBuffer buffer = allocateBytes(data.length * 4L);
         buffer.copyToDevice(data);
         return buffer;
     }
 
     @Override
-    public CudaBuffer allocateArray(short[] data, long size) {
-        CudaBuffer buffer = allocateBytes(size);
+    public CudaBuffer allocateArray(short[] data) {
+        CudaBuffer buffer = allocateBytes(data.length * 2L);
         buffer.copyToDevice(data);
         return buffer;
     }
