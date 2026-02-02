@@ -25,7 +25,7 @@ public record MetalLibrary(MemorySegment handle) implements MetalObject, Compute
             MemorySegment fnName = arena.allocateFrom(name);
             MemorySegment fnPtr = (MemorySegment) METAL_CREATE_FUNCTION.invokeExact(handle, fnName);
 
-            if (fnPtr == null) {
+            if (fnPtr == null || fnPtr.address() == 0) {
                 throw new RuntimeException("Function '" + name + "' not found in library");
             }
 

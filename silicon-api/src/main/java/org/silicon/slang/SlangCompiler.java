@@ -18,9 +18,15 @@ import java.security.MessageDigest;
 public class SlangCompiler {
 
     private final ComputeContext context;
+    private final boolean noCache;
 
     public SlangCompiler(ComputeContext context) {
+        this(context, false);
+    }
+
+    public SlangCompiler(ComputeContext context, boolean noCache) {
         this.context = context;
+        this.noCache = noCache;
     }
 
     public ComputeModule compile(Path path) {
@@ -112,11 +118,11 @@ public class SlangCompiler {
             );
             
             // Cache hit
-            if (Files.exists(modulePath)) {
+            if (Files.exists(modulePath) && !noCache) {
                 return context.loadModule(modulePath);
             }
             
-            // Cache miss → compile
+            // Cache miss -> compile
             Files.write(sourcePath, sourceBytes);
             return compile(sourcePath);
         } catch (IOException e) {

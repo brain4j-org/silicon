@@ -8,16 +8,16 @@ import org.silicon.slang.SlangCompiler;
 
 import java.util.Arrays;
 
-public class ComputeTest {
+public class VectorAdd {
     
     private static final int N = 536870912;
-    private static float[] A_HOST = generateData();
-    private static float[] B_HOST = generateData();
+    private static final float[] A_HOST = generateData();
+    private static final float[] B_HOST = generateData();
     
     public static void main(String[] args) {
         System.err.println("Warning: This test needs a big amount of RAM!");
         System.err.println("If the JVM crashes make sure to change -Xmx JVM argument");
-        
+
         System.out.println("Chosen backend: " + Silicon.backend().name());
         
         ComputeDevice device = Silicon.createDevice();
@@ -39,7 +39,7 @@ public class ComputeTest {
     private static void runFp16VectorAdd(ComputeContext context, SlangCompiler compiler) {
         System.out.println("\n=== FP16 vector add ===");
         
-        ComputeModule module = compiler.compileFromResource("vector_add_fp16.slang");
+        ComputeModule module = compiler.compileFromResource("fp16/vector_add_fp16.slang");
         ComputeFunction function = module.getFunction("add");
         
         try (ComputeArena arena = context.createArena()) {
@@ -58,7 +58,7 @@ public class ComputeTest {
     private static void runFp32VectorAdd(ComputeContext context, SlangCompiler compiler) {
         System.out.println("\n=== FP32 vector add ===");
         
-        ComputeModule module = compiler.compileFromResource("vector_add_fp32.slang");
+        ComputeModule module = compiler.compileFromResource("fp32/vector_add_fp32.slang");
         ComputeFunction function = module.getFunction("add");
         
         try (ComputeArena arena = context.createArena()) {
@@ -106,8 +106,8 @@ public class ComputeTest {
     }
     
     private static float[] generateData() {
-        float[] data = new float[ComputeTest.N];
-        for (int i = 0; i < ComputeTest.N; i++) {
+        float[] data = new float[VectorAdd.N];
+        for (int i = 0; i < VectorAdd.N; i++) {
             data[i] = i;
         }
         return data;
