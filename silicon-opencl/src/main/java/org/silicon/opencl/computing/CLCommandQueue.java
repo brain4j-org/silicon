@@ -5,6 +5,7 @@ import org.lwjgl.opencl.CL10;
 import org.lwjgl.system.MemoryStack;
 import org.silicon.api.SiliconException;
 import org.silicon.api.kernel.ComputeArgs;
+import org.silicon.api.kernel.ComputeEvent;
 import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.kernel.ComputeSize;
 import org.silicon.api.function.ComputeFunction;
@@ -79,7 +80,7 @@ public final class CLCommandQueue implements ComputeQueue {
     }
 
     @Override
-    public CompletableFuture<Void> dispatchAsync(
+    public ComputeEvent dispatchAsync(
         ComputeFunction function,
         ComputeSize globalSize,
         ComputeSize groupSize,
@@ -117,21 +118,7 @@ public final class CLCommandQueue implements ComputeQueue {
             );
             if (err != CL10.CL_SUCCESS) throw new IllegalStateException("clEnqueueNDRangeKernel failed: " + err);
 
-            long event = eventPtr.get(0);
-
-            CompletableFuture<Void> callback = new CompletableFuture<>();
-            Thread.startVirtualThread(() -> {
-                try {
-                    CL10.clWaitForEvents(eventPtr);
-                    callback.complete(null);
-                } catch (Throwable t) {
-                    callback.completeExceptionally(t);
-                } finally {
-                    CL10.clReleaseEvent(event);
-                }
-            });
-
-            return callback;
+            return new CLEvent(eventPtr.get(0));
         }
     }
 

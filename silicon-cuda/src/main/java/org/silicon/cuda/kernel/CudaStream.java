@@ -2,6 +2,7 @@ package org.silicon.cuda.kernel;
 
 import org.silicon.api.SiliconException;
 import org.silicon.api.kernel.ComputeArgs;
+import org.silicon.api.kernel.ComputeEvent;
 import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.kernel.ComputeSize;
 import org.silicon.cuda.CudaObject;
@@ -95,7 +96,7 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
     }
 
     @Override
-    public CompletableFuture<Void> dispatchAsync(
+    public ComputeEvent dispatchAsync(
         ComputeFunction function,
         ComputeSize globalSize,
         ComputeSize groupSize,
@@ -136,11 +137,11 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
             if (result != 0) {
                 throw new RuntimeException("cuLaunchKernel failed: " + result);
             }
+            
+            return new CudaEvent(this);
         } catch (Throwable e) {
             throw new SiliconException("dispatch(ComputeFunction, ComputeSize, ComputeSize, ComputeArgs) failed", e);
         }
-        
-        return null;
     }
     
     private CudaPointer getParameters(ComputeArgs args) {

@@ -46,7 +46,7 @@ public func cuda_stream_query(ptr: UnsafeMutableRawPointer) -> Int32 {
 }
 
 @_cdecl("cuda_event_create")
-public func cuda_event_create(flags: Int32) -> UnsafeMutableRawPointer? {
+public func cuda_event_create(flags: UInt32) -> UnsafeMutableRawPointer? {
     var event: CUevent?
     let result = cuEventCreate(&event, flags)
 
@@ -61,10 +61,10 @@ public func cuda_event_record(
     eventPtr: UnsafeMutableRawPointer,
     streamPtr: UnsafeMutableRawPointer
 ) -> Int32 {
-    let eventWrap = pointerToObject(eventPtr)
-    let streamWrap = pointerToObject(streamPtr)
+    let eventWrap: CudaEventWrapper = pointerToObject(eventPtr)
+    let streamWrap: CudaStreamWrapper = pointerToObject(streamPtr)
 
-    let result = cuEventRecord(eventWrap.event, streamWrap.stream)
+    let result: CUresult = cuEventRecord(eventWrap.event, streamWrap.stream)
     return Int32(result.rawValue)
 }
 
@@ -73,8 +73,8 @@ public func cuda_event_record(
 public func cuda_event_synchronize(
     eventPtr: UnsafeMutableRawPointer
 ) -> Int32 {
-    let eventWrap = pointerToObject(eventPtr)
-    let result = cuEventSynchronize(eventWrap.event)
+    let eventWrap: CudaEventWrapper = pointerToObject(eventPtr)
+    let result: CUresult = cuEventSynchronize(eventWrap.event)
     return Int32(result.rawValue)
 }
 
@@ -83,13 +83,13 @@ public func cuda_event_query(
     eventPtr: UnsafeMutableRawPointer
 ) -> Int32 {
     let eventWrap: CudaEventWrapper = pointerToObject(eventPtr)
-    let result = cuEventQuery(eventWrap.event)
+    let result: CUresult = cuEventQuery(eventWrap.event)
     return Int32(result.rawValue)
 }
 
 @_cdecl("cuda_event_destroy")
 public func cuda_event_destroy(ptr: UnsafeMutableRawPointer) -> Int32 {
-    let wrapper = pointerToObject(ptr)
-    let result = cuEventDestroy(wrapper.event)
+    let wrapper: CudaEventWrapper = pointerToObject(ptr)
+    let result: CUresult = cuEventDestroy_v2(wrapper.event)
     return Int32(result.rawValue)
 }

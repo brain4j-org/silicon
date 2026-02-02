@@ -12,8 +12,8 @@ public interface ComputeQueue extends Freeable {
         ComputeSize groupSize,
         ComputeArgs args
     );
-
-    CompletableFuture<Void> dispatchAsync(
+    
+    ComputeEvent dispatchAsync(
         ComputeFunction function,
         ComputeSize globalSize,
         ComputeSize groupSize,

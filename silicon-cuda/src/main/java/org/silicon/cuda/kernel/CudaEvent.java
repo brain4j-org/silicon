@@ -74,7 +74,7 @@ public class CudaEvent implements ComputeEvent {
     
     private void waitAndComplete() {
         try {
-            CUDA_EVENT_SYNCHRONIZE.invokeExact(event);
+            CUDA_EVENT_SYNCHRONIZE.invoke(event);
             future.complete(null);
         } catch (Throwable t) {
             future.completeExceptionally(t);
@@ -91,7 +91,8 @@ public class CudaEvent implements ComputeEvent {
     @Override
     public void await() {
         try {
-            CUDA_EVENT_SYNCHRONIZE.invokeExact(event);
+            int result = (int) CUDA_EVENT_SYNCHRONIZE.invokeExact(event);
+            if (result != 0) throw new RuntimeException("cuEventSynchronize failed: " + result);
         } catch (Throwable t) {
             throw new SiliconException("await() failed", t);
         }
@@ -100,7 +101,8 @@ public class CudaEvent implements ComputeEvent {
     private void tryDestroy() {
         if (destroyed.compareAndSet(false, true)) {
             try {
-                CUDA_EVENT_DESTROY.invokeExact(event);
+                int result = (int) CUDA_EVENT_DESTROY.invokeExact(event);
+                if (result != 0) throw new RuntimeException("cuEventDestroy failed: " + result);
             } catch (Throwable t) {
                 throw new SiliconException("destroy() failed", t);
             }

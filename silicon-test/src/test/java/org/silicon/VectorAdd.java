@@ -5,6 +5,7 @@ import org.silicon.api.device.*;
 import org.silicon.api.function.ComputeFunction;
 import org.silicon.api.function.ComputeModule;
 import org.silicon.api.kernel.ComputeArgs;
+import org.silicon.api.kernel.ComputeEvent;
 import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.kernel.ComputeSize;
 import org.silicon.api.slang.SlangCompiler;
@@ -92,8 +93,11 @@ public class VectorAdd {
         ComputeQueue queue = arena.createQueue();
         
         long start = System.nanoTime();
-        queue.dispatch(function, globalSize, groupSize, args);
-        queue.await();
+        
+        ComputeEvent event = queue.dispatchAsync(function, globalSize, groupSize, args);
+        event.future().thenRun(() -> System.out.println("Complted kernel!"));
+        event.await();
+        
         long end = System.nanoTime();
         
         System.out.printf("Execution time: %.2f ms%n", (end - start) / 1e6);

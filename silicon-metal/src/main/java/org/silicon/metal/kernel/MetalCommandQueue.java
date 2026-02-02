@@ -2,6 +2,7 @@ package org.silicon.metal.kernel;
 
 import org.silicon.api.SiliconException;
 import org.silicon.api.kernel.ComputeArgs;
+import org.silicon.api.kernel.ComputeEvent;
 import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.kernel.ComputeSize;
 import org.silicon.api.device.ComputeArena;
@@ -47,7 +48,7 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
     }
 
     @Override
-    public CompletableFuture<Void> dispatchAsync(
+    public ComputeEvent dispatchAsync(
         ComputeFunction function,
         ComputeSize globalSize,
         ComputeSize groupSize,
@@ -58,20 +59,7 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
         }
         
         MetalCommandBuffer commandBuffer = dispatchRaw(metalFunction, globalSize, groupSize, args);
-        CompletableFuture<Void> callback = new CompletableFuture<>();
-
-        Thread.startVirtualThread(() -> {
-            try {
-                commandBuffer.waitUntilCompleted();
-                callback.complete(null);
-            } catch (Throwable t) {
-                callback.completeExceptionally(t);
-            } finally {
-                commandBuffer.free();
-            }
-        });
-
-        return callback;
+        return new MetalEvent(commandBuffer);
     }
 
     private MetalCommandBuffer dispatchRaw(MetalFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
