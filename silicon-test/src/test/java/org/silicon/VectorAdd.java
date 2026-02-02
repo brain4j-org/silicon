@@ -52,7 +52,7 @@ public class VectorAdd {
             ComputeBuffer c = arena.allocateBytes((long) N * 2); // half = 2 byte
             
             dispatch(function, arena, a, b, c);
-            
+
             float[] preview = new float[16];
             c.getHalf(preview);
             System.out.println("FP16 result preview: " + Arrays.toString(preview));
@@ -71,7 +71,7 @@ public class VectorAdd {
             ComputeBuffer c = arena.allocateBytes((long) N * 4);
 
             dispatch(function, arena, a, b, c);
-            
+
             float[] preview = new float[16];
             c.get(preview);
             System.out.println("FP32 result preview: " + Arrays.toString(preview));
@@ -86,18 +86,19 @@ public class VectorAdd {
         ComputeBuffer c
     ) {
         ComputeArgs args = ComputeArgs.of(a, b, c);
-        
+
         ComputeSize globalSize = new ComputeSize(N, 1, 1);
         ComputeSize groupSize  = new ComputeSize(function.maxWorkGroupSize(), 1, 1);
-        
+
         ComputeQueue queue = arena.createQueue();
         
         long start = System.nanoTime();
         
         ComputeEvent event = queue.dispatchAsync(function, globalSize, groupSize, args);
-        event.future().thenRun(() -> System.out.println("Complted kernel!"));
+
+        event.future().thenRun(() -> System.out.println("Kernel has been completed!"));
         event.await();
-        
+
         long end = System.nanoTime();
         
         System.out.printf("Execution time: %.2f ms%n", (end - start) / 1e6);

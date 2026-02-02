@@ -25,7 +25,8 @@ public class CLBuffer implements ComputeBuffer {
 
     @Override
     public CLBuffer copy() {
-        return copyAsync(null);
+        CLBuffer buffer = context.allocateBytes(size);
+        return copyInto(buffer);
     }
 
     @Override
@@ -44,33 +45,6 @@ public class CLBuffer implements ComputeBuffer {
         
         queue.await();
         queue.free();
-        
-        return buffer;
-    }
-
-    @Override
-    public CLBuffer copyAsync(ComputeQueue queue) {
-        CLBuffer buffer = context.allocateBytes(size);
-        return copyIntoAsync(buffer, queue);
-    }
-
-    @Override
-    public CLBuffer copyIntoAsync(ComputeBuffer other, ComputeQueue queue) {
-        if (!(other instanceof CLBuffer buffer)) {
-            throw new IllegalArgumentException("Other buffer must be an OpenCL buffer");
-        }
-        
-        if (queue == null) {
-            throw new IllegalArgumentException("Queue cannot be null");
-        }
-
-        CLCommandQueue clQueue = (CLCommandQueue) queue;
-
-        int res = CL10.clEnqueueCopyBuffer(
-            clQueue.handle(), buffer.getHandle(), handle,
-            0, 0, size, null, null
-        );
-        if (res != 0) throw new RuntimeException("clEnqueueCopyBuffer failed: " + res);
         
         return buffer;
     }

@@ -40,4 +40,12 @@ public class CLEvent implements ComputeEvent {
     public void await() {
         CL10.clWaitForEvents(eventPtr);
     }
+
+    @Override
+    public String toString() {
+        return "CLEvent{" +
+            "completed=" + isCompleted() +
+            ", failed=" + isFailed() +
+            '}';
+    }
 }

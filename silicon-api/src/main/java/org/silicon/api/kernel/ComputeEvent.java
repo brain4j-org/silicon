@@ -7,6 +7,10 @@ public interface ComputeEvent {
         return future().isDone();
     }
 
+    default boolean isFailed() {
+        return future().isCompletedExceptionally();
+    }
+
     CompletableFuture<Void> future();
 
     void await();

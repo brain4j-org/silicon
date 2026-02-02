@@ -58,16 +58,6 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
 
         return dst;
     }
-
-    @Override
-    public MetalBuffer copyAsync(ComputeQueue queue) {
-        return copy();
-    }
-
-    @Override
-    public MetalBuffer copyIntoAsync(ComputeBuffer other, ComputeQueue queue) {
-        return copyInto(other);
-    }
     
     @Override
     public MemoryState state() {

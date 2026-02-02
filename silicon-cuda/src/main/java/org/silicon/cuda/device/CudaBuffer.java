@@ -91,40 +91,17 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
     @Override
     public CudaBuffer copyInto(ComputeBuffer other) {
         ensureAlive();
-        
-        try {
-            CudaBuffer buffer = (CudaBuffer) other;
+        ensureOther(other);
 
+        if (!(other instanceof CudaBuffer buffer)) throw new IllegalArgumentException("Other buffer is not a CUDA buffer");
+
+        try {
             int res = (int) CUDA_MEMCPY_DTOD.invoke(buffer.handle, handle, size);
             if (res != 0) throw new RuntimeException("cuMemcpyDtoD failed: " + res);
 
             return buffer;
         } catch (Throwable e) {
             throw new SiliconException("copyInto(ComputeBuffer) failed", e);
-        }
-    }
-
-    @Override
-    public CudaBuffer copyAsync(ComputeQueue queue) {
-        CudaBuffer buffer = context.allocateBytes(size);
-        return copyIntoAsync(buffer, queue);
-    }
-
-    @Override
-    public CudaBuffer copyIntoAsync(ComputeBuffer other, ComputeQueue queue) {
-        ensureAlive();
-        ensureOther(other);
-
-        if (!(queue instanceof CudaStream stream)) throw new IllegalArgumentException("Queue is not a CUDA stream");
-        if (!(other instanceof CudaBuffer buffer)) throw new IllegalArgumentException("Buffer is not a CUDA buffer");
-
-        try {
-            int res = (int) CUDA_MEMCPY_DTOD_ASYNC.invoke(buffer.handle, handle, size, stream.handle());
-            if (res != 0) throw new RuntimeException("cuMemcpyDtoD failed: " + res);
-
-            return buffer;
-        } catch (Throwable e) {
-            throw new SiliconException("copyIntoAsync(ComputeBuffer, ComputeQueue) failed", e);
         }
     }
 

@@ -34,4 +34,12 @@ public class MetalEvent implements ComputeEvent {
     public void await() {
         buffer.waitUntilCompleted();
     }
+
+    @Override
+    public String toString() {
+        return "MetalEvent{" +
+            "completed=" + isCompleted() +
+            ", failed=" + isFailed() +
+            '}';
+    }
 }

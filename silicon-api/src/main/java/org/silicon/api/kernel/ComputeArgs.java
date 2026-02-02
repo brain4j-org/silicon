@@ -3,6 +3,7 @@ package org.silicon.api.kernel;
 import org.silicon.api.device.ComputeBuffer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ComputeArgs {
@@ -65,5 +66,13 @@ public class ComputeArgs {
     public ComputeArgs shortVal(short value) {
         args.add(value);
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "ComputeArgs{" +
+            "size=" + args.size() +
+            ", args=" + args +
+            '}';
     }
 }
