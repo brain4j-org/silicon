@@ -1,5 +1,11 @@
 package org.silicon.api;
 
+/**
+ * Base runtime exception for Silicon API errors.
+ * <p>
+ * Used for backend-specific failures and API misuse where a runtime exception
+ * is appropriate, avoiding checked-exception boilerplate.
+ */
 public class SiliconException extends RuntimeException {
 
     public SiliconException() {

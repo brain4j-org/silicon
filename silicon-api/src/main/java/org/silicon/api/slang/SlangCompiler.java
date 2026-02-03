@@ -14,20 +14,41 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 
+/**
+ * Compiles Slang source files to backend-specific modules.
+ * <p>
+ * Invokes the {@code slangc} tool and can cache compiled outputs on disk
+ * for classpath resources.
+ */
 public class SlangCompiler {
 
     private final ComputeContext context;
     private final boolean noCache;
 
+    /**
+     * Creates a compiler using the given context and cache enabled.
+     * @param context compute context used to load modules
+     */
     public SlangCompiler(ComputeContext context) {
         this(context, false);
     }
 
+    /**
+     * Creates a compiler using the given context.
+     * @param context compute context used to load modules
+     * @param noCache if true, disables cache hits for resource compilation
+     */
     public SlangCompiler(ComputeContext context, boolean noCache) {
         this.context = context;
         this.noCache = noCache;
     }
 
+    /**
+     * Compiles a Slang file on disk and loads the resulting module.
+     * The target format is derived from {@link ComputeContext#getBackendType()}.
+     * @param path path to the Slang source file
+     * @return loaded compute module
+     */
     public ComputeModule compile(Path path) {
         BackendType backendType = context.getBackendType();
         String target = switch (backendType) {
@@ -77,6 +98,12 @@ public class SlangCompiler {
         }
     }
     
+    /**
+     * Compiles a Slang resource from the classpath and loads the resulting module.
+     * Uses a SHA-256 based cache directory unless disabled via {@code noCache}.
+     * @param resourcePath classpath resource path (must be relative)
+     * @return loaded compute module
+     */
     public ComputeModule compileFromResource(String resourcePath) {
         BackendType backendType = context.getBackendType();
         
