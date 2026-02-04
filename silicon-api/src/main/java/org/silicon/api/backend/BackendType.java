@@ -6,29 +6,31 @@ package org.silicon.api.backend;
  * Lower priority value means preferred during auto-selection.
  */
 public enum BackendType {
-    CUDA("CUDA", 0),
-    METAL("Metal", 1),
-    OPENCL("OpenCL", 2);
-    
-    private final String name;
-    private final int priority;
-    
-    BackendType(String name, int priority) {
-        this.name = name;
-        this.priority = priority;
+
+    CUDA("CUDA", "ptx"),
+    METAL("METAL", "metal"),
+    OPENCL("OPENCL", null);
+
+    private final String formalName, compileTarget;
+
+    BackendType(String formalName, String compileTarget) {
+        this.formalName = formalName;
+        this.compileTarget = compileTarget;
     }
 
-    /**
-     * @return human-readable backend name
-     */
     public String formalName() {
-        return name;
+        return formalName;
     }
-    
-    /**
-     * @return lower value means higher priority during auto-selection
-     */
+
+    public String compileTarget() {
+        if (compileTarget == null) {
+            throw new IllegalStateException(formalName + " is not supported yet.");
+        }
+        return compileTarget;
+    }
+
     public int priority() {
-        return priority;
+        return ordinal();
     }
+
 }

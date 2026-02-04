@@ -26,7 +26,7 @@ public record MetalLibrary(MemorySegment handle) implements MetalObject, Compute
             MemorySegment fnPtr = (MemorySegment) METAL_CREATE_FUNCTION.invokeExact(handle, fnName);
 
             if (fnPtr == null || fnPtr.address() == 0) {
-                throw new RuntimeException("Function '" + name + "' not found in library");
+                throw new SiliconException("Function '" + name + "' not found in library");
             }
 
             return new MetalFunction(fnPtr);

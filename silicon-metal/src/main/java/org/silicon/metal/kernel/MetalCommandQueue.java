@@ -124,7 +124,7 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
             MemorySegment ptr = (MemorySegment) METAL_CREATE_COMMAND_BUFFER.invokeExact(handle);
             
             if (ptr == null || ptr.address() == 0) {
-                throw new RuntimeException("metalMakeCommandBuffer failed");
+                throw new SiliconException("metalMakeCommandBuffer failed");
             }
             
             return new MetalCommandBuffer(ptr);

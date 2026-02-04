@@ -90,7 +90,7 @@ public class CUDA implements ComputeBackend {
             MemorySegment ptr = (MemorySegment) CUDA_CREATE_SYSTEM_DEVICE.invokeExact(index);
             
             if (ptr == null || ptr.address() == 0) {
-                throw new RuntimeException("cuDeviceGet failed");
+                throw new SiliconException("cuDeviceGet failed");
             }
             
             return new CudaDevice(ptr, index);

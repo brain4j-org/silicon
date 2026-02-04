@@ -4,6 +4,7 @@ import org.silicon.api.device.ComputeBuffer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -51,7 +52,7 @@ public class ComputeArgs {
      * @return the underlying argument list (in order)
      */
     public List<Object> getArgs() {
-        return args;
+        return Collections.unmodifiableList(args);
     }
 
     /**

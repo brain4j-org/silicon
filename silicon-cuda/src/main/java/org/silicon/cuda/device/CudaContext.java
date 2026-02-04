@@ -8,12 +8,12 @@ import org.silicon.cuda.function.CudaModule;
 import org.silicon.api.device.ComputeArena;
 import org.silicon.api.device.ComputeContext;
 
-import java.io.File;
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 
@@ -47,7 +47,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     public CudaContext setCurrent() {
         try {
             int res = (int) CUDA_CONTEXT_SET_CURRENT.invoke(handle);
-            if (res != 0) throw new RuntimeException("cuCtxSetCurrent failed: " + res);
+            if (res != 0) throw new SiliconException("cuCtxSetCurrent failed: " + res);
 
             return this;
         } catch (Throwable e) {
@@ -59,7 +59,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
         try {
             int res = (int) CUDA_SYNC_CONTEXT.invoke();
 
-            if (res != 0) throw new RuntimeException("cuCtxSynchronize failed: " + res);
+            if (res != 0) throw new SiliconException("cuCtxSynchronize failed: " + res);
 
             return this;
         } catch (Throwable e) {
@@ -83,7 +83,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             MemorySegment ptr = (MemorySegment) CUDA_STREAM_CREATE.invoke();
 
             if (ptr == null || ptr.address() == 0) {
-                throw new RuntimeException("cuStreamCreate failed");
+                throw new SiliconException("cuStreamCreate failed");
             }
 
             return new CudaStream(ptr);
@@ -94,7 +94,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
 
     @Override
     public CudaModule loadModule(Path path) {
-        if (!new File(path.toString()).exists()) {
+        if (!Files.exists(path)) {
             throw new IllegalArgumentException(path + " does not exist");
         }
 
@@ -103,7 +103,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD.invoke(cPath);
 
             if (moduleHandle == null || moduleHandle.address() == 0) {
-                throw new RuntimeException("cuModuleLoad failed for: " + path);
+                throw new SiliconException("cuModuleLoad failed for: " + path);
             }
 
             return new CudaModule(moduleHandle, this);
@@ -119,7 +119,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD_DATA.invoke(data);
 
             if (moduleHandle == null || moduleHandle.address() == 0) {
-                throw new RuntimeException("cuModuleLoadData failed");
+                throw new SiliconException("cuModuleLoadData failed");
             }
 
             return new CudaModule(moduleHandle, this);
@@ -139,7 +139,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             MemorySegment ptr = (MemorySegment) CUDA_MEM_ALLOC.invoke(size);
 
             if (ptr == null || ptr.address() == 0) {
-                throw new RuntimeException("cuMemAlloc failed: " + ptr);
+                throw new SiliconException("cuMemAlloc failed: " + ptr);
             }
 
             return new CudaBuffer(this, ptr, size);
@@ -157,35 +157,35 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
 
     @Override
     public CudaBuffer allocateArray(double[] data) {
-        CudaBuffer buffer = allocateBytes(data.length * 8L);
+        CudaBuffer buffer = allocateBytes(data.length * ValueLayout.JAVA_DOUBLE.byteSize());
         buffer.copyToDevice(data);
         return buffer;
     }
 
     @Override
     public CudaBuffer allocateArray(float[] data) {
-        CudaBuffer buffer = allocateBytes(data.length * 4L);
+        CudaBuffer buffer = allocateBytes(data.length * ValueLayout.JAVA_FLOAT.byteSize());
         buffer.copyToDevice(data);
         return buffer;
     }
-    
+
     @Override
     public CudaBuffer allocateArray(long[] data) {
-        CudaBuffer buffer = allocateBytes(data.length * 8L);
+        CudaBuffer buffer = allocateBytes(data.length * ValueLayout.JAVA_LONG.byteSize());
         buffer.copyToDevice(data);
         return buffer;
     }
-    
+
     @Override
     public CudaBuffer allocateArray(int[] data) {
-        CudaBuffer buffer = allocateBytes(data.length * 4L);
+        CudaBuffer buffer = allocateBytes(data.length * ValueLayout.JAVA_INT.byteSize());
         buffer.copyToDevice(data);
         return buffer;
     }
 
     @Override
     public CudaBuffer allocateArray(short[] data) {
-        CudaBuffer buffer = allocateBytes(data.length * 2L);
+        CudaBuffer buffer = allocateBytes(data.length * ValueLayout.JAVA_SHORT.byteSize());
         buffer.copyToDevice(data);
         return buffer;
     }

@@ -1,9 +1,10 @@
 package org.silicon.opencl.device;
 
 import org.lwjgl.opencl.CL10;
-import org.silicon.api.memory.MemoryState;
-import org.silicon.api.kernel.ComputeQueue;
+import org.silicon.api.SiliconException;
 import org.silicon.api.device.ComputeBuffer;
+import org.silicon.api.kernel.ComputeQueue;
+import org.silicon.api.memory.MemoryState;
 import org.silicon.opencl.computing.CLCommandQueue;
 
 import java.nio.ByteBuffer;
@@ -41,7 +42,7 @@ public class CLBuffer implements ComputeBuffer {
             queue.handle(), buffer.getHandle(), handle,
             0, 0, size, null, null
         );
-        if (res != 0) throw new RuntimeException("clEnqueueCopyBuffer failed: " + res);
+        if (res != 0) throw new SiliconException("clEnqueueCopyBuffer failed: " + res);
         
         queue.await();
         queue.free();
@@ -59,7 +60,7 @@ public class CLBuffer implements ComputeBuffer {
         if (state != MemoryState.ALIVE) return;
 
         int res = CL10.clReleaseMemObject(handle);
-        if (res != 0) throw new RuntimeException("clReleaseMemObject failed: " + res);
+        if (res != 0) throw new SiliconException("clReleaseMemObject failed: " + res);
 
         state = MemoryState.FREE;
     }
@@ -143,7 +144,7 @@ public class CLBuffer implements ComputeBuffer {
             .order(ByteOrder.nativeOrder());
 
         int res = CL10.clEnqueueReadBuffer(queue.handle(), handle, true, 0, buffer, null, null);
-        if (res != 0) throw new RuntimeException("clEnqueueReadBuffer failed: " + res);
+        if (res != 0) throw new SiliconException("clEnqueueReadBuffer failed: " + res);
 
         return new Result(queue, buffer);
     }

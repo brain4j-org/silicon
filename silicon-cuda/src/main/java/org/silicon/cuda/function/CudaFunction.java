@@ -1,7 +1,8 @@
 package org.silicon.cuda.function;
 
-import org.silicon.cuda.CudaObject;
+import org.silicon.api.SiliconException;
 import org.silicon.api.function.ComputeFunction;
+import org.silicon.cuda.CudaObject;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
@@ -20,7 +21,7 @@ public record CudaFunction(MemorySegment handle) implements CudaObject, ComputeF
         try {
             return (int) CUDA_FUNC_MAX_THREADS.invokeExact(handle);
         } catch (Throwable e) {
-            throw new RuntimeException("maxWorkGroupSize() failed", e);
+            throw new SiliconException("maxWorkGroupSize() failed", e);
         }
     }
 }

@@ -14,7 +14,7 @@ import java.util.ServiceLoader;
  */
 public class Silicon {
 
-    private static ComputeBackend backend;
+    private static volatile ComputeBackend backend;
 
     /**
      * Explicitly selects a backend by type.

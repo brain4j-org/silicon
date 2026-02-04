@@ -38,7 +38,7 @@ public final class MetalCommandBuffer implements MetalObject, Freeable {
             MemorySegment ptr = (MemorySegment) METAL_MAKE_ENCODER.invokeExact(handle, pipeline.handle());
 
             if (ptr == null || ptr.address() == 0) {
-                throw new RuntimeException("makeComputeCommandEncoder failed");
+                throw new SiliconException("makeComputeCommandEncoder failed");
             }
 
             return new MetalEncoder(ptr);

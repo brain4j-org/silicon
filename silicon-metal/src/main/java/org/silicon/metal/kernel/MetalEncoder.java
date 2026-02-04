@@ -125,7 +125,7 @@ public final class MetalEncoder implements MetalObject, AutoCloseable {
         try {
             endEncoding();
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            throw new SiliconException(e);
         }
     }
 

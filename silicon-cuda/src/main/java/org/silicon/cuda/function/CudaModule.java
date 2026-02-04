@@ -25,7 +25,7 @@ public record CudaModule(MemorySegment handle, CudaContext context) implements C
             MemorySegment funcHandle = (MemorySegment) CUDA_MODULE_GET_FUNCTION.invoke(handle, cName);
 
             if (funcHandle == null || funcHandle.address() == 0) {
-                throw new RuntimeException("Failed to get function: " + name);
+                throw new SiliconException("Failed to get function: " + name);
             }
 
             return new CudaFunction(funcHandle);
