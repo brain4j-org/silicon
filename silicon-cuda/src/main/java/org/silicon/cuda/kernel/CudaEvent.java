@@ -63,7 +63,7 @@ public class CudaEvent implements ComputeEvent {
             
             int res = (int) CUDA_EVENT_RECORD.invokeExact(event, stream.handle());
             if (res != 0) {
-                throw new RuntimeException("cuEventRecord failed: " + res);
+                throw new SiliconException("cuEventRecord failed: " + res);
             }
             
             Thread.startVirtualThread(this::waitAndComplete);
@@ -92,7 +92,7 @@ public class CudaEvent implements ComputeEvent {
     public void await() {
         try {
             int result = (int) CUDA_EVENT_SYNCHRONIZE.invokeExact(event);
-            if (result != 0) throw new RuntimeException("cuEventSynchronize failed: " + result);
+            if (result != 0) throw new SiliconException("cuEventSynchronize failed: " + result);
         } catch (Throwable t) {
             throw new SiliconException("await() failed", t);
         }
@@ -102,7 +102,7 @@ public class CudaEvent implements ComputeEvent {
         if (destroyed.compareAndSet(false, true)) {
             try {
                 int result = (int) CUDA_EVENT_DESTROY.invokeExact(event);
-                if (result != 0) throw new RuntimeException("cuEventDestroy failed: " + result);
+                if (result != 0) throw new SiliconException("cuEventDestroy failed: " + result);
             } catch (Throwable t) {
                 throw new SiliconException("destroy() failed", t);
             }

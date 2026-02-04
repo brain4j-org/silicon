@@ -3,6 +3,7 @@ package org.silicon.opencl.device;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
 import org.lwjgl.system.MemoryStack;
+import org.silicon.api.SiliconException;
 import org.silicon.api.device.ComputeContext;
 import org.silicon.api.device.ComputeDevice;
 import org.silicon.api.device.DeviceFeature;
@@ -24,7 +25,7 @@ public record CLDevice(long handle, long platform) implements ComputeDevice {
             properties.flip();
 
             long context = CL10.clCreateContext(properties, handle, null, 0, result);
-            if (result.get(0) != CL10.CL_SUCCESS) throw new RuntimeException("clCreateContext failed: " + result.get(0));
+            if (result.get(0) != CL10.CL_SUCCESS) throw new SiliconException("clCreateContext failed: " + result.get(0));
 
             return new CLContext(context, handle);
         }

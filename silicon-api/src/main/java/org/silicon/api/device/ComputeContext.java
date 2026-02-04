@@ -1,8 +1,9 @@
 package org.silicon.api.device;
 
+import org.silicon.api.SiliconException;
 import org.silicon.api.backend.BackendType;
-import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.function.ComputeModule;
+import org.silicon.api.kernel.ComputeQueue;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -30,7 +31,7 @@ public interface ComputeContext {
             byte[] src = in.readAllBytes();
             return loadModule(src);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SiliconException("loadModuleFromResources(String) failed", e);
         }
     }
 

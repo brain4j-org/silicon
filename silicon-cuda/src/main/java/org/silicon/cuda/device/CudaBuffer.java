@@ -97,7 +97,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
 
         try {
             int res = (int) CUDA_MEMCPY_DTOD.invoke(buffer.handle, handle, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyDtoD failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyDtoD failed: " + res);
 
             return buffer;
         } catch (Throwable e) {
@@ -116,7 +116,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         
         try {
             int res = (int) CUDA_MEM_FREE.invoke(handle);
-            if (res != 0) throw new RuntimeException("cuMemFree failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemFree failed: " + res);
 
             state = MemoryState.FREE;
         } catch (Throwable e) {
@@ -133,7 +133,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_BYTE, data.length);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, size);
         } catch (Throwable e) {
@@ -150,7 +150,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_DOUBLE, data.length);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, size);
         } catch (Throwable e) {
@@ -167,7 +167,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_FLOAT, data.length);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, size);
         } catch (Throwable e) {
@@ -184,7 +184,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_LONG, data.length);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, size);
         } catch (Throwable e) {
@@ -201,7 +201,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_INT, data.length);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, size);
         } catch (Throwable e) {
@@ -218,7 +218,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_SHORT, data.length);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, size);
         } catch (Throwable e) {
@@ -240,7 +240,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_BYTE, data);
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
         } catch (Throwable e) {
             throw new SiliconException("copyToDevice(byte[]) failed", e);
         }
@@ -254,7 +254,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_DOUBLE, data);
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
         } catch (Throwable e) {
             throw new SiliconException("copyToDevice(double[]) failed", e);
         }
@@ -268,7 +268,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_FLOAT, data);
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
         } catch (Throwable e) {
             throw new SiliconException("copyToDevice(float[]) failed", e);
         }
@@ -282,7 +282,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_LONG, data);
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
         } catch (Throwable e) {
             throw new SiliconException("copyToDevice(long[]) failed", e);
         }
@@ -296,7 +296,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_INT, data);
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
         } catch (Throwable e) {
             throw new SiliconException("copyToDevice(int[]) failed", e);
         }
@@ -310,7 +310,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_SHORT, data);
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
-            if (res != 0) throw new RuntimeException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
         } catch (Throwable e) {
             throw new SiliconException("copyToDevice(short[]) failed", e);
         }

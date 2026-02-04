@@ -53,7 +53,7 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
             MemorySegment queuePtr = (MemorySegment) METAL_CREATE_COMMAND_QUEUE.invokeExact(device.handle());
 
             if (queuePtr == null) {
-                throw new RuntimeException("Failed to create Metal command queue");
+                throw new SiliconException("Failed to create Metal command queue");
             }
 
             return new MetalCommandQueue(queuePtr, arena);
@@ -83,7 +83,7 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
             MemorySegment libPtr = (MemorySegment) METAL_CREATE_LIBRARY.invokeExact(device.handle(), src);
 
             if (libPtr == null) {
-                throw new RuntimeException("Failed to compile Metal library");
+                throw new SiliconException("Failed to compile Metal library");
             }
 
             return new MetalLibrary(libPtr);
@@ -98,7 +98,7 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
             MemorySegment ptr = (MemorySegment) METAL_NEW_BUFFER.invokeExact(device.handle(), size);
             
             if (ptr == null || ptr.address() == 0) {
-                throw new RuntimeException("metalMakeBuffer failed");
+                throw new SiliconException("metalMakeBuffer failed");
             }
             
             return new MetalBuffer(ptr, this, size);
@@ -116,35 +116,35 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
 
     @Override
     public ComputeBuffer allocateArray(double[] data) {
-        long size = data.length * 8L;
+        long size = data.length * ValueLayout.JAVA_DOUBLE.byteSize();
         MemorySegment srcSeg = MemorySegment.ofArray(data);
         return allocateFromArray(srcSeg, size);
     }
 
     @Override
     public ComputeBuffer allocateArray(float[] data) {
-        long size = data.length * 4L;
+        long size = data.length * ValueLayout.JAVA_FLOAT.byteSize();
         MemorySegment srcSeg = MemorySegment.ofArray(data);
         return allocateFromArray(srcSeg, size);
     }
 
     @Override
     public ComputeBuffer allocateArray(long[] data) {
-        long size = data.length * 8L;
+        long size = data.length * ValueLayout.JAVA_LONG.byteSize();
         MemorySegment srcSeg = MemorySegment.ofArray(data);
         return allocateFromArray(srcSeg, size);
     }
-    
+
     @Override
     public ComputeBuffer allocateArray(int[] data) {
-        long size = data.length * 4L;
+        long size = data.length * ValueLayout.JAVA_INT.byteSize();
         MemorySegment srcSeg = MemorySegment.ofArray(data);
         return allocateFromArray(srcSeg, size);
     }
 
     @Override
     public ComputeBuffer allocateArray(short[] data) {
-        long size = data.length * 2L;
+        long size = data.length * ValueLayout.JAVA_SHORT.byteSize();
         MemorySegment srcSeg = MemorySegment.ofArray(data);
         return allocateFromArray(srcSeg, size);
     }

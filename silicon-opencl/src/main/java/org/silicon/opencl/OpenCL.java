@@ -3,6 +3,7 @@ package org.silicon.opencl;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
 import org.lwjgl.system.MemoryStack;
+import org.silicon.api.SiliconException;
 import org.silicon.api.backend.BackendType;
 import org.silicon.api.backend.ComputeBackend;
 import org.silicon.api.device.ComputeDevice;
@@ -17,7 +18,7 @@ public class OpenCL implements ComputeBackend {
             IntBuffer buffer = stack.mallocInt(1);
             
             int result = CL10.clGetPlatformIDs(null, buffer);
-            if (result != CL10.CL_SUCCESS) throw new RuntimeException("clGetPlatformIDs failed: " + result);
+            if (result != CL10.CL_SUCCESS) throw new SiliconException("clGetPlatformIDs failed: " + result);
             
             return buffer.get(0);
         } catch (Exception e) {
@@ -30,7 +31,7 @@ public class OpenCL implements ComputeBackend {
             PointerBuffer platforms = stack.mallocPointer(platformCount);
             
             int result = CL10.clGetPlatformIDs(platforms, (IntBuffer) null);
-            if (result != CL10.CL_SUCCESS) throw new RuntimeException("clGetPlatformIDs failed: " + result);
+            if (result != CL10.CL_SUCCESS) throw new SiliconException("clGetPlatformIDs failed: " + result);
             
             return platforms.get(0);
         } catch (Exception e) {
@@ -47,7 +48,7 @@ public class OpenCL implements ComputeBackend {
             IntBuffer numDevices = stack.mallocInt(1);
             
             int result = CL10.clGetDeviceIDs(platform, CL10.CL_DEVICE_TYPE_GPU, null, numDevices);
-            if (result != CL10.CL_SUCCESS) throw new RuntimeException("clGetDeviceIDs failed: " + result);
+            if (result != CL10.CL_SUCCESS) throw new SiliconException("clGetDeviceIDs failed: " + result);
             
             return numDevices.get(0);
         } catch (Exception e) {
@@ -81,7 +82,7 @@ public class OpenCL implements ComputeBackend {
             PointerBuffer devices = stack.mallocPointer(deviceCount);
             
             int result = CL10.clGetDeviceIDs(platform, CL10.CL_DEVICE_TYPE_GPU, devices, (IntBuffer)null);
-            if (result != CL10.CL_SUCCESS) throw new RuntimeException("clGetDeviceIDs failed: " + result);
+            if (result != CL10.CL_SUCCESS) throw new SiliconException("clGetDeviceIDs failed: " + result);
             
             long device = devices.get(index);
             return new CLDevice(device, platform);

@@ -29,8 +29,8 @@ public class ComputeArena implements AutoCloseable {
 
     @Override
     public void close() {
-        for (Freeable object : retained) {
-            object.free();
+        for (int i = retained.size() - 1; i >= 0; i--) {
+            retained.get(i).free();
         }
     }
 

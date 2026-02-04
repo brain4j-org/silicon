@@ -21,6 +21,7 @@ public class Metal implements ComputeBackend {
 
     static {
         LOOKUP = loadFromResources("/libmetal4j.dylib");
+        System.out.println("look: " + LOOKUP);
 
         if (LOOKUP != null) {
             METAL_CREATE_SYSTEM_DEVICE = MetalObject.find(
@@ -57,7 +58,7 @@ public class Metal implements ComputeBackend {
             MemorySegment ptr = (MemorySegment) METAL_CREATE_SYSTEM_DEVICE.invokeExact();
             
             if (ptr == null || ptr.address() == 0) {
-                throw new RuntimeException("metalCreateSystemDevice failed");
+                throw new SiliconException("metalCreateSystemDevice failed");
             }
             
             return new MetalDevice(ptr);

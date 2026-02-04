@@ -1,5 +1,6 @@
 package org.silicon.api.slang;
 
+import org.silicon.api.SiliconException;
 import org.silicon.api.backend.BackendType;
 import org.silicon.api.device.ComputeContext;
 import org.silicon.api.function.ComputeModule;
@@ -51,11 +52,7 @@ public class SlangCompiler {
      */
     public ComputeModule compile(Path path) {
         BackendType backendType = context.getBackendType();
-        String target = switch (backendType) {
-            case CUDA -> "ptx";
-            case METAL -> "metal";
-            case OPENCL -> throw new IllegalStateException("OpenCL is not yet supported");
-        };
+        String target = backendType.compileTarget();
 
         String fileName = path.getFileName().toString();
         String out = fileName.replaceAll("\\.", "_") + "." + target;
@@ -83,18 +80,20 @@ public class SlangCompiler {
             try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.err.println("[slangc] " + line); // debugging, TODO: improve debugging and error logging
+                    System.err.println("[slangc] " + line);
                 }
             }
 
             int exit = process.waitFor();
             if (exit != 0) {
-                throw new RuntimeException("Slang compilation failed with exit code " + exit);
+                throw new SiliconException("Slang compilation failed with exit code " + exit);
             }
 
             return context.loadModule(outPath);
+        } catch (SiliconException e) {
+            throw e;
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            throw new SiliconException("compile(Path) failed", e);
         }
     }
     
@@ -133,11 +132,7 @@ public class SlangCompiler {
             String fileName = Path.of(resourcePath).getFileName().toString();
             Path sourcePath = cacheDir.resolve(fileName);
             
-            String target = switch (backendType) {
-                case CUDA -> "ptx";
-                case METAL -> "metal";
-                case OPENCL -> throw new IllegalStateException("OpenCL is not yet supported");
-            };
+            String target = backendType.compileTarget();
             
             Path modulePath = cacheDir.resolve(
                 fileName.replaceAll("\\.", "_") + "." + target
@@ -152,7 +147,7 @@ public class SlangCompiler {
             Files.write(sourcePath, sourceBytes);
             return compile(sourcePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to compile resource: " + resourcePath, e);
+            throw new SiliconException("Failed to compile resource: " + resourcePath, e);
         }
     }
 
@@ -186,7 +181,7 @@ public class SlangCompiler {
             
             return sb.toString();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SiliconException("sha256() failed", e);
         }
     }
 }

@@ -39,7 +39,7 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
             MemorySegment ctx = (MemorySegment) CUDA_CREATE_CONTEXT.invoke(handle());
 
             if (ctx == null || ctx.address() == 0) {
-                throw new RuntimeException("Failed to create CUDA context");
+                throw new SiliconException("Failed to create CUDA context");
             }
 
             return new CudaContext(ctx, this).setCurrent();

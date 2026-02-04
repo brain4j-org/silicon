@@ -88,7 +88,7 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
             );
 
             if (result != 0) {
-                throw new RuntimeException("cuLaunchKernel failed: " + result);
+                throw new SiliconException("cuLaunchKernel failed: " + result);
             }
         } catch (Throwable e) {
             throw new SiliconException("dispatch(ComputeFunction, ComputeSize, ComputeSize, ComputeArgs) failed", e);
@@ -135,7 +135,7 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
             );
             
             if (result != 0) {
-                throw new RuntimeException("cuLaunchKernel failed: " + result);
+                throw new SiliconException("cuLaunchKernel failed: " + result);
             }
             
             return new CudaEvent(this);
@@ -172,7 +172,7 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
 
         try {
             int res = (int) CUDA_STREAM_SYNC.invoke(handle);
-            if (res != 0) throw new RuntimeException("cuStreamSynchronized failed: " + res);
+            if (res != 0) throw new SiliconException("cuStreamSynchronized failed: " + res);
         } catch (Throwable e) {
             throw new SiliconException("awaitCompletion() failed", e);
         }
@@ -189,7 +189,7 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
 
         try {
             int res = (int) CUDA_STREAM_DESTROY.invoke(handle);
-            if (res != 0) throw new RuntimeException("cuStreamDestroy failed: " + res);
+            if (res != 0) throw new SiliconException("cuStreamDestroy failed: " + res);
             
             state = MemoryState.FREE;
         } catch (Throwable e) {
