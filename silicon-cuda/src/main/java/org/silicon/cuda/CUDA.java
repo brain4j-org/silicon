@@ -22,7 +22,7 @@ public class CUDA implements ComputeBackend {
     
     static {
         LOOKUP = loadFromResources("/libcuda4j.dll");
-        
+
         if (LOOKUP != null) {
             CUDA_INIT = CudaObject.find(
                 "cuda_init",
@@ -51,6 +51,8 @@ public class CUDA implements ComputeBackend {
     
     @Override
     public int deviceCount() {
+        if (CUDA_DEVICE_COUNT == null) return 0;
+
         try {
             return (int) CUDA_DEVICE_COUNT.invokeExact();
         } catch (Throwable e) {

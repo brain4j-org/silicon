@@ -34,6 +34,8 @@ public class Metal implements ComputeBackend {
 
     @Override
     public int deviceCount() {
+        if (METAL_CREATE_SYSTEM_DEVICE == null) return 0;
+
         return 1;
     }
 
