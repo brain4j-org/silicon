@@ -2,6 +2,7 @@ package org.silicon.api.device;
 
 import org.silicon.api.SiliconException;
 import org.silicon.api.backend.BackendType;
+import org.silicon.api.cache.MemoryPool;
 import org.silicon.api.function.ComputeModule;
 import org.silicon.api.kernel.ComputeQueue;
 
@@ -33,6 +34,11 @@ public interface ComputeContext {
         } catch (Exception e) {
             throw new SiliconException("loadModuleFromResources(String) failed", e);
         }
+    }
+
+    // TODO: add docs
+    default <K extends Record, V> MemoryPool<K, V> createPool() {
+        return new MemoryPool<>();
     }
 
     /**
