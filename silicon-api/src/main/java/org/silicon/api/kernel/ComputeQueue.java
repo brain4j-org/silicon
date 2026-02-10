@@ -3,8 +3,6 @@ package org.silicon.api.kernel;
 import org.silicon.api.function.ComputeFunction;
 import org.silicon.api.memory.Freeable;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
  * Execution queue for dispatching kernels on a device.
  * <p>

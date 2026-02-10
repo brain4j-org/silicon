@@ -4,18 +4,17 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
 import org.lwjgl.system.MemoryStack;
 import org.silicon.api.SiliconException;
+import org.silicon.api.function.ComputeFunction;
 import org.silicon.api.kernel.ComputeArgs;
 import org.silicon.api.kernel.ComputeEvent;
 import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.kernel.ComputeSize;
-import org.silicon.api.function.ComputeFunction;
 import org.silicon.api.memory.MemoryState;
 import org.silicon.opencl.device.CLBuffer;
 import org.silicon.opencl.kernel.CLKernel;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 public final class CLCommandQueue implements ComputeQueue {
 

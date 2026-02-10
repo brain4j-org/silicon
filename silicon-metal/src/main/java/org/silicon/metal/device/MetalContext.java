@@ -6,8 +6,8 @@ import org.silicon.api.device.ComputeArena;
 import org.silicon.api.device.ComputeBuffer;
 import org.silicon.api.device.ComputeContext;
 import org.silicon.metal.MetalObject;
-import org.silicon.metal.kernel.MetalCommandQueue;
 import org.silicon.metal.function.MetalLibrary;
+import org.silicon.metal.kernel.MetalCommandQueue;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;

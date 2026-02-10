@@ -1,9 +1,8 @@
 package org.silicon.metal.device;
 
 import org.silicon.api.SiliconException;
-import org.silicon.api.memory.MemoryState;
-import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.device.ComputeBuffer;
+import org.silicon.api.memory.MemoryState;
 import org.silicon.metal.MetalObject;
 
 import java.lang.foreign.FunctionDescriptor;

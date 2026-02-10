@@ -1,7 +1,6 @@
 package org.silicon.api.device;
 
 import org.silicon.api.BitUtils;
-import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.memory.Freeable;
 
 /**

@@ -1,18 +1,18 @@
 package org.silicon.cuda.kernel;
 
 import org.silicon.api.SiliconException;
+import org.silicon.api.device.ComputeBuffer;
+import org.silicon.api.function.ComputeFunction;
 import org.silicon.api.kernel.ComputeArgs;
 import org.silicon.api.kernel.ComputeEvent;
 import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.kernel.ComputeSize;
+import org.silicon.api.memory.Freeable;
+import org.silicon.api.memory.MemoryState;
 import org.silicon.cuda.CudaObject;
 import org.silicon.cuda.device.CudaBuffer;
 import org.silicon.cuda.device.CudaPointer;
 import org.silicon.cuda.function.CudaFunction;
-import org.silicon.api.device.ComputeBuffer;
-import org.silicon.api.function.ComputeFunction;
-import org.silicon.api.memory.Freeable;
-import org.silicon.api.memory.MemoryState;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
@@ -20,7 +20,6 @@ import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
 

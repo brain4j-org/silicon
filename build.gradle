@@ -68,11 +68,22 @@ subprojects {
     }
 }
 
+tasks.register('buildAll') {
+    dependsOn ':silicon-api:shadowJar'
+    dependsOn ':silicon-cuda:shadowJar'
+    dependsOn ':silicon-metal:shadowJar'
+    dependsOn ':silicon-opencl:shadowJar'
+
+    doLast {
+        println 'Built all modules.'
+    }
+}
+
 tasks.register('publishAll') {
-    dependsOn ':silicon-api:publish',
-              ':silicon-cuda:publish',
-              ':silicon-metal:publish',
-              ':silicon-opencl:publish'
+    dependsOn ':silicon-api:publish'
+    dependsOn ':silicon-cuda:publish'
+    dependsOn ':silicon-metal:publish'
+    dependsOn ':silicon-opencl:publish'
 
     doLast {
         println 'Published all modules to the main repository.'

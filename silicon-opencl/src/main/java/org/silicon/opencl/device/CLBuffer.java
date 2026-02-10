@@ -3,7 +3,6 @@ package org.silicon.opencl.device;
 import org.lwjgl.opencl.CL10;
 import org.silicon.api.SiliconException;
 import org.silicon.api.device.ComputeBuffer;
-import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.memory.MemoryState;
 import org.silicon.opencl.computing.CLCommandQueue;
 

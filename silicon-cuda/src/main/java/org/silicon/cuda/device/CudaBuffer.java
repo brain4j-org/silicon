@@ -1,12 +1,10 @@
 package org.silicon.cuda.device;
 
 import org.silicon.api.SiliconException;
+import org.silicon.api.device.ComputeBuffer;
 import org.silicon.api.memory.Freeable;
 import org.silicon.api.memory.MemoryState;
-import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.cuda.CudaObject;
-import org.silicon.cuda.kernel.CudaStream;
-import org.silicon.api.device.ComputeBuffer;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;

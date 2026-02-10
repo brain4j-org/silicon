@@ -1,12 +1,12 @@
 package org.silicon.metal.kernel;
 
 import org.silicon.api.SiliconException;
+import org.silicon.api.device.ComputeArena;
+import org.silicon.api.function.ComputeFunction;
 import org.silicon.api.kernel.ComputeArgs;
 import org.silicon.api.kernel.ComputeEvent;
 import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.kernel.ComputeSize;
-import org.silicon.api.device.ComputeArena;
-import org.silicon.api.function.ComputeFunction;
 import org.silicon.api.memory.Freeable;
 import org.silicon.api.memory.MemoryState;
 import org.silicon.metal.MetalObject;
@@ -21,7 +21,6 @@ import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freeable {
 

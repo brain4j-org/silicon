@@ -2,11 +2,11 @@ package org.silicon.cuda.device;
 
 import org.silicon.api.SiliconException;
 import org.silicon.api.backend.BackendType;
-import org.silicon.cuda.CudaObject;
-import org.silicon.cuda.kernel.CudaStream;
-import org.silicon.cuda.function.CudaModule;
 import org.silicon.api.device.ComputeArena;
 import org.silicon.api.device.ComputeContext;
+import org.silicon.cuda.CudaObject;
+import org.silicon.cuda.function.CudaModule;
+import org.silicon.cuda.kernel.CudaStream;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;

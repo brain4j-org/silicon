@@ -2,7 +2,6 @@ package org.silicon;
 
 import org.silicon.api.Silicon;
 import org.silicon.api.device.ComputeArena;
-import org.silicon.api.device.ComputeBuffer;
 import org.silicon.api.device.ComputeContext;
 import org.silicon.api.device.ComputeDevice;
 
