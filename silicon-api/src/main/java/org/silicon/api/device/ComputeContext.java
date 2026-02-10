@@ -36,7 +36,12 @@ public interface ComputeContext {
         }
     }
 
-    // TODO: add docs
+    /**
+     * Creates a new memory pool.
+     * @return the new memory pool
+     * @param <K> key to index memory objects
+     * @param <V> values contained in the pool
+     */
     default <K extends Record, V> MemoryPool<K, V> createPool() {
         return new MemoryPool<>();
     }

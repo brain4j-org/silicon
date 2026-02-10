@@ -1,5 +1,10 @@
 package org.silicon.api.cache;
 
+/**
+ * Wrapper for a value borrowed from a {@link MemoryPool}.
+ * <p>
+ * Use in try-with-resources to ensure the value is returned to the pool on {@link #close()}.
+ */
 public final class Pooled<V> implements AutoCloseable {
 
     private final MemoryPool<?, V> pool;
@@ -13,6 +18,10 @@ public final class Pooled<V> implements AutoCloseable {
         this.value = value;
     }
 
+    /**
+     * Returns the pooled value.
+     * @return the borrowed value
+     */
     public V value() {
         return value;
     }
