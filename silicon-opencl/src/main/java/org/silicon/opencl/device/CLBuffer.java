@@ -48,7 +48,12 @@ public class CLBuffer implements ComputeBuffer {
         
         return buffer;
     }
-
+    
+    @Override
+    public long size() {
+        return size;
+    }
+    
     @Override
     public MemoryState state() {
         return state;

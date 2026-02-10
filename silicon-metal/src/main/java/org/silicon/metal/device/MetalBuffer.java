@@ -59,6 +59,11 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
     }
     
     @Override
+    public long size() {
+        return size;
+    }
+    
+    @Override
     public MemoryState state() {
         return state;
     }
@@ -149,11 +154,7 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
     public MetalContext context() {
         return context;
     }
-
-    public long size() {
-        return size;
-    }
-
+    
     public MemorySegment getContents() {
         try {
             return (MemorySegment) METAL_BUFFER_CONTENTS.invokeExact(handle());

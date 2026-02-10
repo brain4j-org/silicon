@@ -102,7 +102,12 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             throw new SiliconException("copyInto(ComputeBuffer) failed", e);
         }
     }
-
+    
+    @Override
+    public long size() {
+        return size;
+    }
+    
     @Override
     public MemoryState state() {
         return state;
@@ -325,11 +330,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
     public CudaContext context() {
         return context;
     }
-
-    public long size() {
-        return size;
-    }
-
+    
     @Override
     public String toString() {
         return "CudaBuffer{" +

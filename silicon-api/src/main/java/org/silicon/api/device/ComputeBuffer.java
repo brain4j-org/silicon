@@ -24,7 +24,13 @@ public interface ComputeBuffer extends Freeable {
      * @return the destination buffer (for chaining)
      */
     ComputeBuffer copyInto(ComputeBuffer other);
-
+    
+    /**
+     * Gets the size in bytes of this buffer.
+     * @return size in bytes as a long
+     */
+    long size();
+    
     /**
      * Reads the buffer contents into a byte array.
      * @param data destination array
