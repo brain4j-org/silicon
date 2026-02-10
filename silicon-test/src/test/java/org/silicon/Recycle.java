@@ -1,4 +1,4 @@
-package org.silicon.cache;
+package org.silicon;
 
 import org.silicon.api.Silicon;
 import org.silicon.api.cache.MemoryPool;
@@ -18,7 +18,7 @@ public class Recycle {
         MemoryPool<TensorKey, ComputeBuffer> pool = context.createPool();
         TensorKey key = new TensorKey(1, 2, 3);
 
-        Supplier<ComputeBuffer> allocator = () -> context.allocateBytes(key.prod());
+        Supplier<ComputeBuffer> allocator = () -> context.allocateBytes(key.size());
 
         // searches for an object with the same descriptor
         // if no match is found then it creates the object through the allocator
@@ -41,7 +41,7 @@ public class Recycle {
     }
 
     public record TensorKey(int... shape) {
-        long prod() {
+        long size() {
             long prod = 1;
             for (int x : shape) prod *= x;
             return prod * Integer.BYTES;
