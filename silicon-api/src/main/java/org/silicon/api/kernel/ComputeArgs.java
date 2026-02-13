@@ -50,7 +50,7 @@ public class ComputeArgs {
     /**
      * @return the underlying argument list (in order)
      */
-    public List<Object> getArgs() {
+    public List<Object> args() {
         return Collections.unmodifiableList(args);
     }
 

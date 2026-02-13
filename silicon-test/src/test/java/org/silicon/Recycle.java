@@ -15,14 +15,14 @@ public class Recycle {
         ComputeContext context = device.createContext();
 
         // pools require RECORDS as KEYS
-        MemoryPool<TensorKey, ComputeBuffer> pool = context.createPool();
+        MemoryPool<TensorKey> pool = context.createPool();
         TensorKey key = new TensorKey(1, 2, 3);
 
         Supplier<ComputeBuffer> allocator = () -> context.allocateBytes(key.size());
 
         // searches for an object with the same descriptor
         // if no match is found then it creates the object through the allocator
-        try (Pooled<ComputeBuffer> pooled = pool.acquire(key, allocator)) {
+        try (Pooled pooled = pool.acquire(key, allocator)) {
             ComputeBuffer buffer = pooled.value();
             Tensor tensor = new Tensor(buffer, key.shape);
             // ... stuff ...

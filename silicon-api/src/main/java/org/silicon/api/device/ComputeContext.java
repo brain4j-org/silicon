@@ -42,14 +42,14 @@ public interface ComputeContext {
      * @param <K> key to index memory objects
      * @param <V> values contained in the pool
      */
-    default <K extends Record, V> MemoryPool<K, V> createPool() {
+    default <K extends Record> MemoryPool<K> createPool() {
         return new MemoryPool<>();
     }
 
     /**
      * @return backend type associated with this context
      */
-    BackendType getBackendType();
+    BackendType backendType();
 
     /**
      * Creates a new execution queue.

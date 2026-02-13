@@ -68,7 +68,7 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     }
 
     @Override
-    public BackendType getBackendType() {
+    public BackendType backendType() {
         return BackendType.CUDA;
     }
 

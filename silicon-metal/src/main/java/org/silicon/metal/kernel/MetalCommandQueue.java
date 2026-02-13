@@ -103,7 +103,7 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
     }
 
     private static void setArgs(ComputeArgs args, MetalEncoder encoder) {
-        List<Object> argList = args.getArgs();
+        List<Object> argList = args.args();
 
         for (int i = 0; i < args.size(); i++) {
             switch (argList.get(i)) {

@@ -33,7 +33,7 @@ public record CLContext(long handle, long device) implements ComputeContext {
     }
     
     @Override
-    public BackendType getBackendType() {
+    public BackendType backendType() {
         return BackendType.OPENCL;
     }
     

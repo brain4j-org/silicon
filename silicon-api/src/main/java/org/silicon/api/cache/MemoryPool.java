@@ -1,5 +1,8 @@
 package org.silicon.api.cache;
 
+import org.silicon.api.device.ComputeBuffer;
+import org.silicon.api.memory.Freeable;
+
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,9 +15,9 @@ import java.util.function.Supplier;
  * <p>
  * This is useful for caching memory portions and to reduce allocations.
  */
-public class MemoryPool<K extends Record, V> {
+public class MemoryPool<K extends Record> {
 
-    private final Map<K, ArrayDeque<V>> free = new HashMap<>();
+    private final Map<K, ArrayDeque<ComputeBuffer>> free = new HashMap<>();
 
     /**
      * Acquires a value for the given key, reusing a cached instance if available.
@@ -22,14 +25,14 @@ public class MemoryPool<K extends Record, V> {
      * @param allocator creates a new value when no cached instance exists
      * @return a pooled wrapper that returns the value on close
      */
-    public Pooled<V> acquire(K key, Supplier<V> allocator) {
-        ArrayDeque<V> q = free.get(key);
+    public Pooled acquire(K key, Supplier<ComputeBuffer> allocator) {
+        ArrayDeque<ComputeBuffer> q = free.get(key);
 
-        V value = (q != null && !q.isEmpty())
+        ComputeBuffer value = (q != null && !q.isEmpty())
             ? q.pollFirst() // if there is a match get it
             : allocator.get(); // allocate the new value
 
-        return new Pooled<>(this, key, value);
+        return new Pooled(this, key, value);
     }
 
     /**
@@ -37,8 +40,15 @@ public class MemoryPool<K extends Record, V> {
      * @param key grouping key for reuse
      * @param value value to return
      */
-    void release(Object key, V value) {
+    void release(Object key, ComputeBuffer value) {
         free.computeIfAbsent((K) key, k -> new ArrayDeque<>())
             .addLast(value);
+    }
+
+    /**
+     * Frees all the buffers retained in this memory pool.
+     */
+    public void free() {
+        free.forEach((k, v) -> v.forEach(Freeable::free));
     }
 }

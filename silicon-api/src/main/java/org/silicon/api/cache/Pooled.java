@@ -1,18 +1,20 @@
 package org.silicon.api.cache;
 
+import org.silicon.api.device.ComputeBuffer;
+
 /**
  * Wrapper for a value borrowed from a {@link MemoryPool}.
  * <p>
  * Use in try-with-resources to ensure the value is returned to the pool on {@link #close()}.
  */
-public final class Pooled<V> implements AutoCloseable {
+public final class Pooled implements AutoCloseable {
 
-    private final MemoryPool<?, V> pool;
+    private final MemoryPool<?> pool;
     private final Object key;
-    private final V value;
+    private final ComputeBuffer value;
     private boolean released;
 
-    Pooled(MemoryPool<?, V> pool, Object key, V value) {
+    Pooled(MemoryPool<?> pool, Object key, ComputeBuffer value) {
         this.pool = pool;
         this.key = key;
         this.value = value;
@@ -22,7 +24,7 @@ public final class Pooled<V> implements AutoCloseable {
      * Returns the pooled value.
      * @return the borrowed value
      */
-    public V value() {
+    public ComputeBuffer value() {
         return value;
     }
 

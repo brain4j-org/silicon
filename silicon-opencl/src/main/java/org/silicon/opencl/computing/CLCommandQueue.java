@@ -144,7 +144,7 @@ public final class CLCommandQueue implements ComputeQueue {
     }
 
     private static void setArgs(ComputeArgs args, long kernelHandle, MemoryStack stack) {
-        List<Object> computeArgs = args.getArgs();
+        List<Object> computeArgs = args.args();
         for (int i = 0; i < args.size(); i++) {
             Object arg = computeArgs.get(i);
             switch (arg) {

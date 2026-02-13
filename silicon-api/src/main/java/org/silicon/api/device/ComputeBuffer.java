@@ -14,6 +14,7 @@ public interface ComputeBuffer extends Freeable {
     /**
      * Creates a device-side copy of this buffer.
      * @return a new buffer with the same contents
+     * @apiNote this operation is not memory safe.
      */
     ComputeBuffer copy();
 

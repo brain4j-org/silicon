@@ -38,7 +38,7 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     );
     
     @Override
-    public BackendType getBackendType() {
+    public BackendType backendType() {
         return BackendType.METAL;
     }
     

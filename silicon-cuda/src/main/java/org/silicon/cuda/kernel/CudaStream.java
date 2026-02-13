@@ -144,7 +144,7 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
     }
     
     private CudaPointer getParameters(ComputeArgs args) {
-        List<Object> computeArgs = args.getArgs();
+        List<Object> computeArgs = args.args();
         CudaPointer[] pointers = new CudaPointer[computeArgs.size()];
         
         for (int i = 0; i < args.size(); i++) {

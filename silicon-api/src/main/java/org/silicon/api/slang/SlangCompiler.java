@@ -46,12 +46,12 @@ public class SlangCompiler {
 
     /**
      * Compiles a Slang file on disk and loads the resulting module.
-     * The target format is derived from {@link ComputeContext#getBackendType()}.
+     * The target format is derived from {@link ComputeContext#backendType()}.
      * @param path path to the Slang source file
      * @return loaded compute module
      */
     public ComputeModule compile(Path path) {
-        BackendType backendType = context.getBackendType();
+        BackendType backendType = context.backendType();
         String target = backendType.compileTarget();
 
         String fileName = path.getFileName().toString();
@@ -104,7 +104,7 @@ public class SlangCompiler {
      * @return loaded compute module
      */
     public ComputeModule compileFromResource(String resourcePath) {
-        BackendType backendType = context.getBackendType();
+        BackendType backendType = context.backendType();
         
         if (resourcePath.startsWith("/")) {
             throw new IllegalArgumentException("Resource path must be relative (no leading '/')");
