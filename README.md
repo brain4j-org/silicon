@@ -1,6 +1,6 @@
 # Silicon
 
-**A unified, low-level GPU computing API. Write once, run anywhere.**
+**A unified, high-level GPU computing API. Write once, run anywhere.**
 
 > ⚠️ Silicon is under active development: the API is stabilizing, but breaking changes may still occur.
 
