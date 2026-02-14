@@ -121,6 +121,48 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
         checkData(bytes);
         get(MemorySegment.ofArray(data), bytes);
     }
+    
+    @Override
+    public void write(byte[] data) {
+        long bytes = data.length;
+        checkData(bytes);
+        set(MemorySegment.ofArray(data), bytes);
+    }
+
+    @Override
+    public void write(double[] data) {
+        long bytes = data.length * 8L;
+        checkData(bytes);
+        set(MemorySegment.ofArray(data), bytes);
+    }
+
+    @Override
+    public void write(float[] data) {
+        long bytes = data.length * 4L;
+        checkData(bytes);
+        set(MemorySegment.ofArray(data), bytes);
+    }
+
+    @Override
+    public void write(long[] data) {
+        long bytes = data.length * 8L;
+        checkData(bytes);
+        set(MemorySegment.ofArray(data), bytes);
+    }
+
+    @Override
+    public void write(int[] data) {
+        long bytes = data.length * 4L;
+        checkData(bytes);
+        set(MemorySegment.ofArray(data), bytes);
+    }
+
+    @Override
+    public void write(short[] data) {
+        long bytes = data.length * 2L;
+        checkData(bytes);
+        set(MemorySegment.ofArray(data), bytes);
+    }
 
     private void checkData(long bytes) {
         ensureAlive();
@@ -132,6 +174,11 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
 
     private void get(MemorySegment dst, long bytes) {
         MemorySegment src = getContents().reinterpret(size);
+        MemorySegment.copy(src, 0, dst, 0, bytes);
+    }
+    
+    private void set(MemorySegment src, long bytes) {
+        MemorySegment dst = getContents().reinterpret(size);
         MemorySegment.copy(src, 0, dst, 0, bytes);
     }
 

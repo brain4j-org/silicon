@@ -37,6 +37,12 @@ public interface ComputeBuffer extends Freeable {
      * @param data destination array
      */
     void get(byte[] data);
+    
+    /**
+     * Writes a byte array into this buffer.
+     * @param data source array
+     */
+    void write(byte[] data);
 
     /**
      * Reads the buffer contents into a double array.
@@ -45,28 +51,58 @@ public interface ComputeBuffer extends Freeable {
     void get(double[] data);
     
     /**
+     * Writes a double array into this buffer.
+     * @param data source array
+     */
+    void write(double[] data);
+    
+    /**
      * Reads the buffer contents into a float array.
      * @param data destination array
      */
     void get(float[] data);
+    
+    /**
+     * Writes a float array into this buffer.
+     * @param data source array
+     */
+    void write(float[] data);
 
     /**
      * Reads the buffer contents into a long array.
      * @param data destination array
      */
     void get(long[] data);
+    
+    /**
+     * Writes a long array into this buffer.
+     * @param data source array
+     */
+    void write(long[] data);
 
     /**
      * Reads the buffer contents into an int array.
      * @param data destination array
      */
     void get(int[] data);
+    
+    /**
+     * Writes an int array into this buffer.
+     * @param data source array
+     */
+    void write(int[] data);
 
     /**
      * Reads the buffer contents into a short array.
      * @param data destination array
      */
     void get(short[] data);
+    
+    /**
+     * Writes a short array into this buffer.
+     * @param data source array
+     */
+    void write(short[] data);
     
     /**
      * Reads FP16 (half) data and converts it to float.

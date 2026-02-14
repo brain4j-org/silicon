@@ -36,12 +36,12 @@ public class ComputeArena implements AutoCloseable {
 
     /**
      * Registers a resource in this arena.
-     * @param buffer resource to register
+     * @param freeable resource to register
      * @return the same resource, for chaining
      */
-    public <T extends Freeable> T retain(T buffer) {
-        retained.add(buffer);
-        return buffer;
+    public <T extends Freeable> T retain(T freeable) {
+        retained.add(freeable);
+        return freeable;
     }
     
     /**

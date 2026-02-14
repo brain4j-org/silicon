@@ -71,7 +71,7 @@ public class CLBuffer implements ComputeBuffer {
 
     @Override
     public void get(byte[] data) {
-        Result result = readBuffer(size);
+        Result result = readBuffer(data.length);
         result.buffer().get(data);
 
         result.queue().await();
@@ -132,6 +132,83 @@ public class CLBuffer implements ComputeBuffer {
         result.queue().await();
         result.queue().free();
     }
+    
+    @Override
+    public void write(byte[] data) {
+        Result result = writeBuffer(data.length);
+        result.buffer().put(data).rewind();
+
+        int res = CL10.clEnqueueWriteBuffer(result.queue().handle(), handle, true, 0, result.buffer(), null, null);
+        if (res != 0) throw new SiliconException("clEnqueueWriteBuffer failed: " + res);
+
+        result.queue().await();
+        result.queue().free();
+    }
+
+    @Override
+    public void write(double[] data) {
+        long required = (long) data.length * Double.BYTES;
+        Result result = writeBuffer(required);
+        result.buffer().asDoubleBuffer().put(data);
+
+        int res = CL10.clEnqueueWriteBuffer(result.queue().handle(), handle, true, 0, result.buffer(), null, null);
+        if (res != 0) throw new SiliconException("clEnqueueWriteBuffer failed: " + res);
+
+        result.queue().await();
+        result.queue().free();
+    }
+
+    @Override
+    public void write(float[] data) {
+        long required = (long) data.length * Float.BYTES;
+        Result result = writeBuffer(required);
+        result.buffer().asFloatBuffer().put(data);
+
+        int res = CL10.clEnqueueWriteBuffer(result.queue().handle(), handle, true, 0, result.buffer(), null, null);
+        if (res != 0) throw new SiliconException("clEnqueueWriteBuffer failed: " + res);
+
+        result.queue().await();
+        result.queue().free();
+    }
+
+    @Override
+    public void write(long[] data) {
+        long required = (long) data.length * Long.BYTES;
+        Result result = writeBuffer(required);
+        result.buffer().asLongBuffer().put(data);
+
+        int res = CL10.clEnqueueWriteBuffer(result.queue().handle(), handle, true, 0, result.buffer(), null, null);
+        if (res != 0) throw new SiliconException("clEnqueueWriteBuffer failed: " + res);
+
+        result.queue().await();
+        result.queue().free();
+    }
+
+    @Override
+    public void write(int[] data) {
+        long required = (long) data.length * Integer.BYTES;
+        Result result = writeBuffer(required);
+        result.buffer().asIntBuffer().put(data);
+
+        int res = CL10.clEnqueueWriteBuffer(result.queue().handle(), handle, true, 0, result.buffer(), null, null);
+        if (res != 0) throw new SiliconException("clEnqueueWriteBuffer failed: " + res);
+
+        result.queue().await();
+        result.queue().free();
+    }
+
+    @Override
+    public void write(short[] data) {
+        long required = (long) data.length * Short.BYTES;
+        Result result = writeBuffer(required);
+        result.buffer().asShortBuffer().put(data);
+
+        int res = CL10.clEnqueueWriteBuffer(result.queue().handle(), handle, true, 0, result.buffer(), null, null);
+        if (res != 0) throw new SiliconException("clEnqueueWriteBuffer failed: " + res);
+
+        result.queue().await();
+        result.queue().free();
+    }
 
     private Result readBuffer(long required) {
         if (state != MemoryState.ALIVE) {
@@ -141,6 +218,10 @@ public class CLBuffer implements ComputeBuffer {
         if (required > size) {
             throw new IllegalArgumentException("Requested read of " + required + " bytes, but buffer size is " + size);
         }
+        
+        if (required > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Requested read of " + required + " bytes exceeds JVM ByteBuffer max capacity");
+        }
 
         CLCommandQueue queue = context.createQueue();
         ByteBuffer buffer = ByteBuffer
@@ -149,6 +230,27 @@ public class CLBuffer implements ComputeBuffer {
 
         int res = CL10.clEnqueueReadBuffer(queue.handle(), handle, true, 0, buffer, null, null);
         if (res != 0) throw new SiliconException("clEnqueueReadBuffer failed: " + res);
+
+        return new Result(queue, buffer);
+    }
+    
+    private Result writeBuffer(long required) {
+        if (state != MemoryState.ALIVE) {
+            throw new IllegalStateException("Buffer is not ALIVE! Current buffer state: " + state);
+        }
+
+        if (required > size) {
+            throw new IllegalArgumentException("Requested write of " + required + " bytes, but buffer size is " + size);
+        }
+        
+        if (required > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Requested write of " + required + " bytes exceeds JVM ByteBuffer max capacity");
+        }
+
+        CLCommandQueue queue = context.createQueue();
+        ByteBuffer buffer = ByteBuffer
+            .allocateDirect((int) required)
+            .order(ByteOrder.nativeOrder());
 
         return new Result(queue, buffer);
     }

@@ -132,6 +132,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
         
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_BYTE, data.length);
 
@@ -149,6 +150,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_DOUBLE, data.length);
 
@@ -166,6 +168,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_FLOAT, data.length);
 
@@ -183,6 +186,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_LONG, data.length);
 
@@ -200,6 +204,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_INT, data.length);
 
@@ -217,6 +222,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocate(ValueLayout.JAVA_SHORT, data.length);
 
@@ -233,12 +239,43 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
     public MemorySegment handle() {
         return handle;
     }
+    
+    @Override
+    public void write(byte[] data) {
+        copyToDevice(data);
+    }
+
+    @Override
+    public void write(double[] data) {
+        copyToDevice(data);
+    }
+
+    @Override
+    public void write(float[] data) {
+        copyToDevice(data);
+    }
+
+    @Override
+    public void write(long[] data) {
+        copyToDevice(data);
+    }
+
+    @Override
+    public void write(int[] data) {
+        copyToDevice(data);
+    }
+
+    @Override
+    public void write(short[] data) {
+        copyToDevice(data);
+    }
 
     // ========================= COPY TO DEVICE =========================
     public void copyToDevice(byte[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_BYTE, data);
 
@@ -253,6 +290,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_DOUBLE, data);
 
@@ -267,6 +305,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_FLOAT, data);
 
@@ -281,6 +320,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_LONG, data);
 
@@ -295,6 +335,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_INT, data);
 
@@ -309,6 +350,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
 
         long size = bytesOf(data);
+        ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_SHORT, data);
 
@@ -329,6 +371,12 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
 
     public CudaContext context() {
         return context;
+    }
+    
+    private void ensureCapacity(long transferSize) {
+        if (transferSize > size) {
+            throw new IllegalArgumentException("Requested transfer of " + transferSize + " bytes, but buffer size is " + size);
+        }
     }
     
     @Override
