@@ -66,7 +66,12 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             throw new SiliconException("synchronize() failed", e);
         }
     }
-
+    
+    @Override
+    public void syncThread() {
+        setCurrent();
+    }
+    
     @Override
     public BackendType backendType() {
         return BackendType.CUDA;

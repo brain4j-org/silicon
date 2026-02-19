@@ -35,6 +35,15 @@ public interface ComputeContext {
             throw new SiliconException("loadModuleFromResources(String) failed", e);
         }
     }
+    
+    /**
+     * Synchronizes the context thread with the current thread.
+     * <p>
+     * This method has only effect on the CUDA's backend.
+     */
+    default void syncThread() {
+        // No impl by default
+    }
 
     /**
      * Creates a new memory pool.
