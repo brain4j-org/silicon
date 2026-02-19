@@ -49,7 +49,6 @@ public interface ComputeContext {
      * Creates a new memory pool.
      * @return the new memory pool
      * @param <K> key to index memory objects
-     * @param <V> values contained in the pool
      */
     default <K extends Record> MemoryPool<K> createPool() {
         return new MemoryPool<>();
