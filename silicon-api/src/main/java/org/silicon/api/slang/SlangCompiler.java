@@ -42,6 +42,32 @@ public class SlangCompiler {
     public SlangCompiler(ComputeContext context, boolean noCache) {
         this.context = context;
         this.noCache = noCache;
+
+        if (!isInstalled()) {
+            throw new RuntimeException("Slang compiler is not installed on this system!");
+        }
+    }
+
+    /**
+     * Checks whether slangc is available and executable.
+     *
+     * @return true if slangc can be invoked successfully
+     */
+    public static boolean isInstalled() {
+        try {
+            Process process = new ProcessBuilder(
+                "slangc",
+                "-version"
+            )
+                .redirectErrorStream(true)
+                .start();
+
+            int exit = process.waitFor();
+
+            return exit == 0;
+        } catch (Throwable ignored) {
+            return false;
+        }
     }
 
     /**
