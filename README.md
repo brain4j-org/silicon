@@ -1,21 +1,42 @@
-# Silicon
+<div align="center">
+  <h1>Silicon</h1>
+</div>
 
-**High-level & cross-platform API that unifies GPU computing (CUDA, Metal, OpenCL). Write once, run anywhere.**
+<h4 align="center">High-performance, cross-platform GPU computing API.</h4>
 
-> ⚠️ Silicon is under active development: the API is stabilizing, but breaking changes may still occur.
+<p align="center">
+    <img alt="Java 22" src="https://img.shields.io/badge/java-22-red">
+    <img alt="GitHub Commit Activity" src="https://img.shields.io/github/commit-activity/m/brain4j-org/silicon"/>
+    <img alt="Github Last Commit" src="https://img.shields.io/github/last-commit/brain4j-org/silicon"/>
+    <img alt="License" src="https://img.shields.io/github/license/brain4j-org/silicon">
+</p>
 
-## What is Silicon?
 
-Silicon is a cross-platform GPU computing API designed to unify multiple
-backend technologies (such as **CUDA**, **Metal**, and **OpenCL**) under a
-single, consistent programming model.
+Write GPU code once and execute it across CUDA, Metal, and OpenCL backends
+through a consistent low-level compute API.
 
-The goal is simple:  
-**write your GPU code once and run it across different vendors and platforms,
-without sacrificing performance or safety.**
+---
 
-Silicon focuses on providing a *thin abstraction layer* over native GPU APIs,
-while handling the most error-prone aspects of GPU programming for you.
+## Install
+
+**Note**: Silicon requires Java 22, as it heavily relies on the Java Panama API.
+
+Silicon is avilable on the official Brain4J [repository](https://repo.brain4j.org/).
+
+```gradle
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.brain4j.org/snapshots' }
+    maven { url 'https://repo.brain4j.org/releases' }
+}
+
+dependencies {
+    implementation "org.silicon:silicon-api:1.0.0-SNAPSHOT" // base API, mandatory
+    // implementation "org.silicon:silicon-cuda:1.0.0-SNAPSHOT" // if you have/use CUDA
+    // implementation "org.silicon:silicon-metal:1.0.0-SNAPSHOT" // if you have/use Metal
+    // implementation "org.silicon:silicon-opencl:1.0.0-SNAPSHOT" // if want OpenCL
+}
+```
 
 ## Why Silicon?
 
@@ -32,7 +53,6 @@ Silicon does **not** trade performance for portability.
 
 Its abstraction layer is intentionally minimal, allowing backend-specific
 optimizations while keeping overhead as close to zero as possible.
-You get predictable performance across platforms, without opaque runtime magic.
 
 ### 3. Simple, consistent API
 Silicon offers a **clean and concise API** that can be learned in minutes.
@@ -40,24 +60,31 @@ Silicon offers a **clean and concise API** that can be learned in minutes.
 Once you understand Silicon’s core concepts, switching between CUDA, Metal,
 or OpenCL backends requires no changes to your application logic.
 
-## Who is Silicon for?
+### 4. Unified multi-backend compute
 
-- Developers who need **portable GPU compute**
-- Engine and system programmers
-- Developers who want **control**, not black-box abstractions
-- Anyone tired of rewriting the same kernels for different platforms
+Modern GPU programming is heavily fragmented.
+
+CUDA, Metal, and OpenCL all expose different APIs, shader languages,
+toolchains, memory models, and execution semantics. Supporting multiple
+platforms often means duplicating kernels, maintaining separate backends,
+and introducing platform-specific bugs.
+
+Silicon reduces this complexity through a unified compute API and
+Slang-based cross-compilation, allowing the same application logic and
+kernel code to run across different GPU architectures with minimal
+backend-specific changes.
 
 ## Features
 
-| Feature                    | CUDA | Metal | OpenCL |
-|----------------------------|------|-------|--------|
-| Async kernel dispatch      | ✅    | ✅     | ✅      |
-| Explicit memory management | ✅    | ✅     | ✅      |
-| Command queues             | ✅    | ✅     | ✅      |
-| Slang JIT Cross Compile    | ✅    | ✅     | ✅      | 
-| Device information API     | ✅    | ✅     | ✅      |
-| FP16 support (half)        | ✅    | ✅     | ✅      |
-
+| Feature                              | CUDA | Metal | OpenCL |
+|--------------------------------------|------|--------|---------|
+| Unified compute API                  | ✅   | ✅     | ✅      |
+| Slang cross-compilation              | ✅   | ✅     | ❌      |
+| Runtime kernel compilation           | ✅   | ✅     | ✅      |
+| Explicit GPU memory management       | ✅   | ✅     | ✅      |
+| Async execution & synchronization    | ✅   | ✅     | ✅      |
+| FP16 (`half`) support                | ✅   | ✅     | ✅      |
+| Device capability querying           | ✅   | ✅     | ✅      |
 
 ## Contributing
 
