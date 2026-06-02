@@ -126,6 +126,8 @@ public final class MetalEncoder implements MetalObject, AutoCloseable {
             endEncoding();
         } catch (Throwable e) {
             throw new SiliconException(e);
+        } finally {
+            arena.close();
         }
     }
 
