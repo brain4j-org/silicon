@@ -9,6 +9,12 @@ dependencies {
     testImplementation project(':silicon-metal')
 }
 
+tasks.named("compileTestJava") {
+    dependsOn(":silicon-cuda:shadowJar")
+    dependsOn(":silicon-opencl:shadowJar")
+    dependsOn(":silicon-metal:shadowJar")
+}
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(22))

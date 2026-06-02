@@ -3,6 +3,7 @@ package org.silicon.opencl;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
 import org.lwjgl.system.MemoryStack;
+import org.silicon.api.NativeLibraryLoader;
 import org.silicon.api.SiliconException;
 import org.silicon.api.backend.BackendType;
 import org.silicon.api.backend.ComputeBackend;
@@ -12,8 +13,16 @@ import org.silicon.opencl.device.CLDevice;
 import java.nio.IntBuffer;
 
 public class OpenCL implements ComputeBackend {
+
+    private static final boolean NATIVES_SUPPORTED = NativeLibraryLoader.isLinux()
+        || NativeLibraryLoader.isWindows()
+        || NativeLibraryLoader.isMacOS();
     
     private int getPlatformCount() {
+        if (!NATIVES_SUPPORTED) {
+            return 0;
+        }
+
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer buffer = stack.mallocInt(1);
             

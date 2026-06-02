@@ -24,6 +24,8 @@ through a consistent low-level compute API.
 Silicon is avilable on the official Brain4J [repository](https://repo.brain4j.org/).
 
 ```gradle
+def siliconVersion = "1.0.2-SNAPSHOT"
+
 repositories {
     mavenCentral()
     maven { url 'https://repo.brain4j.org/snapshots' }
@@ -31,10 +33,12 @@ repositories {
 }
 
 dependencies {
-    implementation "org.silicon:silicon-api:1.0.0-SNAPSHOT" // base API, mandatory
-    // implementation "org.silicon:silicon-cuda:1.0.0-SNAPSHOT" // if you have/use CUDA
-    // implementation "org.silicon:silicon-metal:1.0.0-SNAPSHOT" // if you have/use Metal
-    // implementation "org.silicon:silicon-opencl:1.0.0-SNAPSHOT" // if want OpenCL
+    implementation "org.silicon:silicon-api:$siliconVersion" // base API, mandatory
+
+    // Optional backends
+    // implementation "org.silicon:silicon-cuda:$siliconVersion"
+    // implementation "org.silicon:silicon-metal:$siliconVersion"
+    // implementation "org.silicon:silicon-opencl:$siliconVersion"
 }
 ```
 
@@ -85,6 +89,31 @@ backend-specific changes.
 | Async execution & synchronization    | ✅   | ✅     | ✅      |
 | FP16 (`half`) support                | ✅   | ✅     | ✅      |
 | Device capability querying           | ✅   | ✅     | ✅      |
+
+## Platform support
+
+| Backend | Linux | Windows | macOS |
+|---------|-------|---------|-------|
+| CUDA    | x64 / arm64 | x64 | Not supported |
+| Metal   | Not supported | Not supported | x64 / arm64 |
+| OpenCL  | x64 / arm64 | x64 | x64 / arm64 |
+
+Native libraries are loaded from `natives/<os>-<arch>/` inside each backend jar,
+falling back to the legacy root resource layout when present. Expected
+classifiers are `linux-x64`, `linux-arm64`, `windows-x64`, `macos-x64`, and
+`macos-arm64`.
+
+CUDA and Metal native builds write into `native/out/<classifier>/`. To validate
+that a backend native for the current machine is present, run:
+
+```bash
+./gradlew :silicon-cuda:validateNativeResources
+./gradlew :silicon-metal:validateNativeResources
+```
+
+Slang compilation uses `slangc` from `PATH` by default. Override it with the
+`SLANGC` environment variable or `-Dsilicon.slangc=/path/to/slangc`. The shader
+cache can be overridden with `-Dsilicon.slang.cache=/path/to/cache`.
 
 ## Contributing
 

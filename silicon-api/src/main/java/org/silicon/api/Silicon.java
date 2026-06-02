@@ -31,6 +31,9 @@ public class Silicon {
 
         for (ComputeBackend backend : loader) {
             if (!backend.type().equals(backendType)) continue;
+            if (!backend.isAvailable()) {
+                throw new IllegalStateException("Backend '" + backendType.formalName() + "' is not available on this system");
+            }
 
             Silicon.backend = backend;
             return;

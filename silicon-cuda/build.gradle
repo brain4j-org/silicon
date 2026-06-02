@@ -2,6 +2,33 @@ dependencies {
     implementation project(':silicon-api')
 }
 
+def nativePlatform = {
+    def os = System.getProperty("os.name").toLowerCase(Locale.ROOT)
+    def arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT)
+
+    if (arch == "amd64" || arch == "x86_64") {
+        arch = "x64"
+    } else if (arch == "aarch64" || arch == "arm64") {
+        arch = "arm64"
+    } else {
+        return null
+    }
+
+    if (os.contains("win")) {
+        return [classifier: "windows-${arch}", library: "libcuda4j.dll"]
+    }
+    if (os.contains("linux")) {
+        return [classifier: "linux-${arch}", library: "libcuda4j.so"]
+    }
+
+    return null
+}()
+
+def nativeBuildSupported = {
+    def os = System.getProperty("os.name").toLowerCase(Locale.ROOT)
+    return nativePlatform != null && (os.contains("win") || os.contains("linux"))
+}()
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(22))
@@ -13,4 +40,74 @@ java {
 
 tasks.named("compileJava") {
     dependsOn(":silicon-api:shadowJar")
+}
+
+tasks.register("buildNatives", Exec) {
+    group = "build"
+    description = "Builds the CUDA native library for the current platform."
+
+    onlyIf {
+        nativeBuildSupported
+    }
+
+    workingDir = layout.projectDirectory.dir("native").asFile
+
+    if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win")) {
+        commandLine "cmd", "/c", "build.bat"
+    } else {
+        commandLine "bash", "build.sh"
+    }
+
+    inputs.files(fileTree("native/src") {
+        include "**/*.swift"
+    })
+    inputs.files(fileTree("native/Modules"))
+    inputs.file("native/build.sh")
+    inputs.file("native/build.bat")
+    outputs.dir("native/out")
+}
+
+tasks.named("processResources") {
+    dependsOn("buildNatives")
+
+    from("native/out") {
+        include "windows-*/*.dll"
+        include "linux-*/*.so"
+        into "natives"
+    }
+
+    if (nativePlatform != null) {
+        from("native/out") {
+            include nativePlatform.library
+            into "natives/${nativePlatform.classifier}"
+        }
+
+//        from("native/out/${nativePlatform.classifier}") {
+//            include nativePlatform.library
+//            into "natives/${nativePlatform.classifier}"
+//        }
+    }
+}
+
+tasks.register("validateNativeResources") {
+    group = "verification"
+    description = "Fails if the current platform native library is not present under native/out."
+
+    dependsOn("buildNatives")
+
+    onlyIf {
+        nativePlatform != null
+    }
+
+    doLast {
+        def flatNative = layout.projectDirectory.file("native/out/${nativePlatform.library}").asFile
+        def classifiedNative = layout.projectDirectory.file("native/out/${nativePlatform.classifier}/${nativePlatform.library}").asFile
+        if (!flatNative.exists() && !classifiedNative.exists()) {
+            throw new GradleException("Missing CUDA native library for ${nativePlatform.classifier}. Expected ${flatNative} or ${classifiedNative}.")
+        }
+    }
+}
+
+tasks.named("build") {
+    dependsOn("buildNatives")
 }

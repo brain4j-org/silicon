@@ -38,8 +38,12 @@ subprojects {
                 url = version.endsWith("SNAPSHOT") ? snapshotsRepo : releasesRepo
 
                 credentials {
-                    username = findProperty("BRAIN4J_USERNAME")
-                    password = findProperty("BRAIN4J_TOKEN")
+                    username = providers.gradleProperty("BRAIN4J_USERNAME")
+                            .orElse(providers.environmentVariable("BRAIN4J_USERNAME"))
+                            .getOrNull()
+                    password = providers.gradleProperty("BRAIN4J_TOKEN")
+                            .orElse(providers.environmentVariable("BRAIN4J_TOKEN"))
+                            .getOrNull()
                 }
 
                 authentication {
@@ -60,11 +64,11 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion.set(JavaLanguageVersion.of(22))
         }
 
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_22
+        targetCompatibility = JavaVersion.VERSION_22
     }
 }
 

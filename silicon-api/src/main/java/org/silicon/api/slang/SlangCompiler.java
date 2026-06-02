@@ -1,6 +1,7 @@
 package org.silicon.api.slang;
 
 import org.silicon.api.SiliconException;
+import org.silicon.api.NativeLibraryLoader;
 import org.silicon.api.backend.BackendType;
 import org.silicon.api.device.ComputeContext;
 import org.silicon.api.function.ComputeModule;
@@ -22,6 +23,9 @@ import java.security.MessageDigest;
  * for classpath resources.
  */
 public class SlangCompiler {
+
+    private static final String SLANGC_PROPERTY = "silicon.slangc";
+    private static final String SLANGC_ENV = "SLANGC";
 
     private final ComputeContext context;
     private final boolean noCache;
@@ -56,7 +60,7 @@ public class SlangCompiler {
     public static boolean isInstalled() {
         try {
             Process process = new ProcessBuilder(
-                "slangc",
+                slangcCommand(),
                 "-version"
             )
                 .redirectErrorStream(true)
@@ -93,7 +97,7 @@ public class SlangCompiler {
 
         try {
             ProcessBuilder builder = new ProcessBuilder(
-                "slangc", fileName,
+                slangcCommand(), fileName,
                 "-target", target,
                 "-o", out
             );
@@ -179,12 +183,42 @@ public class SlangCompiler {
 
     
     private static Path cacheRoot() {
-        return Paths.get(
-            System.getProperty("user.home"),
-            ".cache",
-            "silicon",
-            "slang"
-        );
+        String override = System.getProperty("silicon.slang.cache");
+        if (override != null && !override.isBlank()) {
+            return Paths.get(override);
+        }
+
+        if (NativeLibraryLoader.isWindows()) {
+            String localAppData = System.getenv("LOCALAPPDATA");
+            if (localAppData != null && !localAppData.isBlank()) {
+                return Paths.get(localAppData, "Silicon", "slang");
+            }
+        }
+
+        if (NativeLibraryLoader.isMacOS()) {
+            return Paths.get(System.getProperty("user.home"), "Library", "Caches", "silicon", "slang");
+        }
+
+        String xdgCacheHome = System.getenv("XDG_CACHE_HOME");
+        if (xdgCacheHome != null && !xdgCacheHome.isBlank()) {
+            return Paths.get(xdgCacheHome, "silicon", "slang");
+        }
+
+        return Paths.get(System.getProperty("user.home"), ".cache", "silicon", "slang");
+    }
+
+    private static String slangcCommand() {
+        String property = System.getProperty(SLANGC_PROPERTY);
+        if (property != null && !property.isBlank()) {
+            return property;
+        }
+
+        String env = System.getenv(SLANGC_ENV);
+        if (env != null && !env.isBlank()) {
+            return env;
+        }
+
+        return "slangc";
     }
     
     private static byte[] concat(byte[] a, byte[] b) {

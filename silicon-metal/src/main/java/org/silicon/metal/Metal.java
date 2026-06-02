@@ -1,6 +1,7 @@
 package org.silicon.metal;
 
 import org.silicon.api.SiliconException;
+import org.silicon.api.NativeLibraryLoader;
 import org.silicon.api.backend.BackendType;
 import org.silicon.api.backend.ComputeBackend;
 import org.silicon.metal.device.MetalDevice;
@@ -11,16 +12,19 @@ import java.lang.invoke.MethodHandle;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Metal implements ComputeBackend {
     
     public static final Linker LINKER = Linker.nativeLinker();
 
     public static final SymbolLookup LOOKUP;
+    private static final List<String> LOAD_FAILURES = new ArrayList<>();
     public static final MethodHandle METAL_CREATE_SYSTEM_DEVICE;
 
     static {
-        LOOKUP = loadFromResources("/libmetal4j.dylib");
+        LOOKUP = loadFromResources("metal4j");
 
         if (LOOKUP != null) {
             METAL_CREATE_SYSTEM_DEVICE = MetalObject.find(
@@ -52,6 +56,10 @@ public class Metal implements ComputeBackend {
     @Override
     public MetalDevice createDevice(int index) {
         try {
+            if (METAL_CREATE_SYSTEM_DEVICE == null || !isAvailable()) {
+                throw new IllegalStateException("This backend is not available on this platform: " + LOAD_FAILURES);
+            }
+
             if (index != 0) {
                 throw new IllegalArgumentException("Index should be equal to 0 when using Metal");
             }
@@ -73,21 +81,51 @@ public class Metal implements ComputeBackend {
         return createDevice(0);
     }
 
-    public static SymbolLookup loadFromResources(String resourceName) {
-        try (InputStream in = MetalObject.class.getResourceAsStream(resourceName)) {
+    public static SymbolLookup loadFromResources(String baseName) {
+        List<String> nativeNames = NativeLibraryLoader.nativeLibraryNames(baseName);
+        if (nativeNames.isEmpty()) {
+            LOAD_FAILURES.add("Unsupported platform: " + NativeLibraryLoader.platformDescription());
+            return null;
+        }
+
+        List<String> resources = new ArrayList<>();
+        for (String nativeName : nativeNames) {
+            NativeLibraryLoader.platformClassifier()
+                .ifPresent(platform -> resources.add("/natives/" + platform + "/" + nativeName));
+            resources.add("/" + nativeName);
+        }
+
+        for (String resource : resources) {
+            SymbolLookup lookup = loadResource(resource);
+            if (lookup != null) {
+                return lookup;
+            }
+        }
+
+        return null;
+    }
+
+    private static SymbolLookup loadResource(String resourceName) {
+        try (InputStream in = Metal.class.getResourceAsStream(resourceName)) {
             if (in == null) {
-                throw new IllegalArgumentException("Resource not found: " + resourceName);
+                LOAD_FAILURES.add("Resource not found: " + resourceName);
+                return null;
             }
 
             String suffix = resourceName.substring(resourceName.lastIndexOf('.'));
-            Path tempFile = Files.createTempFile("nativeLib", suffix);
+            Path tempFile = Files.createTempFile("silicon-metal-", suffix);
 
             Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
             tempFile.toFile().deleteOnExit();
 
             return SymbolLookup.libraryLookup(tempFile.toString(), Arena.global());
-        } catch (Exception _) {
+        } catch (Exception e) {
+            LOAD_FAILURES.add("Failed to load " + resourceName + ": " + e.getMessage());
             return null;
         }
+    }
+
+    public static List<String> loadFailures() {
+        return List.copyOf(LOAD_FAILURES);
     }
 }

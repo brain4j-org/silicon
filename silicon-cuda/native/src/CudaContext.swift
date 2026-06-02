@@ -3,8 +3,11 @@ import CUDADriver
 
 final class CudaContextWrapper {
     let ctx: CUcontext
-    init(ctx: CUcontext) {
+    let dev: CUdevice
+
+    init(ctx: CUcontext, dev: CUdevice) {
         self.ctx = ctx
+        self.dev = dev
     }
 }
 
@@ -20,18 +23,20 @@ public func cuda_create_context(devPtr: UnsafeMutableRawPointer) -> UnsafeMutabl
     let deviceWrap: CudaDeviceWrapper = pointerToObject(devPtr)
 
     var ctx: CUcontext?
-    guard cuCtxCreate_v2(&ctx, 0, deviceWrap.device) == CUDA_SUCCESS, let realCtx = ctx else {
+    guard cuDevicePrimaryCtxRetain(&ctx, deviceWrap.device) == CUDA_SUCCESS,
+          let realCtx = ctx else {
         return nil
     }
 
-    let wrapper = CudaContextWrapper(ctx: realCtx)
+    _ = cuCtxSetCurrent(realCtx)
+    let wrapper = CudaContextWrapper(ctx: realCtx, dev: deviceWrap.device)
     return objectToPointer(wrapper)
 }
 
 @_cdecl("cuda_destroy_context")
 public func cuda_destroy_context(ptr: UnsafeMutableRawPointer) {
     let wrapper = Unmanaged<CudaContextWrapper>.fromOpaque(ptr).takeRetainedValue()
-    _ = cuCtxDestroy_v2(wrapper.ctx)
+    _ = cuDevicePrimaryCtxRelease_v2(wrapper.dev)
 }
 
 @_cdecl("cuda_sync_context")

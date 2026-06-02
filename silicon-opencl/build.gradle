@@ -11,9 +11,11 @@ dependencies {
     implementation "org.lwjgl:lwjgl"
     implementation "org.lwjgl:lwjgl-opencl"
 
-    implementation "org.lwjgl:lwjgl::natives-windows"
-    implementation "org.lwjgl:lwjgl::natives-linux"
-    implementation "org.lwjgl:lwjgl::natives-macos-arm64"
+    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
+    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
+    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:natives-linux-arm64"
+    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
+    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:natives-macos-arm64"
 }
 
 tasks.named("compileJava") {
