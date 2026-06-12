@@ -38,6 +38,20 @@ public interface ComputeBackend {
     }
 
     /**
+     * @return human-readable reason why this backend is unavailable, or null if none is known
+     */
+    default String unavailableReason() {
+        return null;
+    }
+
+    /**
+     * @return original failure that made this backend unavailable, or null if none is known
+     */
+    default Throwable unavailableCause() {
+        return null;
+    }
+
+    /**
      * Creates the first device (index 0).
      * @return compute device
      */

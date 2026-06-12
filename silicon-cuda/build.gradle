@@ -1,6 +1,16 @@
+import groovy.json.JsonSlurper
+import java.util.regex.Pattern
+
 dependencies {
     implementation project(':silicon-api')
 }
+
+def cudaSwiftRuntimeManifest = "cuda4j-runtime-libraries.txt"
+def requiredWindowsSwiftRuntimeDlls = [
+    "swiftCore.dll",
+    "swiftWinSDK.dll",
+    "swiftCRT.dll"
+]
 
 def nativePlatform = {
     def os = System.getProperty("os.name").toLowerCase(Locale.ROOT)
@@ -29,6 +39,63 @@ def nativeBuildSupported = {
     return nativePlatform != null && (os.contains("win") || os.contains("linux"))
 }()
 
+def swiftcExecutable = {
+    def executable = providers.gradleProperty("swiftc.path")
+        .orElse(providers.environmentVariable("SWIFTC"))
+        .orElse("swiftc")
+        .get()
+        .trim()
+
+    if (executable.length() >= 2) {
+        char first = executable.charAt(0)
+        char last = executable.charAt(executable.length() - 1)
+        if ((first == '"' as char && last == '"' as char) || (first == "'" as char && last == "'" as char)) {
+            return executable.substring(1, executable.length() - 1)
+        }
+    }
+
+    return executable
+}
+
+def swiftRuntimeDirectories = {
+    def configured = providers.gradleProperty("swift.runtime.dirs")
+        .orElse(providers.environmentVariable("SWIFT_RUNTIME_DIRS"))
+        .getOrNull()
+
+    if (configured != null && !configured.isBlank()) {
+        return configured.split(Pattern.quote(File.pathSeparator))
+            .collect { file(it) }
+            .findAll { it.exists() && it.isDirectory() }
+            .unique { it.absolutePath }
+    }
+
+    def stdout = new ByteArrayOutputStream()
+    try {
+        exec {
+            commandLine swiftcExecutable(), "-print-target-info"
+            standardOutput = stdout
+        }
+    } catch (Exception e) {
+        throw new GradleException(
+            "Unable to query Swift runtime paths. Install Swift for Windows or set -Pswiftc.path/SWIFTC and optionally -Pswift.runtime.dirs/SWIFT_RUNTIME_DIRS.",
+            e
+        )
+    }
+
+    def targetInfo = new JsonSlurper().parseText(stdout.toString("UTF-8"))
+    def runtimeDirs = []
+    targetInfo.paths?.runtimeLibraryPaths?.each { runtimeDirs.add(file(it.toString())) }
+    if (targetInfo.paths?.runtimeResourcePath != null) {
+        runtimeDirs.add(file(targetInfo.paths.runtimeResourcePath.toString()))
+    }
+
+    return runtimeDirs
+        .findAll { it.exists() && it.isDirectory() }
+        .unique { it.absolutePath }
+}
+
+def swiftRuntimeOutputDir = layout.buildDirectory.dir("generated/swift-runtime/${nativePlatform?.classifier ?: "unsupported"}")
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(22))
@@ -51,6 +118,7 @@ tasks.register("buildNatives", Exec) {
     }
 
     workingDir = layout.projectDirectory.dir("native").asFile
+    environment "SWIFTC", swiftcExecutable()
 
     if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win")) {
         commandLine "cmd", "/c", "build.bat"
@@ -65,6 +133,70 @@ tasks.register("buildNatives", Exec) {
     inputs.file("native/build.sh")
     inputs.file("native/build.bat")
     outputs.dir("native/out")
+
+    doFirst {
+        try {
+            exec {
+                commandLine swiftcExecutable(), "--version"
+                standardOutput = new ByteArrayOutputStream()
+                errorOutput = new ByteArrayOutputStream()
+            }
+        } catch (Exception e) {
+            throw new GradleException(
+                "Swift compiler is required to build silicon-cuda natives. Install Swift or set -Pswiftc.path/SWIFTC.",
+                e
+            )
+        }
+    }
+}
+
+tasks.register("collectSwiftRuntimeLibraries") {
+    group = "build"
+    description = "Collects Swift runtime DLLs required by the Windows CUDA native library."
+
+    onlyIf {
+        nativePlatform != null && nativePlatform.classifier.startsWith("windows-")
+    }
+
+    outputs.dir(swiftRuntimeOutputDir)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        def outputDir = swiftRuntimeOutputDir.get().asFile
+        delete(outputDir)
+        outputDir.mkdirs()
+
+        def runtimeDirs = swiftRuntimeDirectories()
+        if (runtimeDirs.isEmpty()) {
+            throw new GradleException("No Swift runtime directories were found for CUDA native packaging.")
+        }
+
+        def runtimeDlls = new LinkedHashMap<String, File>()
+        runtimeDirs.each { dir ->
+            fileTree(dir) {
+                include "swift*.dll"
+            }.files
+                .sort { it.name.toLowerCase(Locale.ROOT) }
+                .each { runtimeDlls.putIfAbsent(it.name, it) }
+        }
+
+        def missing = requiredWindowsSwiftRuntimeDlls.findAll { !runtimeDlls.containsKey(it) }
+        if (!missing.isEmpty()) {
+            throw new GradleException(
+                "Missing required Swift runtime DLLs for silicon-cuda: ${missing}. Searched: ${runtimeDirs*.absolutePath}"
+            )
+        }
+
+        copy {
+            from runtimeDlls.values()
+            into outputDir
+        }
+
+        def manifest = new File(outputDir, cudaSwiftRuntimeManifest)
+        manifest.text = runtimeDlls.keySet()
+            .sort { a, b -> a.compareToIgnoreCase(b) }
+            .join(System.lineSeparator()) + System.lineSeparator()
+    }
 }
 
 tasks.named("processResources") {
@@ -86,6 +218,16 @@ tasks.named("processResources") {
 //            include nativePlatform.library
 //            into "natives/${nativePlatform.classifier}"
 //        }
+    }
+
+    if (nativePlatform != null && nativePlatform.classifier.startsWith("windows-")) {
+        dependsOn("collectSwiftRuntimeLibraries")
+
+        from(swiftRuntimeOutputDir) {
+            include "*.dll"
+            include cudaSwiftRuntimeManifest
+            into "natives/${nativePlatform.classifier}"
+        }
     }
 }
 

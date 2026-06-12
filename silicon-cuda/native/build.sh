@@ -3,6 +3,7 @@ set -euo pipefail
 
 CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
 OUT_DIR="${OUT_DIR:-out}"
+SWIFTC="${SWIFTC:-swiftc}"
 ARCH="$(uname -m)"
 
 case "$ARCH" in
@@ -20,7 +21,7 @@ esac
 
 mkdir -p "$OUT_DIR/$CLASSIFIER"
 
-swiftc -emit-library \
+"$SWIFTC" -emit-library \
   src/CudaDevice.swift src/CudaUtils.swift src/CudaContext.swift src/CudaBuffer.swift src/CudaStream.swift src/CudaModule.swift src/CudaFunction.swift \
   -I Modules \
   -I "$CUDA_HOME/include" \
