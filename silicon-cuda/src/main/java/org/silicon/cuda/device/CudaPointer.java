@@ -11,7 +11,7 @@ public record CudaPointer(MemorySegment segment) {
     public static final Arena GLOBAL = Arena.ofShared();
     
     public static CudaPointer from(CudaPointer... pointers) {
-        MemorySegment seg = GLOBAL.allocate(ADDRESS, pointers.length);
+        MemorySegment seg = GLOBAL.allocate(ADDRESS.byteSize() * pointers.length);
         
         for (int i = 0; i < pointers.length; i++) {
             MemorySegment pointerSeg = pointers[i].segment;
@@ -65,7 +65,8 @@ public record CudaPointer(MemorySegment segment) {
     
     public static CudaPointer fromString(String value) {
         byte[] bytes = (value + "\0").getBytes(StandardCharsets.UTF_8);
-        MemorySegment seg = GLOBAL.allocateFrom(JAVA_BYTE, bytes);
+        MemorySegment seg = GLOBAL.allocate(bytes.length);
+        seg.copyFrom(MemorySegment.ofArray(bytes));
         return new CudaPointer(seg);
     }
 }

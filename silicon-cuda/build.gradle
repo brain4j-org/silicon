@@ -96,15 +96,6 @@ def swiftRuntimeDirectories = {
 
 def swiftRuntimeOutputDir = layout.buildDirectory.dir("generated/swift-runtime/${nativePlatform?.classifier ?: "unsupported"}")
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(22))
-    }
-
-    sourceCompatibility = JavaVersion.VERSION_22
-    targetCompatibility = JavaVersion.VERSION_22
-}
-
 tasks.named("compileJava") {
     dependsOn(":silicon-api:shadowJar")
 }
@@ -146,6 +137,136 @@ tasks.register("buildNatives", Exec) {
                 "Swift compiler is required to build silicon-cuda natives. Install Swift or set -Pswiftc.path/SWIFTC.",
                 e
             )
+        }
+    }
+}
+
+def nativeTargets = [
+    [classifier: "linux-x64",    library: "libcuda4j.so",  os: "linux",   arch: "x64"],
+    [classifier: "linux-arm64",  library: "libcuda4j.so",  os: "linux",   arch: "arm64"],
+    [classifier: "windows-x64",  library: "libcuda4j.dll", os: "windows", arch: "x64"],
+    [classifier: "windows-arm64",library: "libcuda4j.dll", os: "windows", arch: "arm64"]
+]
+
+nativeTargets.each { target ->
+    def safeName = target.classifier.split('-').collect { it.capitalize() }.join('')
+    def buildTaskName = "buildNative${safeName}"
+    def jarTaskName = "jar${safeName}"
+
+    tasks.register(buildTaskName, Exec) {
+        group = "build"
+        description = "Builds CUDA native library for ${target.classifier}."
+
+        onlyIf {
+            def os = System.getProperty("os.name").toLowerCase(Locale.ROOT)
+            def arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT)
+            def archOk = (target.arch == "x64" && (arch == "amd64" || arch == "x86_64")) ||
+                         (target.arch == "arm64" && (arch == "aarch64" || arch == "arm64"))
+            def osOk = (target.os == "linux" && os.contains("linux")) ||
+                       (target.os == "windows" && os.contains("win"))
+            osOk && archOk
+        }
+
+        workingDir = layout.projectDirectory.dir("native").asFile
+        environment "SWIFTC", swiftcExecutable()
+        environment "TARGET_CLASSIFIER", target.classifier
+
+        if (target.os == "windows") {
+            commandLine "cmd", "/c", "build.bat"
+        } else {
+            commandLine "bash", "build.sh"
+        }
+
+        inputs.files(fileTree("native/src") { include "**/*.swift" })
+        inputs.files(fileTree("native/Modules"))
+        inputs.file("native/build.sh")
+        inputs.file("native/build.bat")
+        outputs.dir("native/out/${target.classifier}")
+
+        doFirst {
+            try {
+                exec {
+                    commandLine swiftcExecutable(), "--version"
+                    standardOutput = new ByteArrayOutputStream()
+                    errorOutput = new ByteArrayOutputStream()
+                }
+            } catch (Exception e) {
+                throw new GradleException(
+                    "Swift compiler is required to build silicon-cuda natives. Install Swift or set -Pswiftc.path/SWIFTC.",
+                    e
+                )
+            }
+        }
+    }
+
+    tasks.register(jarTaskName, Jar) {
+        group = "build"
+        description = "Packages CUDA native library for ${target.classifier} into a classifier JAR."
+
+        archiveClassifier.set(target.classifier)
+
+        dependsOn(buildTaskName)
+
+        from("native/out/${target.classifier}") {
+            include target.library
+            into "natives/${target.classifier}"
+        }
+
+        if (target.os == "windows") {
+            dependsOn(tasks.named("collectSwiftRuntimeLibraries${safeName}"))
+            from(layout.buildDirectory.dir("generated/swift-runtime/${target.classifier}")) {
+                include "*.dll"
+                include cudaSwiftRuntimeManifest
+                into "natives/${target.classifier}"
+            }
+        }
+    }
+
+    if (target.os == "windows") {
+        def swiftRuntimeTaskName = "collectSwiftRuntimeLibraries${safeName}"
+        tasks.register(swiftRuntimeTaskName) {
+            group = "build"
+            description = "Collects Swift runtime DLLs for ${target.classifier}."
+
+            outputs.dir(layout.buildDirectory.dir("generated/swift-runtime/${target.classifier}"))
+            outputs.upToDateWhen { false }
+
+            doLast {
+                def outputDir = layout.buildDirectory.dir("generated/swift-runtime/${target.classifier}").get().asFile
+                delete(outputDir)
+                outputDir.mkdirs()
+
+                def runtimeDirs = swiftRuntimeDirectories()
+                if (runtimeDirs.isEmpty()) {
+                    throw new GradleException("No Swift runtime directories were found for CUDA native packaging.")
+                }
+
+                def runtimeDlls = new LinkedHashMap<String, File>()
+                runtimeDirs.each { dir ->
+                    fileTree(dir) {
+                        include "swift*.dll"
+                    }.files
+                        .sort { it.name.toLowerCase(Locale.ROOT) }
+                        .each { runtimeDlls.putIfAbsent(it.name, it) }
+                }
+
+                def missing = requiredWindowsSwiftRuntimeDlls.findAll { !runtimeDlls.containsKey(it) }
+                if (!missing.isEmpty()) {
+                    throw new GradleException(
+                        "Missing required Swift runtime DLLs for silicon-cuda: ${missing}. Searched: ${runtimeDirs*.absolutePath}"
+                    )
+                }
+
+                copy {
+                    from runtimeDlls.values()
+                    into outputDir
+                }
+
+                def manifest = new File(outputDir, cudaSwiftRuntimeManifest)
+                manifest.text = runtimeDlls.keySet()
+                    .sort { a, b -> a.compareToIgnoreCase(b) }
+                    .join(System.lineSeparator()) + System.lineSeparator()
+            }
         }
     }
 }
@@ -213,11 +334,6 @@ tasks.named("processResources") {
             include nativePlatform.library
             into "natives/${nativePlatform.classifier}"
         }
-
-//        from("native/out/${nativePlatform.classifier}") {
-//            include nativePlatform.library
-//            into "natives/${nativePlatform.classifier}"
-//        }
     }
 
     if (nativePlatform != null && nativePlatform.classifier.startsWith("windows-")) {
@@ -252,4 +368,16 @@ tasks.register("validateNativeResources") {
 
 tasks.named("build") {
     dependsOn("buildNatives")
+}
+
+afterEvaluate {
+    publishing.publications.gpr(MavenPublication) {
+        nativeTargets.each { target ->
+            def safeName = target.classifier.split('-').collect { it.capitalize() }.join('')
+            def jarTask = tasks.named("jar${safeName}")
+            artifact(jarTask) {
+                classifier = target.classifier
+            }
+        }
+    }
 }

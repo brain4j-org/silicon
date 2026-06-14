@@ -134,7 +134,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_BYTE, data.length);
+            MemorySegment host = arena.allocate(data.length);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
             if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
@@ -152,7 +152,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_DOUBLE, data.length);
+            MemorySegment host = arena.allocate(size);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
             if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
@@ -170,7 +170,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_FLOAT, data.length);
+            MemorySegment host = arena.allocate(size);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
             if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
@@ -188,7 +188,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_LONG, data.length);
+            MemorySegment host = arena.allocate(size);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
             if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
@@ -206,7 +206,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_INT, data.length);
+            MemorySegment host = arena.allocate(size);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
             if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
@@ -224,7 +224,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocate(ValueLayout.JAVA_SHORT, data.length);
+            MemorySegment host = arena.allocate(size);
 
             int res = (int) CUDA_MEMCPY_DTOH.invoke(host, handle, size);
             if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
@@ -277,7 +277,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_BYTE, data);
+            MemorySegment host = arena.allocate(size);
+            host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
             if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
@@ -292,7 +293,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_DOUBLE, data);
+            MemorySegment host = arena.allocate(size);
+            host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
             if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
@@ -307,7 +309,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_FLOAT, data);
+            MemorySegment host = arena.allocate(size);
+            host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
             if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
@@ -322,7 +325,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_LONG, data);
+            MemorySegment host = arena.allocate(size);
+            host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
             if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
@@ -337,7 +341,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_INT, data);
+            MemorySegment host = arena.allocate(size);
+            host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
             if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
@@ -352,7 +357,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         long size = bytesOf(data);
         ensureCapacity(size);
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment host = arena.allocateFrom(ValueLayout.JAVA_SHORT, data);
+            MemorySegment host = arena.allocate(size);
+            host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CUDA_MEMCPY_HTOD.invoke(handle, host, size);
             if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);

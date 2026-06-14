@@ -10,6 +10,7 @@ import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import java.nio.charset.StandardCharsets;
 
 public record CudaModule(MemorySegment handle, CudaContext context) implements CudaObject, ComputeModule {
 
@@ -21,7 +22,9 @@ public record CudaModule(MemorySegment handle, CudaContext context) implements C
     @Override
     public CudaFunction getFunction(String name) {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment cName = arena.allocateFrom(name);
+            byte[] nameBytes = (name + "\0").getBytes(StandardCharsets.UTF_8);
+            MemorySegment cName = arena.allocate(nameBytes.length);
+            cName.copyFrom(MemorySegment.ofArray(nameBytes));
             MemorySegment funcHandle = (MemorySegment) CUDA_MODULE_GET_FUNCTION.invoke(handle, cName);
 
             if (funcHandle == null || funcHandle.address() == 0) {

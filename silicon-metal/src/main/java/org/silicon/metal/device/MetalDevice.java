@@ -9,6 +9,7 @@ import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import java.nio.charset.StandardCharsets;
 
 public record MetalDevice(MemorySegment handle) implements MetalObject, ComputeDevice {
 
@@ -41,8 +42,16 @@ public record MetalDevice(MemorySegment handle) implements MetalObject, ComputeD
     public String name() {
         try {
             MemorySegment nameHandle = (MemorySegment) METAL_DEVICE_NAME.invokeExact(handle);
-            String name = nameHandle.reinterpret(Long.MAX_VALUE).getString(0);
-
+            long maxLen = 256;
+            byte[] nameBytes = new byte[(int) maxLen];
+            int i = 0;
+            while (i < maxLen) {
+                byte b = nameHandle.get(ValueLayout.JAVA_BYTE, i);
+                if (b == 0) break;
+                nameBytes[i] = b;
+                i++;
+            }
+            String name = new String(nameBytes, 0, i, StandardCharsets.UTF_8);
             METAL_FREE_NATIVE.invokeExact(nameHandle);
 
             return name;

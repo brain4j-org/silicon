@@ -4,20 +4,24 @@ set -euo pipefail
 CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
 OUT_DIR="${OUT_DIR:-out}"
 SWIFTC="${SWIFTC:-swiftc}"
-ARCH="$(uname -m)"
 
-case "$ARCH" in
-  x86_64|amd64)
-    CLASSIFIER="linux-x64"
-    ;;
-  aarch64|arm64)
-    CLASSIFIER="linux-arm64"
-    ;;
-  *)
-    echo "Unsupported CUDA native architecture: $ARCH" >&2
-    exit 1
-    ;;
-esac
+if [ -n "${TARGET_CLASSIFIER:-}" ]; then
+    CLASSIFIER="$TARGET_CLASSIFIER"
+else
+    ARCH="$(uname -m)"
+    case "$ARCH" in
+      x86_64|amd64)
+        CLASSIFIER="linux-x64"
+        ;;
+      aarch64|arm64)
+        CLASSIFIER="linux-arm64"
+        ;;
+      *)
+        echo "Unsupported CUDA native architecture: $ARCH" >&2
+        exit 1
+        ;;
+    esac
+fi
 
 mkdir -p "$OUT_DIR/$CLASSIFIER"
 

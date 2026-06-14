@@ -9,6 +9,7 @@ import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import java.nio.charset.StandardCharsets;
 
 public record MetalLibrary(MemorySegment handle) implements MetalObject, ComputeModule {
 
@@ -22,7 +23,9 @@ public record MetalLibrary(MemorySegment handle) implements MetalObject, Compute
     @Override
     public MetalFunction getFunction(String name) {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment fnName = arena.allocateFrom(name);
+            byte[] nameBytes = (name + "\0").getBytes(StandardCharsets.UTF_8);
+            MemorySegment fnName = arena.allocate(nameBytes.length);
+            fnName.copyFrom(MemorySegment.ofArray(nameBytes));
             MemorySegment fnPtr = (MemorySegment) METAL_CREATE_FUNCTION.invokeExact(handle, fnName);
 
             if (fnPtr == null || fnPtr.address() == 0) {

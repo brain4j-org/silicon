@@ -14,6 +14,7 @@ import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -79,7 +80,9 @@ public record MetalContext(MetalDevice device) implements MetalObject, ComputeCo
     @Override
     public MetalLibrary loadModule(String source) {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment src = arena.allocateFrom(source);
+            byte[] srcBytes = (source + "\0").getBytes(StandardCharsets.UTF_8);
+            MemorySegment src = arena.allocate(srcBytes.length);
+            src.copyFrom(MemorySegment.ofArray(srcBytes));
             MemorySegment libPtr = (MemorySegment) METAL_CREATE_LIBRARY.invokeExact(device.handle(), src);
 
             if (libPtr == null) {

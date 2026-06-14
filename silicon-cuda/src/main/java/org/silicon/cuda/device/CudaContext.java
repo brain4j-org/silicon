@@ -13,6 +13,7 @@ import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -104,7 +105,9 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
         }
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment cPath = arena.allocateFrom(path.toString());
+            byte[] pathBytes = (path.toString() + "\0").getBytes(StandardCharsets.UTF_8);
+            MemorySegment cPath = arena.allocate(pathBytes.length);
+            cPath.copyFrom(MemorySegment.ofArray(pathBytes));
             MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD.invoke(cPath);
 
             if (moduleHandle == null || moduleHandle.address() == 0) {
@@ -120,7 +123,8 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     @Override
     public CudaModule loadModule(byte[] rawSrc) {
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment data = arena.allocateFrom(ValueLayout.JAVA_BYTE, rawSrc);
+            MemorySegment data = arena.allocate(rawSrc.length);
+            data.copyFrom(MemorySegment.ofArray(rawSrc));
             MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD_DATA.invoke(data);
 
             if (moduleHandle == null || moduleHandle.address() == 0) {
