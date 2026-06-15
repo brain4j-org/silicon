@@ -35,8 +35,9 @@ public interface ComputeBuffer extends Freeable {
     /**
      * Reads the buffer contents into a byte array.
      * @param data destination array
+     * @return the data array
      */
-    void get(byte[] data);
+    byte[] get(byte[] data);
     
     /**
      * Writes a byte array into this buffer.
@@ -47,8 +48,9 @@ public interface ComputeBuffer extends Freeable {
     /**
      * Reads the buffer contents into a double array.
      * @param data destination array
+     * @return the data array
      */
-    void get(double[] data);
+    double[] get(double[] data);
     
     /**
      * Writes a double array into this buffer.
@@ -59,8 +61,9 @@ public interface ComputeBuffer extends Freeable {
     /**
      * Reads the buffer contents into a float array.
      * @param data destination array
+     * @return the data array
      */
-    void get(float[] data);
+    float[] get(float[] data);
     
     /**
      * Writes a float array into this buffer.
@@ -71,8 +74,9 @@ public interface ComputeBuffer extends Freeable {
     /**
      * Reads the buffer contents into a long array.
      * @param data destination array
+     * @return the data array
      */
-    void get(long[] data);
+    long[] get(long[] data);
     
     /**
      * Writes a long array into this buffer.
@@ -83,8 +87,9 @@ public interface ComputeBuffer extends Freeable {
     /**
      * Reads the buffer contents into an int array.
      * @param data destination array
+     * @return the data array
      */
-    void get(int[] data);
+    int[] get(int[] data);
     
     /**
      * Writes an int array into this buffer.
@@ -95,8 +100,9 @@ public interface ComputeBuffer extends Freeable {
     /**
      * Reads the buffer contents into a short array.
      * @param data destination array
+     * @return the data array
      */
-    void get(short[] data);
+    short[] get(short[] data);
     
     /**
      * Writes a short array into this buffer.
@@ -109,10 +115,11 @@ public interface ComputeBuffer extends Freeable {
      * <p>
      * Internally reads into a short array and converts via {@link BitUtils}.
      * @param data destination float array
+     * @return the data array
      */
-    default void getHalf(float[] data) {
+    default float[] getHalf(float[] data) {
         short[] tmp = new short[data.length];
-        get(tmp);
-        BitUtils.half2Float(tmp, data);
+        BitUtils.half2Float(get(tmp), data);
+        return data;
     }
 }

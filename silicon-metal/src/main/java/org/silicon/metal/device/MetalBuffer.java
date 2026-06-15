@@ -81,45 +81,51 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
     }
 
     @Override
-    public void get(byte[] data) {
+    public byte[] get(byte[] data) {
         long bytes = data.length;
         checkData(bytes);
         get(MemorySegment.ofArray(data), bytes);
+        return data;
     }
 
     @Override
-    public void get(double[] data) {
+    public double[] get(double[] data) {
         long bytes = data.length * 8L;
         checkData(bytes);
         get(MemorySegment.ofArray(data), bytes);
+        return data;
     }
 
     @Override
-    public void get(float[] data) {
+    public float[] get(float[] data) {
         long bytes = data.length * 4L;
         checkData(bytes);
         get(MemorySegment.ofArray(data), bytes);
+        return data;
     }
 
     @Override
-    public void get(long[] data) {
+    public long[] get(long[] data) {
         long bytes = data.length * 8L;
         checkData(bytes);
         get(MemorySegment.ofArray(data), bytes);
+        return data;
     }
 
     @Override
-    public void get(int[] data) {
+    public int[] get(int[] data) {
         long bytes = data.length * 4L;
         checkData(bytes);
         get(MemorySegment.ofArray(data), bytes);
+        return data;
     }
 
     @Override
-    public void get(short[] data) {
+    public short[] get(short[] data) {
         long bytes = data.length * 2L;
         checkData(bytes);
         get(MemorySegment.ofArray(data), bytes);
+        return data;
     }
     
     @Override

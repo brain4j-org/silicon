@@ -128,7 +128,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
     }
 
     @Override
-    public void get(byte[] data) {
+    public byte[] get(byte[] data) {
         ensureAlive();
         
         long size = bytesOf(data);
@@ -143,10 +143,11 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         } catch (Throwable e) {
             throw new SiliconException("get(byte[]) failed", e);
         }
+        return data;
     }
 
     @Override
-    public void get(double[] data) {
+    public double[] get(double[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -161,10 +162,11 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         } catch (Throwable e) {
             throw new SiliconException("get(double[]) failed", e);
         }
+        return data;
     }
 
     @Override
-    public void get(float[] data) {
+    public float[] get(float[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -179,10 +181,11 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         } catch (Throwable e) {
             throw new SiliconException("get(float[]) failed", e);
         }
+        return data;
     }
 
     @Override
-    public void get(long[] data) {
+    public long[] get(long[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -197,10 +200,11 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         } catch (Throwable e) {
             throw new SiliconException("get(long[]) failed", e);
         }
+        return data;
     }
 
     @Override
-    public void get(int[] data) {
+    public int[] get(int[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -215,10 +219,11 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         } catch (Throwable e) {
             throw new SiliconException("get(int[]) failed", e);
         }
+        return data;
     }
 
     @Override
-    public void get(short[] data) {
+    public short[] get(short[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -233,6 +238,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         } catch (Throwable e) {
             throw new SiliconException("get(short[]) failed", e);
         }
+        return data;
     }
 
     @Override

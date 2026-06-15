@@ -13,7 +13,7 @@ import org.silicon.api.slang.SlangCompiler;
 import java.util.Arrays;
 
 public class VectorAdd {
-    
+
     private static final int N = 536870912;
     private static final float[] A_HOST = generateData();
     private static final float[] B_HOST = generateData();
@@ -53,8 +53,7 @@ public class VectorAdd {
             
             dispatch(function, arena, a, b, c);
 
-            float[] preview = new float[16];
-            c.getHalf(preview);
+            float[] preview = c.getHalf(new float[16]);
             System.out.println("FP16 result preview: " + Arrays.toString(preview));
         }
     }
@@ -72,8 +71,7 @@ public class VectorAdd {
 
             dispatch(function, arena, a, b, c);
 
-            float[] preview = new float[16];
-            c.get(preview);
+            float[] preview = c.get(new float[16]);
             System.out.println("FP32 result preview: " + Arrays.toString(preview));
         }
     }

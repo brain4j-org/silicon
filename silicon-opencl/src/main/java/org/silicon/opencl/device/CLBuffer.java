@@ -70,16 +70,17 @@ public class CLBuffer implements ComputeBuffer {
     }
 
     @Override
-    public void get(byte[] data) {
+    public byte[] get(byte[] data) {
         Result result = readBuffer(data.length);
         result.buffer().get(data);
 
         result.queue().await();
         result.queue().free();
+        return data;
     }
 
     @Override
-    public void get(double[] data) {
+    public double[] get(double[] data) {
         long required = (long) data.length * Double.BYTES;
 
         Result result = readBuffer(required);
@@ -87,10 +88,11 @@ public class CLBuffer implements ComputeBuffer {
 
         result.queue().await();
         result.queue().free();
+        return data;
     }
 
     @Override
-    public void get(float[] data) {
+    public float[] get(float[] data) {
         long required = (long) data.length * Float.BYTES;
 
         Result result = readBuffer(required);
@@ -98,10 +100,11 @@ public class CLBuffer implements ComputeBuffer {
 
         result.queue().await();
         result.queue().free();
+        return data;
     }
 
     @Override
-    public void get(long[] data) {
+    public long[] get(long[] data) {
         long required = (long) data.length * Long.BYTES;
 
         Result result = readBuffer(required);
@@ -109,10 +112,11 @@ public class CLBuffer implements ComputeBuffer {
 
         result.queue().await();
         result.queue().free();
+        return data;
     }
 
     @Override
-    public void get(int[] data) {
+    public int[] get(int[] data) {
         long required = (long) data.length * Integer.BYTES;
 
         Result result = readBuffer(required);
@@ -120,10 +124,11 @@ public class CLBuffer implements ComputeBuffer {
 
         result.queue().await();
         result.queue().free();
+        return data;
     }
 
     @Override
-    public void get(short[] data) {
+    public short[] get(short[] data) {
         long required = (long) data.length * Short.BYTES;
 
         Result result = readBuffer(required);
@@ -131,6 +136,7 @@ public class CLBuffer implements ComputeBuffer {
 
         result.queue().await();
         result.queue().free();
+        return data;
     }
     
     @Override
