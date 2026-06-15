@@ -57,7 +57,7 @@ public class Silicon {
                 }
                 continue;
             }
-            
+
             if (best == null) {
                 best = backend;
                 continue;

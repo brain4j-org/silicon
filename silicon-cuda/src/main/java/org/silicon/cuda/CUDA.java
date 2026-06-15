@@ -123,7 +123,7 @@ public class CUDA implements ComputeBackend {
             return null;
         }
 
-        String resource = "/natives/" + classifier.get() + "/" + NativeLibraryLoader.nativeLibraryName(baseName);
+        String resource = "/natives/" + classifier.get() + "/" + NativeLibraryLoader.nativeLibraryName(baseName).get();
 
         return loadResource(resource);
     }
