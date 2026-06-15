@@ -53,16 +53,7 @@ public record CudaDevice(MemorySegment handle, int index) implements CudaObject,
     public String name() {
         try {
             MemorySegment nameHandle = (MemorySegment) CUDA_DEVICE_NAME.invokeExact(handle);
-            long maxLen = 256;
-            byte[] nameBytes = new byte[(int) maxLen];
-            int i = 0;
-            while (i < maxLen) {
-                byte b = nameHandle.get(ValueLayout.JAVA_BYTE, i);
-                if (b == 0) break;
-                nameBytes[i] = b;
-                i++;
-            }
-            return new String(nameBytes, 0, i, StandardCharsets.UTF_8);
+            return nameHandle.reinterpret(Long.MAX_VALUE).getUtf8String(0);
         } catch (Throwable e) {
             throw new SiliconException("name() failed", e);
         }

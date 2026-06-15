@@ -105,9 +105,11 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
         }
 
         try (Arena arena = Arena.ofConfined()) {
-            byte[] pathBytes = (path.toString() + "\0").getBytes(StandardCharsets.UTF_8);
+            byte[] pathBytes = (path + "\0").getBytes(StandardCharsets.UTF_8);
+
             MemorySegment cPath = arena.allocate(pathBytes.length);
             cPath.copyFrom(MemorySegment.ofArray(pathBytes));
+
             MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD.invoke(cPath);
 
             if (moduleHandle == null || moduleHandle.address() == 0) {
