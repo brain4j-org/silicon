@@ -24,7 +24,7 @@ public class Metal implements ComputeBackend {
     public static final MethodHandle METAL_CREATE_SYSTEM_DEVICE;
 
     static {
-        LOOKUP = loadFromResources("metal4j");
+        LOOKUP = loadFromResources("metal");
 
         if (LOOKUP != null) {
             METAL_CREATE_SYSTEM_DEVICE = MetalObject.find(
@@ -82,27 +82,16 @@ public class Metal implements ComputeBackend {
     }
 
     public static SymbolLookup loadFromResources(String baseName) {
-        List<String> nativeNames = NativeLibraryLoader.nativeLibraryNames(baseName);
-        if (nativeNames.isEmpty()) {
+        var classifier = NativeLibraryLoader.platformClassifier();
+
+        if (classifier.isEmpty()) {
             LOAD_FAILURES.add("Unsupported platform: " + NativeLibraryLoader.platformDescription());
             return null;
         }
 
-        List<String> resources = new ArrayList<>();
-        for (String nativeName : nativeNames) {
-            NativeLibraryLoader.platformClassifier()
-                .ifPresent(platform -> resources.add("/natives/" + platform + "/" + nativeName));
-            resources.add("/" + nativeName);
-        }
+        String resource = "/natives/" + classifier.get() + "/" + NativeLibraryLoader.nativeLibraryName(baseName).get();
 
-        for (String resource : resources) {
-            SymbolLookup lookup = loadResource(resource);
-            if (lookup != null) {
-                return lookup;
-            }
-        }
-
-        return null;
+        return loadResource(resource);
     }
 
     private static SymbolLookup loadResource(String resourceName) {
@@ -125,7 +114,15 @@ public class Metal implements ComputeBackend {
         }
     }
 
-    public static List<String> loadFailures() {
-        return List.copyOf(LOAD_FAILURES);
+    @Override
+    public String unavailableReason() {
+        return unavailableReasonMessage();
+    }
+
+    private static String unavailableReasonMessage() {
+        if (LOAD_FAILURES.isEmpty()) {
+            return null;
+        }
+        return String.join("; ", LOAD_FAILURES);
     }
 }

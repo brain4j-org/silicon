@@ -19,8 +19,6 @@ import java.util.List;
 
 public class CUDA implements ComputeBackend {
 
-    private static final String RUNTIME_MANIFEST = "cuda4j-runtime-libraries.txt";
-    
     public static final Linker LINKER = Linker.nativeLinker();
     public static final SymbolLookup LOOKUP;
     private static final List<String> LOAD_FAILURES = new ArrayList<>();
@@ -31,7 +29,7 @@ public class CUDA implements ComputeBackend {
     public static final MethodHandle CUDA_CREATE_SYSTEM_DEVICE;
     
     static {
-        LOOKUP = loadFromResources("cuda4j");
+        LOOKUP = loadFromResources("cuda");
 
         if (LOOKUP != null) {
             CUDA_INIT = CudaObject.find(
@@ -118,114 +116,36 @@ public class CUDA implements ComputeBackend {
     }
 
     public static SymbolLookup loadFromResources(String baseName) {
-        List<String> nativeNames = NativeLibraryLoader.nativeLibraryNames(baseName);
-        if (nativeNames.isEmpty()) {
-            recordLoadFailure("Unsupported platform: " + NativeLibraryLoader.platformDescription(), null);
+        var classifier = NativeLibraryLoader.platformClassifier();
+
+        if (classifier.isEmpty()) {
+            LOAD_FAILURES.add("Unsupported platform: " + NativeLibraryLoader.platformDescription());
             return null;
         }
 
-        List<String> resources = new ArrayList<>();
-        for (String nativeName : nativeNames) {
-            NativeLibraryLoader.platformClassifier()
-                .ifPresent(platform -> resources.add("/natives/" + platform + "/" + nativeName));
-            resources.add("/" + nativeName);
-        }
+        String resource = "/natives/" + classifier.get() + "/" + NativeLibraryLoader.nativeLibraryName(baseName);
 
-        for (String resource : resources) {
-            SymbolLookup lookup = loadResource(resource);
-            if (lookup != null) {
-                LOAD_FAILURES.clear();
-                LOAD_FAILURE = null;
-                return lookup;
-            }
-        }
-
-        return null;
+        return loadResource(resource);
     }
 
     private static SymbolLookup loadResource(String resourceName) {
-        if (CUDA.class.getResource(resourceName) == null) {
-            recordLoadFailure("Resource not found: " + resourceName, null);
-            return null;
-        }
-
-        try {
-            Path tempDirectory = Files.createTempDirectory("silicon-cuda-");
-            tempDirectory.toFile().deleteOnExit();
-
-            for (Path runtimeLibrary : extractRuntimeLibraries(resourceName, tempDirectory)) {
-                RUNTIME_LOOKUPS.add(SymbolLookup.libraryLookup(runtimeLibrary.toString(), Arena.global()));
-            }
-
-            Path nativeLibrary = extractResource(resourceName, tempDirectory);
-            return SymbolLookup.libraryLookup(nativeLibrary.toString(), Arena.global());
-        } catch (Exception e) {
-            recordLoadFailure("Failed to load " + resourceName, e);
-            return null;
-        }
-    }
-
-    private static List<Path> extractRuntimeLibraries(String nativeResourceName, Path targetDirectory) throws Exception {
-        if (!NativeLibraryLoader.isWindows()) {
-            return List.of();
-        }
-
-        String resourceDirectory = resourceDirectory(nativeResourceName);
-        String manifestResourceName = resourceDirectory + RUNTIME_MANIFEST;
-
-        try (InputStream in = CUDA.class.getResourceAsStream(manifestResourceName)) {
-            if (in == null) {
-                recordLoadFailure("Swift runtime manifest not found: " + manifestResourceName, null);
-                return List.of();
-            }
-
-            String manifest = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-            List<String> libraryNames = manifest.lines()
-                .map(String::trim)
-                .filter(line -> !line.isEmpty())
-                .filter(line -> !line.startsWith("#"))
-                .distinct()
-                .sorted(Comparator.comparingInt(CUDA::windowsRuntimeLoadPriority).thenComparing(String::compareToIgnoreCase))
-                .toList();
-
-            List<Path> runtimeLibraries = new ArrayList<>();
-            for (String libraryName : libraryNames) {
-                runtimeLibraries.add(extractResource(resourceDirectory + libraryName, targetDirectory));
-            }
-            return runtimeLibraries;
-        }
-    }
-
-    private static Path extractResource(String resourceName, Path targetDirectory) throws Exception {
-        String fileName = resourceName.substring(resourceName.lastIndexOf('/') + 1);
-        Path target = targetDirectory.resolve(fileName);
-
         try (InputStream in = CUDA.class.getResourceAsStream(resourceName)) {
             if (in == null) {
-                throw new IllegalStateException("Resource not found: " + resourceName);
+                LOAD_FAILURES.add("Resource not found: " + resourceName);
+                return null;
             }
 
-            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-            target.toFile().deleteOnExit();
-            return target;
-        }
-    }
+            String suffix = resourceName.substring(resourceName.lastIndexOf('.'));
+            Path tempFile = Files.createTempFile("silicon-cuda-", suffix);
 
-    private static String resourceDirectory(String resourceName) {
-        int lastSlash = resourceName.lastIndexOf('/');
-        if (lastSlash < 0) {
-            return "/";
-        }
-        return resourceName.substring(0, lastSlash + 1);
-    }
+            Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
+            tempFile.toFile().deleteOnExit();
 
-    private static int windowsRuntimeLoadPriority(String libraryName) {
-        return switch (libraryName.toLowerCase()) {
-            case "swiftcrt.dll" -> 0;
-            case "swiftwinsdk.dll" -> 1;
-            case "swiftcore.dll" -> 2;
-            default -> 3;
-        };
+            return SymbolLookup.libraryLookup(tempFile.toString(), Arena.global());
+        } catch (Exception e) {
+            LOAD_FAILURES.add("Failed to load " + resourceName + ": " + e.getMessage());
+            return null;
+        }
     }
 
     public static List<String> loadFailures() {
@@ -248,9 +168,11 @@ public class CUDA implements ComputeBackend {
 
     private static IllegalStateException unavailableException() {
         String reason = unavailableReasonMessage();
+
         if (reason == null || reason.isBlank()) {
             reason = "no CUDA device is available";
         }
+
         return new IllegalStateException("This backend is not available on this platform: " + reason, LOAD_FAILURE);
     }
 

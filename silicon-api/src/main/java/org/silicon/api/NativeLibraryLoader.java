@@ -53,22 +53,27 @@ public final class NativeLibraryLoader {
 
     public static Optional<String> nativeLibraryName(String baseName) {
         List<String> names = nativeLibraryNames(baseName);
+
         if (names.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(names.get(0));
+
+        return Optional.of(names.getFirst());
     }
 
     public static List<String> nativeLibraryNames(String baseName) {
         if (isWindows()) {
-            return List.of("lib" + baseName + ".dll", baseName + ".dll");
+            return List.of("lib" + baseName + ".dll");
         }
+
         if (isLinux()) {
             return List.of("lib" + baseName + ".so");
         }
+
         if (isMacOS()) {
             return List.of("lib" + baseName + ".dylib");
         }
+
         return List.of();
     }
 
