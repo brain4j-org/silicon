@@ -2,10 +2,10 @@
 void matmul(
     uint3 tid : SV_DispatchThreadID,
 
-    StructuredBuffer<float> A : register(t0),
-    StructuredBuffer<float> B : register(t1),
-    RWStructuredBuffer<float> C : register(t2),
-    StructuredBuffer<uint> Sizes  : register(t3)
+    StructuredBuffer<float> A,
+    StructuredBuffer<float> B,
+    RWStructuredBuffer<float> C,
+    StructuredBuffer<uint> Sizes
 )
 {
     uint M = Sizes[0];

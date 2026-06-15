@@ -10,10 +10,10 @@ void matmul(
     uint3 groupId          : SV_GroupID,
     uint3 local            : SV_GroupThreadID,
 
-    StructuredBuffer<half> A     : register(t0),
-    StructuredBuffer<half> B     : register(t1),
-    RWStructuredBuffer<half> C   : register(t2),
-    StructuredBuffer<uint> Sizes : register(t3)
+    StructuredBuffer<half> A    ,
+    StructuredBuffer<half> B    ,
+    RWStructuredBuffer<half> C  ,
+    StructuredBuffer<uint> Sizes
 )
 {
     uint M = Sizes[0];

@@ -1,9 +1,9 @@
 [shader("compute")]
 void add(
     uint3 tid : SV_DispatchThreadID,
-    StructuredBuffer<half> a : register(t0),
-    StructuredBuffer<half> b : register(t1),
-    RWStructuredBuffer<half> c : register(t2)
+    StructuredBuffer<half> a,
+    StructuredBuffer<half> b,
+    RWStructuredBuffer<half> c
 )
 {
     uint i = tid.x;
