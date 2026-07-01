@@ -153,19 +153,8 @@ public class Bindings {
     public static final MethodHandle CU_EVENT_DESTROY =
         fromHeader("CUresult cuEventDestroy(CUevent hEvent)");
 
-    public static final MethodHandle CU_LAUNCH_KERNEL = CudaObject.find(
-        "cuLaunchKernel",
-        FunctionDescriptor.of(
-            CU_RESULT,
-            CU_FUNCTION,
-            JAVA_INT, JAVA_INT, JAVA_INT,
-            JAVA_INT, JAVA_INT, JAVA_INT,
-            JAVA_INT,
-            CU_STREAM,
-            ADDRESS,
-            ADDRESS
-        )
-    );
+    public static final MethodHandle CU_LAUNCH_KERNEL =
+        fromHeader("CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void** kernelParams, void** extra)");
 
     public static MethodHandle fromHeader(String header) {
         Matcher result = PROTOTYPE.matcher(header);
