@@ -1,0 +1,5 @@
+module CUDADriver [system] {
+    header "cuda.h"
+    link "cuda"
+    export *
+}
