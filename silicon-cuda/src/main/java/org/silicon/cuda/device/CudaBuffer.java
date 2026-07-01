@@ -5,6 +5,7 @@ import org.silicon.api.device.ComputeBuffer;
 import org.silicon.api.memory.Freeable;
 import org.silicon.api.memory.MemoryState;
 import org.silicon.cuda.CudaObject;
+import org.silicon.cuda.memory.NativeHandle;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;
@@ -12,7 +13,7 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 
-public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
+public class CudaBuffer implements CudaObject, ComputeBuffer, NativeHandle, Freeable {
 
     public static final MethodHandle CUDA_BUFFER_PTR = CudaObject.find(
         "cuda_buffer_ptr",
@@ -91,7 +92,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         ensureAlive();
         ensureOther(other);
 
-        if (!(other instanceof CudaBuffer buffer)) throw new IllegalArgumentException("Other buffer is not a CUDA buffer");
+        if (!(other instanceof CudaBuffer buffer))
+            throw new IllegalArgumentException("Other buffer is not a CUDA buffer");
 
         try {
             int res = (int) CUDA_MEMCPY_DTOD.invoke(buffer.handle, handle, size);
@@ -248,36 +250,6 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
     
     @Override
     public void write(byte[] data) {
-        copyToDevice(data);
-    }
-
-    @Override
-    public void write(double[] data) {
-        copyToDevice(data);
-    }
-
-    @Override
-    public void write(float[] data) {
-        copyToDevice(data);
-    }
-
-    @Override
-    public void write(long[] data) {
-        copyToDevice(data);
-    }
-
-    @Override
-    public void write(int[] data) {
-        copyToDevice(data);
-    }
-
-    @Override
-    public void write(short[] data) {
-        copyToDevice(data);
-    }
-
-    // ========================= COPY TO DEVICE =========================
-    public void copyToDevice(byte[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -293,7 +265,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         }
     }
 
-    public void copyToDevice(double[] data) {
+    @Override
+    public void write(double[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -309,7 +282,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         }
     }
 
-    public void copyToDevice(float[] data) {
+    @Override
+    public void write(float[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -325,7 +299,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         }
     }
 
-    public void copyToDevice(long[] data) {
+    @Override
+    public void write(long[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -341,7 +316,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         }
     }
 
-    public void copyToDevice(int[] data) {
+    @Override
+    public void write(int[] data) {
         ensureAlive();
 
         long size = bytesOf(data);
@@ -357,7 +333,8 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
         }
     }
 
-    public void copyToDevice(short[] data) {
+    @Override
+    public void write(short[] data) {
         ensureAlive();
 
         long size = bytesOf(data);

@@ -1,7 +1,7 @@
 package org.silicon.api.slang;
 
 import org.silicon.api.SiliconException;
-import org.silicon.api.NativeLibraryLoader;
+import org.silicon.api.Platform;
 import org.silicon.api.backend.BackendType;
 import org.silicon.api.device.ComputeContext;
 import org.silicon.api.function.ComputeModule;
@@ -188,14 +188,14 @@ public class SlangCompiler {
             return Paths.get(override);
         }
 
-        if (NativeLibraryLoader.isWindows()) {
+        if (Platform.isWindows()) {
             String localAppData = System.getenv("LOCALAPPDATA");
             if (localAppData != null && !localAppData.isBlank()) {
                 return Paths.get(localAppData, "Silicon", "slang");
             }
         }
 
-        if (NativeLibraryLoader.isMacOS()) {
+        if (Platform.isMacOS()) {
             return Paths.get(System.getProperty("user.home"), "Library", "Caches", "silicon", "slang");
         }
 

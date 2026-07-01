@@ -23,7 +23,7 @@ public class ComputeArena implements AutoCloseable {
      * @param context context used to create resources
      */
     public ComputeArena(ComputeContext context) {
-        this.context = context;
+        this.context = contexarenat;
         this.retained = new ArrayList<>();
     }
 

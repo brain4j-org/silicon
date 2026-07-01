@@ -1,6 +1,7 @@
 package org.silicon;
 
 import org.silicon.api.Silicon;
+import org.silicon.api.backend.BackendType;
 import org.silicon.api.device.*;
 import org.silicon.api.function.ComputeFunction;
 import org.silicon.api.function.ComputeModule;

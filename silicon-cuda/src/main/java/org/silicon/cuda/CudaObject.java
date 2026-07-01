@@ -8,10 +8,6 @@ public interface CudaObject {
     
     Linker LINKER = CUDA.LINKER;
     SymbolLookup LOOKUP = CUDA.LOOKUP;
-    MethodHandle CUDA_RELEASE_OBJECT = CudaObject.find(
-        "cuda_release_object",
-        FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
-    );
 
     static MethodHandle find(String callName, FunctionDescriptor descriptor) {
         Optional<MemorySegment> call = LOOKUP.find(callName);
@@ -44,6 +40,4 @@ public interface CudaObject {
     default long bytesOf(short[] array) {
         return (long) array.length * Short.BYTES;
     }
-
-    MemorySegment handle();
 }

@@ -4,12 +4,20 @@ import java.util.Locale;
 import java.util.List;
 import java.util.Optional;
 
-public final class NativeLibraryLoader {
+public final class Platform {
 
     private static final String OS = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
     private static final String ARCH = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
 
-    private NativeLibraryLoader() {
+    private Platform() {
+    }
+
+    public static OperativeSystem current() {
+        if (isWindows()) return OperativeSystem.WINDOWS;
+        if (isLinux()) return OperativeSystem.LINUX;
+        if (isMacOS()) return OperativeSystem.MACOS;
+
+        throw new UnsupportedOperationException();
     }
 
     public static boolean isWindows() {
@@ -79,5 +87,9 @@ public final class NativeLibraryLoader {
 
     public static String platformDescription() {
         return OS + " (" + ARCH + ")";
+    }
+
+    public enum OperativeSystem {
+        WINDOWS, LINUX, MACOS
     }
 }

@@ -1,7 +1,7 @@
 package org.silicon.metal;
 
 import org.silicon.api.SiliconException;
-import org.silicon.api.NativeLibraryLoader;
+import org.silicon.api.Platform;
 import org.silicon.api.backend.BackendType;
 import org.silicon.api.backend.ComputeBackend;
 import org.silicon.metal.device.MetalDevice;
@@ -45,7 +45,7 @@ public class Metal implements ComputeBackend {
 
     @Override
     public boolean isAvailable() {
-        return deviceCount() > 0;
+        return Platform.isMacOS() && deviceCount() > 0;
     }
 
     @Override
@@ -82,14 +82,14 @@ public class Metal implements ComputeBackend {
     }
 
     public static SymbolLookup loadFromResources() {
-        var classifier = NativeLibraryLoader.platformClassifier();
+        var classifier = Platform.platformClassifier();
 
         if (classifier.isEmpty()) {
-            LOAD_FAILURES.add("Unsupported platform: " + NativeLibraryLoader.platformDescription());
+            LOAD_FAILURES.add("Unsupported platform: " + Platform.platformDescription());
             return null;
         }
 
-        var lib = NativeLibraryLoader.nativeLibraryName("metal");
+        var lib = Platform.nativeLibraryName("metal");
 
         if (lib.isEmpty()) {
             return null;

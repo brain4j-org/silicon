@@ -1,7 +1,7 @@
 package org.silicon.cuda;
 
 import org.silicon.api.SiliconException;
-import org.silicon.api.NativeLibraryLoader;
+import org.silicon.api.Platform;
 import org.silicon.api.backend.BackendType;
 import org.silicon.api.backend.ComputeBackend;
 import org.silicon.cuda.device.CudaDevice;
@@ -9,60 +9,49 @@ import org.silicon.cuda.device.CudaDevice;
 import java.io.InputStream;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+
+import static org.silicon.cuda.Bindings.*;
 
 public class CUDA implements ComputeBackend {
 
     public static final Linker LINKER = Linker.nativeLinker();
     public static final SymbolLookup LOOKUP;
+
     private static final List<String> LOAD_FAILURES = new ArrayList<>();
-    private static final List<SymbolLookup> RUNTIME_LOOKUPS = new ArrayList<>();
     private static Throwable LOAD_FAILURE;
-    public static final MethodHandle CUDA_INIT;
-    public static final MethodHandle CUDA_DEVICE_COUNT;
-    public static final MethodHandle CUDA_CREATE_SYSTEM_DEVICE;
-    
+
+
     static {
-        LOOKUP = loadFromResources("cuda");
+        LOOKUP = loadFromSystem();
 
         if (LOOKUP != null) {
-            CUDA_INIT = CudaObject.find(
-                "cuda_init",
-                FunctionDescriptor.ofVoid()
-            );
-            CUDA_DEVICE_COUNT = CudaObject.find(
-                "cuda_device_count",
-                FunctionDescriptor.of(ValueLayout.JAVA_INT)
-            );
-            CUDA_CREATE_SYSTEM_DEVICE = CudaObject.find(
-                "cuda_create_system_device",
-                FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_INT)
-            );
-
             try {
                 init();
             } catch (Throwable e) {
                 recordLoadFailure("CUDA native library loaded, but cuda_init failed", e);
             }
-        } else {
-            CUDA_INIT = null;
-            CUDA_DEVICE_COUNT = null;
-            CUDA_CREATE_SYSTEM_DEVICE = null;
         }
     }
-    
+
     @Override
     public int deviceCount() {
-        if (CUDA_DEVICE_COUNT == null) return 0;
+        if (CU_DEVICE_GET_COUNT == null) return 0;
 
-        try {
-            return (int) CUDA_DEVICE_COUNT.invokeExact();
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment count = arena.allocate(ValueLayout.JAVA_INT);
+
+            int result = (int) CU_DEVICE_GET_COUNT.invokeExact(count);
+
+            if (result != 0) {
+                throw new SiliconException("cuDeviceCount() failed: " + CUResult.fromCode(result));
+            }
+
+            return count.get(ValueLayout.JAVA_INT, 0);
         } catch (Throwable e) {
             throw new SiliconException("getDeviceCount() failed", e);
         }
@@ -70,6 +59,8 @@ public class CUDA implements ComputeBackend {
     
     @Override
     public boolean isAvailable() {
+        if (Platform.isMacOS()) return false;
+
         try {
             return deviceCount() > 0;
         } catch (Throwable _) {
@@ -84,7 +75,7 @@ public class CUDA implements ComputeBackend {
     
     @Override
     public CudaDevice createDevice(int index) {
-        if (CUDA_CREATE_SYSTEM_DEVICE == null || !isAvailable()) {
+        if (!isAvailable()) {
             throw unavailableException();
         }
         
@@ -94,14 +85,16 @@ public class CUDA implements ComputeBackend {
             throw new IllegalArgumentException("Index " + index + " out of range! Device count: " + count);
         }
 
-        try {
-            MemorySegment ptr = (MemorySegment) CUDA_CREATE_SYSTEM_DEVICE.invokeExact(index);
-            
-            if (ptr == null || ptr.address() == 0) {
-                throw new SiliconException("cuDeviceGet failed");
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment device = arena.allocate(CU_DEVICE);
+            int result = (int) CU_DEVICE_GET.invokeExact(device, index);
+
+            if (result != 0) {
+                throw new SiliconException("cuDeviceGet failed: " + CUResult.fromCode(result));
             }
-            
-            return new CudaDevice(ptr, index);
+
+            int devicePtr = device.get(ValueLayout.JAVA_INT, 0);
+            return new CudaDevice(devicePtr, index);
         } catch (Throwable e) {
             throw new SiliconException("createSystemDevice(int) failed", e);
         }
@@ -109,21 +102,36 @@ public class CUDA implements ComputeBackend {
     
     public static void init() {
         try {
-            CUDA_INIT.invokeExact();
+            CU_INIT.invokeExact();
         } catch (Throwable e) {
             throw new SiliconException("init() failed", e);
         }
     }
 
+    public static SymbolLookup loadFromSystem() {
+        String library = switch (Platform.current()) {
+            case WINDOWS -> "nvcuda.dll";
+            case LINUX -> "libcuda.so.1";
+            default -> throw new UnsupportedOperationException();
+        };
+
+        try{
+            return SymbolLookup.libraryLookup(library, Arena.global());
+        } catch (Exception e) {
+            LOAD_FAILURE = e;
+            return null;
+        }
+    }
+
     public static SymbolLookup loadFromResources(String baseName) {
-        var classifier = NativeLibraryLoader.platformClassifier();
+        var classifier = Platform.platformClassifier();
 
         if (classifier.isEmpty()) {
-            LOAD_FAILURES.add("Unsupported platform: " + NativeLibraryLoader.platformDescription());
+            LOAD_FAILURES.add("Unsupported platform: " + Platform.platformDescription());
             return null;
         }
 
-        String resource = "/natives/" + classifier.get() + "/" + NativeLibraryLoader.nativeLibraryName(baseName).get();
+        String resource = "/natives/" + classifier.get() + "/" + Platform.nativeLibraryName(baseName).get();
 
         return loadResource(resource);
     }
