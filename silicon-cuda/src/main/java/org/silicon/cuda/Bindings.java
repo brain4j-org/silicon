@@ -6,6 +6,8 @@ import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -23,37 +25,41 @@ public class Bindings {
     public static final AddressLayout CU_MODULE = ValueLayout.ADDRESS;
     public static final AddressLayout CU_FUNCTION = ValueLayout.ADDRESS;
 
-    public static Map<String, MemoryLayout> TYPES = Map.ofEntries(
-        Map.entry("void", null),
-        Map.entry("bool", JAVA_BOOLEAN),
-        Map.entry("char", JAVA_BYTE),
-        Map.entry("signed char", JAVA_BYTE),
-        Map.entry("unsigned char", JAVA_BYTE),
-        Map.entry("short", JAVA_SHORT),
-        Map.entry("unsigned short", JAVA_SHORT),
-        Map.entry("int", JAVA_INT),
-        Map.entry("unsigned int", JAVA_INT),
-        Map.entry("long", JAVA_LONG),
-        Map.entry("unsigned long", JAVA_LONG),
-        Map.entry("long long", JAVA_LONG),
-        Map.entry("unsigned long long", JAVA_LONG),
-        Map.entry("size_t", JAVA_LONG),
-        Map.entry("float", JAVA_FLOAT),
-        Map.entry("double", JAVA_DOUBLE),
+    public static final Map<String, MemoryLayout> TYPES;
 
-        // CUDA typedefs / handles
-        Map.entry("CUresult", CU_RESULT),
-        Map.entry("CUdevice", CU_DEVICE),
-        Map.entry("CUdeviceptr", CU_DEVICE_PTR),
-        Map.entry("CUdevice_attribute", JAVA_INT),
+    static {
+        Map<String, MemoryLayout> map = new HashMap<>();
+        map.put("void", null);
+        map.put("bool", JAVA_BOOLEAN);
+        map.put("char", JAVA_BYTE);
+        map.put("signed char", JAVA_BYTE);
+        map.put("unsigned char", JAVA_BYTE);
+        map.put("short", JAVA_SHORT);
+        map.put("unsigned short", JAVA_SHORT);
+        map.put("int", JAVA_INT);
+        map.put("unsigned int", JAVA_INT);
+        map.put("long", JAVA_LONG);
+        map.put("unsigned long", JAVA_LONG);
+        map.put("long long", JAVA_LONG);
+        map.put("unsigned long long", JAVA_LONG);
+        map.put("size_t", JAVA_LONG);
+        map.put("float", JAVA_FLOAT);
+        map.put("double", JAVA_DOUBLE);
 
-        // Opaque pointer-like handles
-        Map.entry("CUcontext", CU_CONTEXT),
-        Map.entry("CUstream", CU_STREAM),
-        Map.entry("CUmodule", CU_MODULE),
-        Map.entry("CUfunction", CU_FUNCTION),
-        Map.entry("CUevent", ADDRESS)
-    );
+        map.put("CUresult", CU_RESULT);
+        map.put("CUdevice", CU_DEVICE);
+        map.put("CUdeviceptr", CU_DEVICE_PTR);
+        map.put("CUdevice_attribute", JAVA_INT);
+        map.put("CUfunction_attribute", JAVA_INT);
+
+        map.put("CUcontext", CU_CONTEXT);
+        map.put("CUstream", CU_STREAM);
+        map.put("CUmodule", CU_MODULE);
+        map.put("CUfunction", CU_FUNCTION);
+        map.put("CUevent", ADDRESS);
+
+        TYPES = Collections.unmodifiableMap(map);
+    }
 
     private static final Pattern PROTOTYPE = Pattern.compile(
         "^\\s*(?<ret>.*?)\\s+(?:CUDAAPI\\s+)?(?<name>[A-Za-z_][A-Za-z0-9_]*)\\s*\\((?<params>.*)\\)\\s*;?\\s*$",
@@ -90,18 +96,75 @@ public class Bindings {
     public static final MethodHandle CU_STREAM_CREATE =
         fromHeader("CUresult cuStreamCreate(CUstream* phStream, unsigned int flags)");
 
+    public static final MethodHandle CU_STREAM_DESTROY =
+        fromHeader("CUresult cuStreamDestroy_v2(CUstream stream)");
 
-    public static final MethodHandle CUDA_MODULE_LOAD = CudaObject.find(
-        "cuda_module_load",
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    public static final MethodHandle CUDA_MODULE_LOAD_DATA = CudaObject.find(
-        "cuda_module_load_data",
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    public static final MethodHandle CUDA_MEM_ALLOC = CudaObject.find(
-        "cuda_mem_alloc",
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG)
+    public static final MethodHandle CU_STREAM_SYNCHRONIZE =
+        fromHeader("CUresult cuStreamSynchronize(CUstream stream)");
+
+    public static final MethodHandle CU_MEM_ALLOC =
+        fromHeader("CUresult cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize)");
+
+    public static final MethodHandle CU_MEM_FREE =
+        fromHeader("CUresult cuMemFree_v2(CUdeviceptr dptr)");
+
+    public static final MethodHandle CU_MEMCPY_HTOD =
+        fromHeader("CUresult cuMemcpyHtoD_v2(CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount)");
+
+    public static final MethodHandle CU_MEMCPY_DTOH =
+        fromHeader("CUresult cuMemcpyDtoH_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount)");
+
+    public static final MethodHandle CU_MEMCPY_DTOD =
+        fromHeader("CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount)");
+
+    public static final MethodHandle CU_MEMCPY_HTOD_ASYNC =
+        fromHeader("CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount, CUstream hStream)");
+
+    public static final MethodHandle CU_MEMCPY_DTOH_ASYNC =
+        fromHeader("CUresult cuMemcpyDtoHAsync_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream)");
+
+    public static final MethodHandle CU_MEMCPY_DTOD_ASYNC =
+        fromHeader("CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream)");
+
+    public static final MethodHandle CU_MODULE_LOAD =
+        fromHeader("CUresult cuModuleLoad(CUmodule* module, const char* fname)");
+
+    public static final MethodHandle CU_MODULE_LOAD_DATA =
+        fromHeader("CUresult cuModuleLoadData(CUmodule* module, const void* image)");
+
+    public static final MethodHandle CU_MODULE_GET_FUNCTION =
+        fromHeader("CUresult cuModuleGetFunction(CUfunction* hfunc, CUmodule hmod, const char* name)");
+
+    public static final MethodHandle CU_FUNC_GET_ATTRIBUTE =
+        fromHeader("CUresult cuFuncGetAttribute(int* pi, CUfunction_attribute attrib, CUfunction hfunc)");
+
+    public static final MethodHandle CU_EVENT_CREATE =
+        fromHeader("CUresult cuEventCreate(CUevent* phEvent, unsigned int Flags)");
+
+    public static final MethodHandle CU_EVENT_RECORD =
+        fromHeader("CUresult cuEventRecord(CUevent hEvent, CUstream hStream)");
+
+    public static final MethodHandle CU_EVENT_QUERY =
+        fromHeader("CUresult cuEventQuery(CUevent hEvent)");
+
+    public static final MethodHandle CU_EVENT_SYNCHRONIZE =
+        fromHeader("CUresult cuEventSynchronize(CUevent hEvent)");
+
+    public static final MethodHandle CU_EVENT_DESTROY =
+        fromHeader("CUresult cuEventDestroy(CUevent hEvent)");
+
+    public static final MethodHandle CU_LAUNCH_KERNEL = CudaObject.find(
+        "cuLaunchKernel",
+        FunctionDescriptor.of(
+            CU_RESULT,
+            CU_FUNCTION,
+            JAVA_INT, JAVA_INT, JAVA_INT,
+            JAVA_INT, JAVA_INT, JAVA_INT,
+            JAVA_INT,
+            CU_STREAM,
+            ADDRESS,
+            ADDRESS
+        )
     );
 
     public static MethodHandle fromHeader(String header) {
@@ -171,7 +234,7 @@ public class Bindings {
         t = t.replaceAll("\\s+", " ").trim();
 
         t = t.replaceAll("\\s*\\*\\s*", "*");
-        t = t.replaceAll("\\s*\\[\\s*]", "*"); // arrays -> pointers, if they ever appear
+        t = t.replaceAll("\\s*\\[\\s*]", "*");
 
         return t.trim();
     }

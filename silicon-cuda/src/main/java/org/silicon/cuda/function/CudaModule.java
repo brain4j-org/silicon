@@ -2,22 +2,17 @@ package org.silicon.cuda.function;
 
 import org.silicon.api.SiliconException;
 import org.silicon.api.function.ComputeModule;
+import org.silicon.cuda.Bindings;
 import org.silicon.cuda.CudaObject;
 import org.silicon.cuda.device.CudaContext;
 
 import java.lang.foreign.Arena;
-import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
-import java.lang.invoke.MethodHandle;
 import java.nio.charset.StandardCharsets;
 
-public record CudaModule(MemorySegment handle, CudaContext context) implements CudaObject, ComputeModule {
+import static org.silicon.cuda.Bindings.*;
 
-    private static final MethodHandle CUDA_MODULE_GET_FUNCTION = CudaObject.find(
-        "cuda_module_get_function",
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
+public record CudaModule(MemorySegment handle, CudaContext context) implements CudaObject, ComputeModule {
 
     @Override
     public CudaFunction getFunction(String name) {
@@ -25,12 +20,15 @@ public record CudaModule(MemorySegment handle, CudaContext context) implements C
             byte[] nameBytes = (name + "\0").getBytes(StandardCharsets.UTF_8);
             MemorySegment cName = arena.allocate(nameBytes.length);
             cName.copyFrom(MemorySegment.ofArray(nameBytes));
-            MemorySegment funcHandle = (MemorySegment) CUDA_MODULE_GET_FUNCTION.invoke(handle, cName);
 
-            if (funcHandle == null || funcHandle.address() == 0) {
-                throw new SiliconException("Failed to get function: " + name);
+            MemorySegment funcPtr = arena.allocate(Bindings.CU_FUNCTION);
+            int res = (int) CU_MODULE_GET_FUNCTION.invokeExact(funcPtr, handle, cName);
+
+            if (res != 0) {
+                throw new SiliconException("cuModuleGetFunction failed: " + res);
             }
 
+            MemorySegment funcHandle = funcPtr.get(Bindings.CU_FUNCTION, 0);
             return new CudaFunction(funcHandle);
         } catch (Throwable e) {
             throw new SiliconException("getFunction(String) failed", e);

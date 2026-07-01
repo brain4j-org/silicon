@@ -102,7 +102,7 @@ public class CUDA implements ComputeBackend {
     
     public static void init() {
         try {
-            CU_INIT.invokeExact();
+            CU_INIT.invoke(0);
         } catch (Throwable e) {
             throw new SiliconException("init() failed", e);
         }

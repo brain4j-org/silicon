@@ -11,10 +11,8 @@ import org.silicon.cuda.function.CudaModule;
 import org.silicon.cuda.kernel.CudaStream;
 
 import java.lang.foreign.Arena;
-import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-import java.lang.invoke.MethodHandle;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,12 +48,12 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             throw new SiliconException("synchronize() failed", e);
         }
     }
-    
+
     @Override
     public void syncThread() {
         setCurrent();
     }
-    
+
     @Override
     public BackendType backendType() {
         return BackendType.CUDA;
@@ -95,12 +93,14 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
             MemorySegment cPath = arena.allocate(pathBytes.length);
             cPath.copyFrom(MemorySegment.ofArray(pathBytes));
 
-            MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD.invoke(cPath);
+            MemorySegment modulePtr = arena.allocate(Bindings.CU_MODULE);
+            int res = (int) CU_MODULE_LOAD.invokeExact(modulePtr, cPath);
 
-            if (moduleHandle == null || moduleHandle.address() == 0) {
-                throw new SiliconException("cuModuleLoad failed for: " + path);
+            if (res != 0) {
+                throw new SiliconException("cuModuleLoad failed: " + CUResult.fromCode(res));
             }
 
+            MemorySegment moduleHandle = modulePtr.get(Bindings.CU_MODULE, 0);
             return new CudaModule(moduleHandle, this);
         } catch (Throwable e) {
             throw new SiliconException("loadModule(Path) failed", e);
@@ -112,12 +112,15 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment data = arena.allocate(rawSrc.length);
             data.copyFrom(MemorySegment.ofArray(rawSrc));
-            MemorySegment moduleHandle = (MemorySegment) CUDA_MODULE_LOAD_DATA.invoke(data);
 
-            if (moduleHandle == null || moduleHandle.address() == 0) {
-                throw new SiliconException("cuModuleLoadData failed");
+            MemorySegment modulePtr = arena.allocate(Bindings.CU_MODULE);
+            int res = (int) CU_MODULE_LOAD_DATA.invokeExact(modulePtr, data);
+
+            if (res != 0) {
+                throw new SiliconException("cuModuleLoadData failed: " + CUResult.fromCode(res));
             }
 
+            MemorySegment moduleHandle = modulePtr.get(Bindings.CU_MODULE, 0);
             return new CudaModule(moduleHandle, this);
         } catch (Throwable e) {
             throw new SiliconException("loadModule(byte[]) failed", e);
@@ -131,14 +134,16 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
 
     @Override
     public CudaBuffer allocateBytes(long size) {
-        try {
-            MemorySegment ptr = (MemorySegment) CUDA_MEM_ALLOC.invoke(size);
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment dptrOut = arena.allocate(ValueLayout.JAVA_LONG);
+            int res = (int) CU_MEM_ALLOC.invokeExact(dptrOut, size);
 
-            if (ptr == null || ptr.address() == 0) {
-                throw new SiliconException("cuMemAlloc failed: " + ptr);
+            if (res != 0) {
+                throw new SiliconException("cuMemAlloc_v2 failed: " + CUResult.fromCode(res));
             }
 
-            return new CudaBuffer(this, ptr, size);
+            long devicePtr = dptrOut.get(ValueLayout.JAVA_LONG, 0);
+            return new CudaBuffer(this, devicePtr, size);
         } catch (Throwable e) {
             throw new SiliconException("allocateBytes(long) failed", e);
         }

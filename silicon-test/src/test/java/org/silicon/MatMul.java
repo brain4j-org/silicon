@@ -32,6 +32,7 @@ public class MatMul {
         printDeviceInfo(device);
 
         SlangCompiler compiler = new SlangCompiler(context);
+        compiler.clearCache();
 
         if (device.supports(DeviceFeature.FP16)) {
             runFp16MatMul(context, compiler);

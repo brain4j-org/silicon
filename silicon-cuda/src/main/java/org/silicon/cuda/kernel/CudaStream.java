@@ -14,35 +14,13 @@ import org.silicon.cuda.device.CudaBuffer;
 import org.silicon.cuda.device.CudaPointer;
 import org.silicon.cuda.function.CudaFunction;
 
-import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
-import java.lang.invoke.MethodHandle;
 import java.util.List;
 import java.util.Objects;
 
-public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
+import static org.silicon.cuda.Bindings.*;
 
-    public static final MethodHandle CUDA_STREAM_DESTROY = CudaObject.find(
-        "cuda_stream_destroy",
-        FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
-    );
-    public static final MethodHandle CUDA_STREAM_SYNC = CudaObject.find(
-        "cuda_stream_sync",
-        FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle CUDA_LAUNCH_KERNEL = CudaObject.find(
-        "cuda_launch_kernel",
-        FunctionDescriptor.of(
-            ValueLayout.JAVA_INT, // return
-            ValueLayout.ADDRESS, // function
-            ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, // grid
-            ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, // block
-            ValueLayout.JAVA_INT, // shared mem
-            ValueLayout.ADDRESS, // stream
-            ValueLayout.ADDRESS // kernel params
-        )
-    );
+public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
 
     private final MemorySegment handle;
     private MemoryState state;
@@ -59,31 +37,32 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
         if (!(function instanceof CudaFunction(MemorySegment funcHandle))) {
             throw new IllegalArgumentException("Compute function is not an CUDA kernel");
         }
-        
+
         Objects.requireNonNull(globalSize, "Global size must not be null");
         Objects.requireNonNull(groupSize, "Group size must not be null");
-        
+
         if (groupSize.total() <= 0) {
             throw new IllegalArgumentException("Invalid group size");
         }
-        
+
         int localX = Math.min(globalSize.x(), groupSize.x());
         int localY = Math.min(globalSize.y(), groupSize.y());
         int localZ = Math.min(globalSize.z(), groupSize.z());
-        
+
         int gridX = globalSize.x() / localX;
         int gridY = globalSize.y() / localY;
         int gridZ = globalSize.z() / localZ;
-        
+
         CudaPointer parameters = getParameters(args);
-        
+
         try {
-            int result = (int) CUDA_LAUNCH_KERNEL.invoke(
+            int result = (int) CU_LAUNCH_KERNEL.invokeExact(
                 funcHandle,
                 gridX, gridY, gridZ,
                 groupSize.x(), groupSize.y(), groupSize.z(),
-                0, handle(),
-                args.size() == 0 ? MemorySegment.NULL : parameters.segment()
+                0, handle,
+                args.size() == 0 ? MemorySegment.NULL : parameters.segment(),
+                MemorySegment.NULL
             );
 
             if (result != 0) {
@@ -102,51 +81,52 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
         ComputeArgs args
     ) {
         ensureAlive();
-        
+
         if (!(function instanceof CudaFunction(MemorySegment funcHandle))) {
             throw new IllegalArgumentException("Compute function is not an CUDA kernel");
         }
-        
+
         Objects.requireNonNull(globalSize, "Global size must not be null");
         Objects.requireNonNull(groupSize, "Group size must not be null");
-        
+
         if (groupSize.total() <= 0) {
             throw new IllegalArgumentException("Invalid group size");
         }
-        
+
         int localX = Math.min(globalSize.x(), groupSize.x());
         int localY = Math.min(globalSize.y(), groupSize.y());
         int localZ = Math.min(globalSize.z(), groupSize.z());
-        
+
         int gridX = globalSize.x() / localX;
         int gridY = globalSize.y() / localY;
         int gridZ = globalSize.z() / localZ;
-        
+
         CudaPointer parameters = getParameters(args);
-        
+
         try {
-            int result = (int) CUDA_LAUNCH_KERNEL.invoke(
+            int result = (int) CU_LAUNCH_KERNEL.invokeExact(
                 funcHandle,
                 gridX, gridY, gridZ,
                 groupSize.x(), groupSize.y(), groupSize.z(),
-                0, handle(),
-                args.size() == 0 ? MemorySegment.NULL : parameters.segment()
+                0, handle,
+                args.size() == 0 ? MemorySegment.NULL : parameters.segment(),
+                MemorySegment.NULL
             );
-            
+
             if (result != 0) {
                 throw new SiliconException("cuLaunchKernel failed: " + result);
             }
-            
+
             return new CudaEvent(this);
         } catch (Throwable e) {
             throw new SiliconException("dispatch(ComputeFunction, ComputeSize, ComputeSize, ComputeArgs) failed", e);
         }
     }
-    
+
     private CudaPointer getParameters(ComputeArgs args) {
         List<Object> computeArgs = args.args();
         CudaPointer[] pointers = new CudaPointer[computeArgs.size()];
-        
+
         for (int i = 0; i < args.size(); i++) {
             Object arg = computeArgs.get(i);
             switch (arg) {
@@ -161,7 +141,7 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
                 default -> throw new IllegalStateException("Unexpected value: " + arg);
             }
         }
-        
+
         return CudaPointer.from(pointers);
     }
 
@@ -170,8 +150,8 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
         ensureAlive();
 
         try {
-            int res = (int) CUDA_STREAM_SYNC.invoke(handle);
-            if (res != 0) throw new SiliconException("cuStreamSynchronized failed: " + res);
+            int res = (int) CU_STREAM_SYNCHRONIZE.invokeExact(handle);
+            if (res != 0) throw new SiliconException("cuStreamSynchronize failed: " + res);
         } catch (Throwable e) {
             throw new SiliconException("awaitCompletion() failed", e);
         }
@@ -187,16 +167,15 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
         if (!isAlive()) return;
 
         try {
-            int res = (int) CUDA_STREAM_DESTROY.invoke(handle);
-            if (res != 0) throw new SiliconException("cuStreamDestroy failed: " + res);
-            
+            int res = (int) CU_STREAM_DESTROY.invokeExact(handle);
+            if (res != 0) throw new SiliconException("cuStreamDestroy_v2 failed: " + res);
+
             state = MemoryState.FREE;
         } catch (Throwable e) {
             throw new SiliconException("free() failed", e);
         }
     }
 
-    @Override
     public MemorySegment handle() {
         return handle;
     }

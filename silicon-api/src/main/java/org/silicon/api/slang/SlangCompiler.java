@@ -1,7 +1,6 @@
 package org.silicon.api.slang;
 
 import org.silicon.api.SiliconException;
-import org.silicon.api.Platform;
 import org.silicon.api.backend.BackendType;
 import org.silicon.api.device.ComputeContext;
 import org.silicon.api.function.ComputeModule;
@@ -15,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.util.Comparator;
 
 /**
  * Compiles Slang source files to backend-specific modules.
@@ -48,7 +48,7 @@ public class SlangCompiler {
         this.noCache = noCache;
 
         if (!isInstalled()) {
-            throw new RuntimeException("Slang compiler is not installed on this system!");
+            throw new RuntimeException("Slang was not found in " + System.getenv("PATH"));
         }
     }
 
@@ -182,38 +182,41 @@ public class SlangCompiler {
     }
 
     
-    private static Path cacheRoot() {
-        String override = System.getProperty("silicon.slang.cache");
-        if (override != null && !override.isBlank()) {
-            return Paths.get(override);
-        }
+    /**
+     * Deletes the entire Slang compilation cache.
+     * Safe to call even if the cache directory does not exist.
+     */
+    public static void clearCache() {
+        Path root = cacheRoot();
+        try {
+            if (!Files.exists(root)) return;
 
-        if (Platform.isWindows()) {
-            String localAppData = System.getenv("LOCALAPPDATA");
-            if (localAppData != null && !localAppData.isBlank()) {
-                return Paths.get(localAppData, "Silicon", "slang");
+            try (var entries = Files.walk(root)) {
+                entries.sorted(Comparator.reverseOrder())
+                    .forEach(p -> {
+                        try {
+                            Files.delete(p);
+                        } catch (IOException ignored) {
+                        }
+                    });
             }
+        } catch (IOException ignored) {
         }
+    }
 
-        if (Platform.isMacOS()) {
-            return Paths.get(System.getProperty("user.home"), "Library", "Caches", "silicon", "slang");
-        }
-
-        String xdgCacheHome = System.getenv("XDG_CACHE_HOME");
-        if (xdgCacheHome != null && !xdgCacheHome.isBlank()) {
-            return Paths.get(xdgCacheHome, "silicon", "slang");
-        }
-
+    private static Path cacheRoot() {
         return Paths.get(System.getProperty("user.home"), ".cache", "silicon", "slang");
     }
 
     private static String slangcCommand() {
         String property = System.getProperty(SLANGC_PROPERTY);
+
         if (property != null && !property.isBlank()) {
             return property;
         }
 
         String env = System.getenv(SLANGC_ENV);
+
         if (env != null && !env.isBlank()) {
             return env;
         }

@@ -81,4 +81,30 @@ public record CudaDevice(int handle, int index) implements CudaObject, NativeVal
 //            throw new SiliconException("supports(" + feature + ") failed", e);
 //        }
     }
+
+    public String computeCapability() {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment major = arena.allocate(ValueLayout.JAVA_INT);
+            MemorySegment minor = arena.allocate(ValueLayout.JAVA_INT);
+
+            int res = (int) CU_DEVICE_GET_ATTRIBUTE.invokeExact(major, 75, handle);
+            if (res != 0) {
+                throw new SiliconException("cuDeviceGetAttribute(MAJOR) failed: " + CUResult.fromCode(res));
+            }
+
+            res = (int) CU_DEVICE_GET_ATTRIBUTE.invokeExact(minor, 76, handle);
+            if (res != 0) {
+                throw new SiliconException("cuDeviceGetAttribute(MINOR) failed: " + CUResult.fromCode(res));
+            }
+
+            int m = major.get(ValueLayout.JAVA_INT, 0);
+            int n = minor.get(ValueLayout.JAVA_INT, 0);
+
+            System.out.println("major: " + m + ", minor: " + n);
+
+            return String.format("sm_%d_%d", m, n);
+        } catch (Throwable e) {
+            throw new SiliconException("computeCapability() failed", e);
+        }
+    }
 }
