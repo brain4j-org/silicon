@@ -2,6 +2,7 @@ package org.silicon.cuda.function;
 
 import org.silicon.api.SiliconException;
 import org.silicon.api.function.ComputeFunction;
+import org.silicon.cuda.CUResult;
 import org.silicon.cuda.CudaObject;
 
 import java.lang.foreign.Arena;
@@ -21,7 +22,7 @@ public record CudaFunction(MemorySegment handle) implements CudaObject, ComputeF
             int res = (int) CU_FUNC_GET_ATTRIBUTE.invokeExact(pi, CU_FUNC_ATTRIBUTE_MAX_THREADS_PER_BLOCK, handle);
 
             if (res != 0) {
-                throw new SiliconException("cuFuncGetAttribute failed: " + res);
+                throw new SiliconException("cuFuncGetAttribute failed: " + CUResult.fromCode(res));
             }
 
             return pi.get(ValueLayout.JAVA_INT, 0);

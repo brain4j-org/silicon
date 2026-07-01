@@ -3,6 +3,7 @@ package org.silicon.cuda.function;
 import org.silicon.api.SiliconException;
 import org.silicon.api.function.ComputeModule;
 import org.silicon.cuda.Bindings;
+import org.silicon.cuda.CUResult;
 import org.silicon.cuda.CudaObject;
 import org.silicon.cuda.device.CudaContext;
 
@@ -25,7 +26,7 @@ public record CudaModule(MemorySegment handle, CudaContext context) implements C
             int res = (int) CU_MODULE_GET_FUNCTION.invokeExact(funcPtr, handle, cName);
 
             if (res != 0) {
-                throw new SiliconException("cuModuleGetFunction failed: " + res);
+                throw new SiliconException("cuModuleGetFunction failed: " + CUResult.fromCode(res));
             }
 
             MemorySegment funcHandle = funcPtr.get(Bindings.CU_FUNCTION, 0);

@@ -4,6 +4,7 @@ import org.silicon.api.SiliconException;
 import org.silicon.api.device.ComputeBuffer;
 import org.silicon.api.memory.Freeable;
 import org.silicon.api.memory.MemoryState;
+import org.silicon.cuda.CUResult;
 import org.silicon.cuda.CudaObject;
 
 import java.lang.foreign.Arena;
@@ -42,7 +43,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
 
         try {
             int res = (int) CU_MEMCPY_DTOD.invokeExact(buffer.devicePtr, devicePtr, size);
-            if (res != 0) throw new SiliconException("cuMemcpyDtoD failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyDtoD failed: " + CUResult.fromCode(res));
+            }
 
             return buffer;
         } catch (Throwable e) {
@@ -66,7 +69,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
 
         try {
             int res = (int) CU_MEM_FREE.invokeExact(devicePtr);
-            if (res != 0) throw new SiliconException("cuMemFree failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemFree failed: " + CUResult.fromCode(res));
+            }
 
             state = MemoryState.FREE;
         } catch (Throwable e) {
@@ -84,7 +89,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(transferSize);
 
             int res = (int) CU_MEMCPY_DTOH.invokeExact(host, devicePtr, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyDtoH failed: " + CUResult.fromCode(res));
+            }
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, transferSize);
         } catch (Throwable e) {
@@ -103,7 +110,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(transferSize);
 
             int res = (int) CU_MEMCPY_DTOH.invokeExact(host, devicePtr, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyDtoH failed: " + CUResult.fromCode(res));
+            }
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, transferSize);
         } catch (Throwable e) {
@@ -122,7 +131,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(transferSize);
 
             int res = (int) CU_MEMCPY_DTOH.invokeExact(host, devicePtr, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyDtoH failed: " + CUResult.fromCode(res));
+            }
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, transferSize);
         } catch (Throwable e) {
@@ -141,7 +152,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(transferSize);
 
             int res = (int) CU_MEMCPY_DTOH.invokeExact(host, devicePtr, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyDtoH failed: " + CUResult.fromCode(res));
+            }
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, transferSize);
         } catch (Throwable e) {
@@ -160,7 +173,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(transferSize);
 
             int res = (int) CU_MEMCPY_DTOH.invokeExact(host, devicePtr, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyDtoH failed: " + CUResult.fromCode(res));
+            }
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, transferSize);
         } catch (Throwable e) {
@@ -179,7 +194,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             MemorySegment host = arena.allocate(transferSize);
 
             int res = (int) CU_MEMCPY_DTOH.invokeExact(host, devicePtr, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyDtoH failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyDtoH failed: " + CUResult.fromCode(res));
+            }
 
             MemorySegment.copy(host, 0, MemorySegment.ofArray(data), 0, transferSize);
         } catch (Throwable e) {
@@ -199,7 +216,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CU_MEMCPY_HTOD.invokeExact(devicePtr, host, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyHtoD failed: " + CUResult.fromCode(res));
+            }
         } catch (Throwable e) {
             throw new SiliconException("write(byte[]) failed", e);
         }
@@ -216,7 +235,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CU_MEMCPY_HTOD.invokeExact(devicePtr, host, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyHtoD failed: " + CUResult.fromCode(res));
+            }
         } catch (Throwable e) {
             throw new SiliconException("write(double[]) failed", e);
         }
@@ -233,7 +254,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CU_MEMCPY_HTOD.invokeExact(devicePtr, host, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyHtoD failed: " + CUResult.fromCode(res));
+            }
         } catch (Throwable e) {
             throw new SiliconException("write(float[]) failed", e);
         }
@@ -250,7 +273,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CU_MEMCPY_HTOD.invokeExact(devicePtr, host, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyHtoD failed: " + CUResult.fromCode(res));
+            }
         } catch (Throwable e) {
             throw new SiliconException("write(long[]) failed", e);
         }
@@ -267,7 +292,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CU_MEMCPY_HTOD.invokeExact(devicePtr, host, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyHtoD failed: " + CUResult.fromCode(res));
+            }
         } catch (Throwable e) {
             throw new SiliconException("write(int[]) failed", e);
         }
@@ -284,7 +311,9 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
             host.copyFrom(MemorySegment.ofArray(data));
 
             int res = (int) CU_MEMCPY_HTOD.invokeExact(devicePtr, host, transferSize);
-            if (res != 0) throw new SiliconException("cuMemcpyHtoD failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuMemcpyHtoD failed: " + CUResult.fromCode(res));
+            }
         } catch (Throwable e) {
             throw new SiliconException("write(short[]) failed", e);
         }

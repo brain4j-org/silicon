@@ -2,6 +2,7 @@ package org.silicon.cuda.kernel;
 
 import org.silicon.api.SiliconException;
 import org.silicon.api.kernel.ComputeEvent;
+import org.silicon.cuda.CUResult;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -26,14 +27,14 @@ public class CudaEvent implements ComputeEvent {
             int res = (int) CU_EVENT_CREATE.invokeExact(eventPtr, Flags.CU_EVENT_DISABLE_TIMING.value());
 
             if (res != 0) {
-                throw new SiliconException("cuEventCreate failed: " + res);
+                throw new SiliconException("cuEventCreate failed: " + CUResult.fromCode(res));
             }
 
             this.event = eventPtr.get(ValueLayout.ADDRESS, 0);
 
             res = (int) CU_EVENT_RECORD.invokeExact(this.event, stream.handle());
             if (res != 0) {
-                throw new SiliconException("cuEventRecord failed: " + res);
+                throw new SiliconException("cuEventRecord failed: " + CUResult.fromCode(res));
             }
 
             Thread.startVirtualThread(this::waitAndComplete);
@@ -61,8 +62,10 @@ public class CudaEvent implements ComputeEvent {
     @Override
     public void await() {
         try {
-            int result = (int) CU_EVENT_SYNCHRONIZE.invokeExact(event);
-            if (result != 0) throw new SiliconException("cuEventSynchronize failed: " + result);
+            int res = (int) CU_EVENT_SYNCHRONIZE.invokeExact(event);
+            if (res != 0) {
+                throw new SiliconException("cuEventSynchronize failed: " + CUResult.fromCode(res));
+            }
         } catch (Throwable t) {
             throw new SiliconException("await() failed", t);
         }
@@ -71,8 +74,10 @@ public class CudaEvent implements ComputeEvent {
     private void tryDestroy() {
         if (destroyed.compareAndSet(false, true)) {
             try {
-                int result = (int) CU_EVENT_DESTROY.invokeExact(event);
-                if (result != 0) throw new SiliconException("cuEventDestroy failed: " + result);
+                int res = (int) CU_EVENT_DESTROY.invokeExact(event);
+                if (res != 0) {
+                    throw new SiliconException("cuEventDestroy failed: " + CUResult.fromCode(res));
+                }
             } catch (Throwable t) {
                 throw new SiliconException("destroy() failed", t);
             }

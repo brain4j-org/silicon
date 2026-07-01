@@ -9,6 +9,7 @@ import org.silicon.api.kernel.ComputeQueue;
 import org.silicon.api.kernel.ComputeSize;
 import org.silicon.api.memory.Freeable;
 import org.silicon.api.memory.MemoryState;
+import org.silicon.cuda.CUResult;
 import org.silicon.cuda.CudaObject;
 import org.silicon.cuda.device.CudaBuffer;
 import org.silicon.cuda.device.CudaPointer;
@@ -54,19 +55,20 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
         int gridZ = globalSize.z() / localZ;
 
         CudaPointer parameters = getParameters(args);
+        MemorySegment kernelParams = args.size() == 0 ? MemorySegment.NULL : parameters.segment();
 
         try {
-            int result = (int) CU_LAUNCH_KERNEL.invokeExact(
+            int res = (int) CU_LAUNCH_KERNEL.invokeExact(
                 funcHandle,
                 gridX, gridY, gridZ,
                 groupSize.x(), groupSize.y(), groupSize.z(),
                 0, handle,
-                args.size() == 0 ? MemorySegment.NULL : parameters.segment(),
+                kernelParams,
                 MemorySegment.NULL
             );
 
-            if (result != 0) {
-                throw new SiliconException("cuLaunchKernel failed: " + result);
+            if (res != 0) {
+                throw new SiliconException("cuLaunchKernel failed: " + CUResult.fromCode(res));
             }
         } catch (Throwable e) {
             throw new SiliconException("dispatch(ComputeFunction, ComputeSize, ComputeSize, ComputeArgs) failed", e);
@@ -102,19 +104,20 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
         int gridZ = globalSize.z() / localZ;
 
         CudaPointer parameters = getParameters(args);
+        MemorySegment kernelParams = args.size() == 0 ? MemorySegment.NULL : parameters.segment();
 
         try {
-            int result = (int) CU_LAUNCH_KERNEL.invokeExact(
+            int res = (int) CU_LAUNCH_KERNEL.invokeExact(
                 funcHandle,
                 gridX, gridY, gridZ,
                 groupSize.x(), groupSize.y(), groupSize.z(),
                 0, handle,
-                args.size() == 0 ? MemorySegment.NULL : parameters.segment(),
+                kernelParams,
                 MemorySegment.NULL
             );
 
-            if (result != 0) {
-                throw new SiliconException("cuLaunchKernel failed: " + result);
+            if (res != 0) {
+                throw new SiliconException("cuLaunchKernel failed: " + CUResult.fromCode(res));
             }
 
             return new CudaEvent(this);
@@ -151,7 +154,9 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
 
         try {
             int res = (int) CU_STREAM_SYNCHRONIZE.invokeExact(handle);
-            if (res != 0) throw new SiliconException("cuStreamSynchronize failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuStreamSynchronize failed: " + CUResult.fromCode(res));
+            }
         } catch (Throwable e) {
             throw new SiliconException("awaitCompletion() failed", e);
         }
@@ -168,7 +173,9 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
 
         try {
             int res = (int) CU_STREAM_DESTROY.invokeExact(handle);
-            if (res != 0) throw new SiliconException("cuStreamDestroy_v2 failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuStreamDestroy_v2 failed: " + CUResult.fromCode(res));
+            }
 
             state = MemoryState.FREE;
         } catch (Throwable e) {

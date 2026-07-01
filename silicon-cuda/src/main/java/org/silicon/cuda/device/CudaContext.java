@@ -41,7 +41,9 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
         try {
             int res = (int) CU_CTX_SYNCHRONIZE.invokeExact();
 
-            if (res != 0) throw new SiliconException("cuCtxSynchronize failed: " + res);
+            if (res != 0) {
+                throw new SiliconException("cuCtxSynchronize failed: " + CUResult.fromCode(res));
+            }
 
             return this;
         } catch (Throwable e) {
