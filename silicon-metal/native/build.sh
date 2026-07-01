@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LIB_NAME="libmetal4j"
+LIB_NAME="
+"
 OUT_DIR="${OUT_DIR:-out}"
 
 ARCH=$(uname -m)

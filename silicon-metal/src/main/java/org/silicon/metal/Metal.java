@@ -24,7 +24,7 @@ public class Metal implements ComputeBackend {
     public static final MethodHandle METAL_CREATE_SYSTEM_DEVICE;
 
     static {
-        LOOKUP = loadFromResources("metal");
+        LOOKUP = loadFromResources();
 
         if (LOOKUP != null) {
             METAL_CREATE_SYSTEM_DEVICE = MetalObject.find(
@@ -81,7 +81,7 @@ public class Metal implements ComputeBackend {
         return createDevice(0);
     }
 
-    public static SymbolLookup loadFromResources(String baseName) {
+    public static SymbolLookup loadFromResources() {
         var classifier = NativeLibraryLoader.platformClassifier();
 
         if (classifier.isEmpty()) {
@@ -89,8 +89,13 @@ public class Metal implements ComputeBackend {
             return null;
         }
 
-        String resource = "/natives/" + classifier.get() + "/" + NativeLibraryLoader.nativeLibraryName(baseName).get();
+        var lib = NativeLibraryLoader.nativeLibraryName("metal");
 
+        if (lib.isEmpty()) {
+            return null;
+        }
+
+        String resource = "/natives/" + classifier.get() + "/" + lib.get();
         return loadResource(resource);
     }
 
