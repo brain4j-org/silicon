@@ -1,26 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LIB_NAME="
-"
+LIB_NAME="libmetal"
 OUT_DIR="${OUT_DIR:-out}"
 
-ARCH=$(uname -m)
-case "$ARCH" in
-    x86_64)  CLASSIFIER="macos-x64" ;;
-    arm64)   CLASSIFIER="macos-arm64" ;;
-    *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
-esac
+TARGETS=(
+    "arm64-apple-macos15.0 macos-arm64"
+    "x86_64-apple-macos15.0 macos-x64"
+)
 
-OUTPUT="$OUT_DIR/$CLASSIFIER/$LIB_NAME.dylib"
+for entry in "${TARGETS[@]}"; do
+    read -r TARGET CLASSIFIER <<< "$entry"
 
-mkdir -p "$(dirname "$OUTPUT")"
+    OUTPUT="$OUT_DIR/$CLASSIFIER/$LIB_NAME.dylib"
+    mkdir -p "$(dirname "$OUTPUT")"
 
-swiftc \
-    -emit-library \
-    -o "$OUTPUT" \
-    src/*.swift \
-    -framework Metal \
-    -framework Foundation
+    swiftc \
+        -emit-library \
+        -target "$TARGET" \
+        -o "$OUTPUT" \
+        src/*.swift \
+        -framework Metal \
+        -framework Foundation
 
-echo "Built successfully: $OUTPUT"
+    echo "Built successfully: $OUTPUT"
+done
