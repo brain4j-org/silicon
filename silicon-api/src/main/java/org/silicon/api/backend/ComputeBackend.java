@@ -24,6 +24,11 @@ public interface ComputeBackend {
     BackendType type();
 
     /**
+     * Initialized the compute backend by loading the native library
+     */
+    void init();
+
+    /**
      * Creates a device by index.
      * @param index device index
      * @return compute device
@@ -35,20 +40,6 @@ public interface ComputeBackend {
      */
     default String name() {
         return type().formalName();
-    }
-
-    /**
-     * @return human-readable reason why this backend is unavailable, or null if none is known
-     */
-    default String unavailableReason() {
-        return null;
-    }
-
-    /**
-     * @return original failure that made this backend unavailable, or null if none is known
-     */
-    default Throwable unavailableCause() {
-        return null;
     }
 
     /**

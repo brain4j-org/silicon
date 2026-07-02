@@ -24,7 +24,7 @@ public enum BackendType {
 
     public String compileTarget() {
         if (compileTarget == null) {
-            throw new IllegalStateException(formalName + " is not supported yet.");
+            throw new IllegalStateException(formalName + " is not supported for Slang.");
         }
         return compileTarget;
     }

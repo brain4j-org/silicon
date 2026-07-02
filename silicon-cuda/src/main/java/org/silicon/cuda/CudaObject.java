@@ -5,12 +5,11 @@ import java.lang.invoke.MethodHandle;
 import java.util.Optional;
 
 public interface CudaObject {
-    
-    Linker LINKER = CUDA.LINKER;
-    SymbolLookup LOOKUP = CUDA.LOOKUP;
+
+    Linker LINKER = Linker.nativeLinker();
 
     static MethodHandle find(String callName, FunctionDescriptor descriptor) {
-        Optional<MemorySegment> call = LOOKUP.find(callName);
+        Optional<MemorySegment> call = CUDA.LOOKUP.find(callName);
 
         if (call.isEmpty()) throw new NullPointerException("%s is not present".formatted(callName));
 

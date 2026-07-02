@@ -74,7 +74,12 @@ public class OpenCL implements ComputeBackend {
     public BackendType type() {
         return BackendType.OPENCL;
     }
-    
+
+    @Override
+    public void init() {
+
+    }
+
     @Override
     public ComputeDevice createDevice(int index) {
         int deviceCount = deviceCount();

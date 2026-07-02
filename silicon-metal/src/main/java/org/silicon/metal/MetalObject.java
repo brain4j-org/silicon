@@ -6,15 +6,14 @@ import java.util.Optional;
 
 public interface MetalObject {
     
-    Linker LINKER = Metal.LINKER;
-    SymbolLookup LOOKUP = Metal.LOOKUP;
+    Linker LINKER = Linker.nativeLinker();
     MethodHandle METAL_RELEASE_OBJECT = MetalObject.find(
         "metal_release_object",
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
     );
     
     static MethodHandle find(String callName, FunctionDescriptor descriptor) {
-        Optional<MemorySegment> call = LOOKUP.find(callName);
+        Optional<MemorySegment> call = Metal.LOOKUP.find(callName);
         
         if (call.isEmpty()) throw new NullPointerException("%s is not present".formatted(callName));
         

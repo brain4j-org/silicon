@@ -14,43 +14,51 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Metal implements ComputeBackend {
-    
-    public static final Linker LINKER = Linker.nativeLinker();
 
-    public static final SymbolLookup LOOKUP;
     private static final List<String> LOAD_FAILURES = new ArrayList<>();
-    public static final MethodHandle METAL_CREATE_SYSTEM_DEVICE;
 
-    static {
-        LOOKUP = loadFromResources();
-
-        if (LOOKUP != null) {
-            METAL_CREATE_SYSTEM_DEVICE = MetalObject.find(
-                "metal_create_system_device",
-                FunctionDescriptor.of(ValueLayout.ADDRESS)
-            );
-        } else {
-            METAL_CREATE_SYSTEM_DEVICE = null;
-        }
-    }
+    public static SymbolLookup LOOKUP;
+    public static MethodHandle METAL_CREATE_SYSTEM_DEVICE;
 
     @Override
     public int deviceCount() {
-        if (METAL_CREATE_SYSTEM_DEVICE == null) return 0;
-
+        // TODO: maybe have a proper implementation for this?
+        // Though I have never seen a Mac with more than 1 GPU
         return 1;
     }
 
     @Override
     public boolean isAvailable() {
-        return Platform.isMacOS() && deviceCount() > 0;
+        try {
+            init();
+            return Platform.isMacOS() && deviceCount() > 0;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public BackendType type() {
         return BackendType.METAL;
+    }
+
+    @Override
+    public void init() {
+        if (LOOKUP != null) return;
+
+        LOOKUP = loadFromResources();
+
+        if (LOOKUP == null) {
+            throw new SiliconException("Failed to load library!");
+        }
+
+        METAL_CREATE_SYSTEM_DEVICE = MetalObject.find(
+            "metal_create_system_device",
+            FunctionDescriptor.of(ValueLayout.ADDRESS)
+        );
     }
 
     @Override
@@ -82,17 +90,16 @@ public class Metal implements ComputeBackend {
     }
 
     public static SymbolLookup loadFromResources() {
-        var classifier = Platform.platformClassifier();
+        Optional<String> classifier = Platform.platformClassifier();
 
         if (classifier.isEmpty()) {
-            LOAD_FAILURES.add("Unsupported platform: " + Platform.platformDescription());
-            return null;
+            throw new SiliconException("Unsupported platform: " + Platform.platformDescription());
         }
 
-        var lib = Platform.nativeLibraryName("metal");
+        Optional<String> lib = Platform.nativeLibraryName("metal");
 
         if (lib.isEmpty()) {
-            return null;
+            throw new SiliconException("No library found for metal. Do natives exist?");
         }
 
         String resource = "/natives/" + classifier.get() + "/" + lib.get();
@@ -114,20 +121,15 @@ public class Metal implements ComputeBackend {
 
             return SymbolLookup.libraryLookup(tempFile.toString(), Arena.global());
         } catch (Exception e) {
-            LOAD_FAILURES.add("Failed to load " + resourceName + ": " + e.getMessage());
-            return null;
+            e.printStackTrace(System.err);
+            throw new SiliconException("Failed to load " + resourceName + ": " + e.getMessage());
         }
-    }
-
-    @Override
-    public String unavailableReason() {
-        return unavailableReasonMessage();
     }
 
     private static String unavailableReasonMessage() {
         if (LOAD_FAILURES.isEmpty()) {
             return null;
         }
-        return String.join("; ", LOAD_FAILURES);
+        return String.join("\n * ", LOAD_FAILURES);
     }
 }

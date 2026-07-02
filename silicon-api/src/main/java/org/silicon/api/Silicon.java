@@ -4,8 +4,6 @@ import org.silicon.api.backend.BackendType;
 import org.silicon.api.backend.ComputeBackend;
 import org.silicon.api.device.ComputeDevice;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ServiceLoader;
 
 /**
@@ -32,12 +30,16 @@ public class Silicon {
         ServiceLoader<ComputeBackend> loader = ServiceLoader.load(ComputeBackend.class);
 
         for (ComputeBackend backend : loader) {
-            if (!backend.type().equals(backendType)) continue;
+            if (!backend.type().equals(backendType)) {
+                continue;
+            }
+
             if (!backend.isAvailable()) {
-                throw unavailableBackendException(backend);
+                throw new SiliconException("Backend " + backend.type() + " is not available!");
             }
 
             Silicon.backend = backend;
+            backend.init();
             return;
         }
         
@@ -47,14 +49,9 @@ public class Silicon {
     private static ComputeBackend loadBackend() {
         ServiceLoader<ComputeBackend> loader = ServiceLoader.load(ComputeBackend.class);
         ComputeBackend best = null;
-        List<String> unavailableReasons = new ArrayList<>();
-        
+
         for (ComputeBackend backend : loader) {
             if (!backend.isAvailable()) {
-                String reason = backend.unavailableReason();
-                if (reason != null && !reason.isBlank()) {
-                    unavailableReasons.add(backend.type().formalName() + ": " + reason);
-                }
                 continue;
             }
 
@@ -69,30 +66,13 @@ public class Silicon {
         }
         
         if (best == null) {
-            String message = "No compute backend available on this system";
-            if (!unavailableReasons.isEmpty()) {
-                message += ": " + String.join("; ", unavailableReasons);
-            }
-            throw new IllegalStateException(message);
+            throw new SiliconException("No compute backend available on this system!");
         }
-        
+
+        best.init();
         return best;
     }
 
-    private static IllegalStateException unavailableBackendException(ComputeBackend backend) {
-        String message = "Backend '" + backend.type().formalName() + "' is not available on this system";
-        String reason = backend.unavailableReason();
-        if (reason != null && !reason.isBlank()) {
-            message += ": " + reason;
-        }
-
-        Throwable cause = backend.unavailableCause();
-        if (cause == null) {
-            return new IllegalStateException(message);
-        }
-        return new IllegalStateException(message, cause);
-    }
-    
     private static boolean isBetter(ComputeBackend candidate, ComputeBackend current) {
         return candidate.type().priority() < current.type().priority();
     }
