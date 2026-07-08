@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'org.silicon'
-version = '1.0.1-SNAPSHOT'
+version = '0.1.0'
 
 allprojects {
     tasks.withType(JavaCompile).configureEach {
