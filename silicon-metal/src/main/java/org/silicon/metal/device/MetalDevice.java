@@ -42,7 +42,7 @@ public record MetalDevice(MemorySegment handle) implements MetalObject, ComputeD
     public String name() {
         try {
             MemorySegment nameHandle = (MemorySegment) METAL_DEVICE_NAME.invokeExact(handle);
-            String name = nameHandle.reinterpret(Long.MAX_VALUE).getUtf8String(0);
+            String name = nameHandle.reinterpret(Long.MAX_VALUE).getString(0, StandardCharsets.UTF_8);
 
             METAL_FREE_NATIVE.invokeExact(nameHandle);
 

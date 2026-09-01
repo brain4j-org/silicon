@@ -7,17 +7,7 @@ plugins {
 group = 'org.silicon'
 version = '0.1.0'
 
-allprojects {
-    tasks.withType(JavaCompile).configureEach {
-        options.compilerArgs.add('--enable-preview')
-    }
-    tasks.withType(Test).configureEach {
-        jvmArgs('--enable-preview')
-    }
-    tasks.withType(JavaExec).configureEach {
-        jvmArgs('--enable-preview')
-    }
-}
+def javaVersion = 22
 
 subprojects {
     version = rootProject.version
@@ -76,11 +66,12 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion = JavaLanguageVersion.of(javaVersion)
         }
+    }
 
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+    tasks.withType(JavaCompile).configureEach {
+        options.release = javaVersion
     }
 }
 

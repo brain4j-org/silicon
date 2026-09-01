@@ -11,6 +11,7 @@ import org.silicon.cuda.memory.NativeValueHandle;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+import java.nio.charset.StandardCharsets;
 
 import static org.silicon.cuda.Bindings.*;
 
@@ -44,7 +45,7 @@ public record CudaDevice(int handle, int index) implements CudaObject, NativeVal
                 throw new SiliconException("cuDeviceGetName failed: " + CUResult.fromCode(res));
             }
 
-            return name.getUtf8String(0);
+            return name.getString(0, StandardCharsets.UTF_8);
         } catch (Throwable e) {
             throw new SiliconException("name() failed", e);
         }

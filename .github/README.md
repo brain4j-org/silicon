@@ -5,7 +5,7 @@
 <h4 align="center">High-performance, cross-platform GPU computing API.</h4>
 
 <p align="center">
-    <img alt="Java 21" src="https://img.shields.io/badge/java-21-red">
+    <img alt="Java 22" src="https://img.shields.io/badge/java-22-red">
     <img alt="GitHub Commit Activity" src="https://img.shields.io/github/commit-activity/m/brain4j-org/silicon"/>
     <img alt="Github Last Commit" src="https://img.shields.io/github/last-commit/brain4j-org/silicon"/>
     <img alt="License" src="https://img.shields.io/github/license/brain4j-org/silicon">
@@ -24,7 +24,7 @@ through a consistent low-level compute API.
 Silicon is avilable on the official Brain4J [repository](https://repo.brain4j.org/).
 
 ```gradle
-def siliconVersion = "1.0.2-SNAPSHOT"
+def siliconVersion = "0.1.0"
 
 repositories {
     mavenCentral()
@@ -35,7 +35,7 @@ repositories {
 dependencies {
     implementation "org.silicon:silicon-api:$siliconVersion" // base API, mandatory
 
-    // Optional backends
+    // Backends
     // implementation "org.silicon:silicon-cuda:$siliconVersion"
     // implementation "org.silicon:silicon-metal:$siliconVersion"
     // implementation "org.silicon:silicon-opencl:$siliconVersion"
