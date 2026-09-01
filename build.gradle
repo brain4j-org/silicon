@@ -40,12 +40,8 @@ subprojects {
                 url = version.endsWith("SNAPSHOT") ? snapshotsRepo : releasesRepo
 
                 credentials {
-                    username = providers.gradleProperty("BRAIN4J_USERNAME")
-                            .orElse(providers.environmentVariable("BRAIN4J_USERNAME"))
-                            .getOrNull()
-                    password = providers.gradleProperty("BRAIN4J_TOKEN")
-                            .orElse(providers.environmentVariable("BRAIN4J_TOKEN"))
-                            .getOrNull()
+                    username = findProperty("brain4jUser") ?: System.getenv("brain4jUser")
+                    password = findProperty("brain4jPass") ?: System.getenv("brain4jPass")
                 }
 
                 authentication {
