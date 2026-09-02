@@ -42,12 +42,12 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
     }
 
     @Override
-    public void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
+    public synchronized void dispatch(ComputeFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
         dispatchRaw((MetalFunction) function, globalSize, groupSize, args);
     }
 
     @Override
-    public ComputeEvent dispatchAsync(
+    public synchronized ComputeEvent dispatchAsync(
         ComputeFunction function,
         ComputeSize globalSize,
         ComputeSize groupSize,
@@ -61,7 +61,7 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
         return new MetalEvent(commandBuffer);
     }
 
-    private MetalCommandBuffer dispatchRaw(MetalFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
+    private synchronized MetalCommandBuffer dispatchRaw(MetalFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
         MetalPipeline pipeline = function.pipeline();
 
         MetalCommandBuffer commandBuffer = makeCommandBuffer();
@@ -86,14 +86,17 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
     }
 
     @Override
-    public void await() {
+    public synchronized void await() {
         if (state != MemoryState.ALIVE) {
             throw new IllegalStateException("Queue is not ALIVE! Current Queue state: " + state);
         }
 
         if (commandBuffers.isEmpty()) return;
 
-        commandBuffers.getLast().waitUntilCompleted();
+        // Wait for all command buffers to complete (serial queue, but be explicit)
+        for (MetalCommandBuffer buf : commandBuffers) {
+            buf.waitUntilCompleted();
+        }
 
         for (MetalCommandBuffer buf : commandBuffers) {
             buf.free();
