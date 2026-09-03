@@ -18,7 +18,11 @@ import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,15 +33,17 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
 
+    private static final int MAX_IN_FLIGHT = 64;
+
     private final MemorySegment handle;
-    private final List<MetalCommandBuffer> commandBuffers;
+    private final Deque<MetalCommandBuffer> commandBuffers;
     private final ComputeArena arena;
     private MemoryState state;
 
     public MetalCommandQueue(MemorySegment handle, ComputeArena arena) {
         this.handle = handle;
         this.arena = arena;
-        this.commandBuffers = new ArrayList<>();
+        this.commandBuffers = new ArrayDeque<>();
         this.state = MemoryState.ALIVE;
     }
 
@@ -64,14 +70,23 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
     private synchronized MetalCommandBuffer dispatchRaw(MetalFunction function, ComputeSize globalSize, ComputeSize groupSize, ComputeArgs args) {
         MetalPipeline pipeline = function.pipeline();
 
-        MetalCommandBuffer commandBuffer = makeCommandBuffer();
-        
         Objects.requireNonNull(globalSize, "Global size must not be null");
         Objects.requireNonNull(groupSize, "Group size must not be null");
-        
+
         if (groupSize.total() <= 0) {
             throw new IllegalArgumentException("Invalid group size");
         }
+
+        // Caps the maximum committed-but-unreleased command buffers to avoid system pressure.
+        // Backpressure: on a serial queue buffers complete in FIFO order, so the
+        // oldest entry is guaranteed to be the next one to finish.
+        while (commandBuffers.size() >= MAX_IN_FLIGHT) {
+            MetalCommandBuffer oldest = commandBuffers.removeFirst();
+            oldest.waitUntilCompleted();
+            oldest.free();
+        }
+
+        MetalCommandBuffer commandBuffer = makeCommandBuffer();
 
         try (MetalEncoder encoder = commandBuffer.makeEncoder(pipeline)) {
             setArgs(args, encoder);
@@ -108,17 +123,93 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
     private static void setArgs(ComputeArgs args, MetalEncoder encoder) {
         List<Object> argList = args.args();
 
-        for (int i = 0; i < args.size(); i++) {
-            switch (argList.get(i)) {
-                case Double x -> encoder.setDouble(x, i);
-                case Float x -> encoder.setFloat(x, i);
-                case Long x -> encoder.setLong(x, i);
-                case Integer x -> encoder.setInt(x, i);
-                case Short x -> encoder.setShort(x, i);
-                case MetalBuffer x -> encoder.setBuffer(x, i);
-                default -> throw new IllegalStateException("Unexpected value: " + argList.get(i));
+        // Discovery of 03/09/2026 - Slang over Metal issue
+        // Before this, the system crashed when starting certain kernels
+        // and the GPU starved, requiring a complete reboot.
+        // ISSUE: Slang compiles Metal targets by aggregating all uniform scalars of an
+        // entry point into a single "EntryPointParams" struct bound at buffer(0),
+        // shifting the actual buffer arguments to buffer(1..N).
+        // The Java side receives a flat, signature-ordered argument list,
+        // so we rebuild the Slang layout here: pack the scalars into one struct
+        // at slot 0 and assign buffers to the consecutive slots that follow.
+        // Kernels with no scalars keep buffers starting at slot 0.
+        List<Object> scalars = new ArrayList<>();
+        List<MetalBuffer> buffers = new ArrayList<>();
+
+        for (Object arg : argList) {
+            if (arg instanceof MetalBuffer buffer) {
+                buffers.add(buffer);
+            } else {
+                scalars.add(arg);
             }
         }
+
+        int nextSlot = 0;
+
+        if (!scalars.isEmpty()) {
+            encoder.setPackedScalars(packScalars(scalars), nextSlot++);
+        }
+
+        for (MetalBuffer buffer : buffers) {
+            encoder.setBuffer(buffer, nextSlot++);
+        }
+    }
+
+    // Packs scalar arguments following C struct layout rules
+    private static byte[] packScalars(List<Object> scalars) {
+        int cursor = 0;
+        int maxAlign = 1;
+
+        for (Object scalar : scalars) {
+            int align = switch (scalar) {
+                case Short _ -> 2;
+                case Long _, Double _ -> 8;
+                default -> 4; // int, float
+            };
+            maxAlign = Math.max(maxAlign, align);
+            cursor = roundUpTo(cursor, align) + scalarSize(scalar);
+        }
+
+        int structSize = roundUpTo(cursor, maxAlign);
+
+        ByteBuffer buffer = ByteBuffer.allocate(structSize)
+                .order(ByteOrder.nativeOrder());
+
+        cursor = 0;
+        for (Object scalar : scalars) {
+            int align = switch (scalar) {
+                case Short _ -> 2;
+                case Long _, Double _ -> 8;
+                default -> 4;
+            };
+            cursor = roundUpTo(cursor, align);
+
+            switch (scalar) {
+                case Integer x -> buffer.putInt(cursor, x);
+                case Float x -> buffer.putFloat(cursor, x);
+                case Long x -> buffer.putLong(cursor, x);
+                case Double x -> buffer.putDouble(cursor, x);
+                case Short x -> buffer.putShort(cursor, x);
+                default -> throw new IllegalStateException("Unsupported scalar type: " + scalar.getClass());
+            }
+
+            cursor += scalarSize(scalar);
+        }
+
+        return buffer.array();
+    }
+
+    private static int scalarSize(Object scalar) {
+        return switch (scalar) {
+            case Integer _, Float _ -> 4;
+            case Long _, Double _ -> 8;
+            case Short _ -> 2;
+            default -> throw new IllegalStateException("Unsupported scalar type: " + scalar.getClass());
+        };
+    }
+
+    private static int roundUpTo(int value, int alignment) {
+        return (value + alignment - 1) / alignment * alignment;
     }
 
     public MetalCommandBuffer makeCommandBuffer() {

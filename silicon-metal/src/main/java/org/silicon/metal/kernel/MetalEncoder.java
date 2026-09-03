@@ -62,6 +62,18 @@ public final class MetalEncoder implements MetalObject, AutoCloseable {
         }
     }
 
+    /**
+     * Binds a pre-packed scalar block at the given buffer index.
+     * The data is copied into the encoder-owned arena, which lives until
+     * {@link #close()}; setBytes copies immediately into the command buffer
+     * so the lifetime requirement is satisfied.
+     */
+    public void setPackedScalars(byte[] data, int index) {
+        MemorySegment seg = arena.allocate(data.length, 8);
+        MemorySegment.copy(MemorySegment.ofArray(data), 0, seg, 0, data.length);
+        setBytesRaw(seg, data.length, index);
+    }
+
     public void dispatchThreads(int globalX, int globalY, int globalZ, int groupX, int groupY, int groupZ) {
         try {
             METAL_DISPATCH.invokeExact(handle, globalX, globalY, globalZ, groupX, groupY, groupZ);
