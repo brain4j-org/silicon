@@ -2,6 +2,7 @@ package org.silicon.api.device;
 
 import org.silicon.api.BitUtils;
 import org.silicon.api.memory.Freeable;
+import org.silicon.api.kernel.ComputeQueue;
 
 /**
  * Device-managed memory buffer.
@@ -25,6 +26,19 @@ public interface ComputeBuffer extends Freeable {
      * @return the destination buffer (for chaining)
      */
     ComputeBuffer copyInto(ComputeBuffer other);
+
+    /**
+     * Copies this buffer into another buffer, ordered on the given queue so
+     * that the copy executes after all previously dispatched work. Backends
+     * without queue-ordered copies fall back to the synchronous variant.
+     *
+     * @param other destination buffer
+     * @param queue the queue used to order the copy with pending kernels
+     * @return the destination buffer (for chaining)
+     */
+    default ComputeBuffer copyInto(ComputeBuffer other, ComputeQueue queue) {
+        return copyInto(other);
+    }
     
     /**
      * Gets the size in bytes of this buffer.

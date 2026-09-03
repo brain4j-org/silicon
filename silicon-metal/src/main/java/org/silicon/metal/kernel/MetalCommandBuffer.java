@@ -17,6 +17,10 @@ public final class MetalCommandBuffer implements MetalObject, Freeable {
         "metal_make_encoder",
         FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
+    public static final MethodHandle METAL_MAKE_BLIT_ENCODER = MetalObject.find(
+        "metal_make_blit_encoder",
+        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+    );
     public static final MethodHandle METAL_COMMIT = MetalObject.find(
         "metal_commit",
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
@@ -44,6 +48,20 @@ public final class MetalCommandBuffer implements MetalObject, Freeable {
             return new MetalEncoder(ptr);
         } catch (Throwable e) {
             throw new SiliconException("makeEncoder(MetalPipeline) failed", e);
+        }
+    }
+
+    public MetalBlitEncoder makeBlitEncoder() {
+        try {
+            MemorySegment ptr = (MemorySegment) METAL_MAKE_BLIT_ENCODER.invokeExact(handle);
+
+            if (ptr == null || ptr.address() == 0) {
+                throw new SiliconException("makeBlitCommandEncoder failed");
+            }
+
+            return new MetalBlitEncoder(ptr);
+        } catch (Throwable e) {
+            throw new SiliconException("makeBlitEncoder() failed", e);
         }
     }
 

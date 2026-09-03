@@ -100,6 +100,22 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
         return commandBuffer;
     }
 
+    /**
+     * Device-side copy through a blit encoder on THIS queue, so the copy is
+     * ordered with respect to previously dispatched kernels (no host traffic,
+     * no synchronization with the CPU).
+     */
+    public synchronized void blitCopy(MetalBuffer src, MetalBuffer dst, long bytes) {
+        MetalCommandBuffer commandBuffer = makeCommandBuffer();
+
+        try (MetalBlitEncoder encoder = commandBuffer.makeBlitEncoder()) {
+            encoder.copy(src, dst, bytes);
+        }
+
+        commandBuffer.commit();
+        commandBuffers.add(commandBuffer);
+    }
+
     @Override
     public synchronized void await() {
         if (state != MemoryState.ALIVE) {

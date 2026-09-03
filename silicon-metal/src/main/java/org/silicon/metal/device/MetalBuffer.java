@@ -2,6 +2,8 @@ package org.silicon.metal.device;
 
 import org.silicon.api.SiliconException;
 import org.silicon.api.device.ComputeBuffer;
+import org.silicon.api.kernel.ComputeQueue;
+import org.silicon.metal.kernel.MetalCommandQueue;
 import org.silicon.api.memory.MemoryState;
 import org.silicon.metal.MetalObject;
 
@@ -56,6 +58,24 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
         MemorySegment.copy(srcSeg, 0, dstSeg, 0, size);
 
         return dst;
+    }
+
+    @Override
+    public MetalBuffer copyInto(ComputeBuffer other, ComputeQueue queue) {
+        if (state != MemoryState.ALIVE) {
+            throw new IllegalStateException("Buffer is not ALIVE! Current buffer state: " + state);
+        }
+
+        if (!(other instanceof MetalBuffer dst)) {
+            throw new IllegalArgumentException("Both buffers must be Metal buffers");
+        }
+
+        if (queue instanceof MetalCommandQueue metalQueue) {
+            metalQueue.blitCopy(this, dst, size);
+            return dst;
+        }
+
+        return copyInto(other);
     }
     
     @Override

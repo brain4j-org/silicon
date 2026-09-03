@@ -77,3 +77,27 @@ public func metal_wait_until_completed(
     let cmdBuf: MTLCommandBuffer = pointerToObject(cmdBufPtr)
     cmdBuf.waitUntilCompleted()
 }
+@_cdecl("metal_make_blit_encoder")
+public func metal_make_blit_encoder(
+    cmdBufPtr: UnsafeMutableRawPointer
+) -> UnsafeMutableRawPointer? {
+    let cmdBuf: MTLCommandBuffer = pointerToObject(cmdBufPtr)
+    let encoder = cmdBuf.makeBlitCommandEncoder()
+    if let encoder = encoder {
+        return objectToPointer(encoder)
+    }
+    return nil
+}
+
+@_cdecl("metal_blit_copy")
+public func metal_blit_copy(
+    encPtr: UnsafeMutableRawPointer,
+    srcPtr: UnsafeMutableRawPointer,
+    dstPtr: UnsafeMutableRawPointer,
+    size: Int
+) {
+    let encoder: MTLBlitCommandEncoder = pointerToObject(encPtr)
+    let src: MTLBuffer = pointerToObject(srcPtr)
+    let dst: MTLBuffer = pointerToObject(dstPtr)
+    encoder.copy(from: src, sourceOffset: 0, to: dst, destinationOffset: 0, size: size)
+}
