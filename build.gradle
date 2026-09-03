@@ -64,10 +64,20 @@ subprojects {
         toolchain {
             languageVersion = JavaLanguageVersion.of(javaVersion)
         }
+
+        // publishes -javadoc.jar and -sources.jar alongside the main artifact.
+        withJavadocJar()
+        withSourcesJar()
     }
 
     tasks.withType(JavaCompile).configureEach {
         options.release = javaVersion
+    }
+
+    tasks.withType(Javadoc).configureEach {
+        // missing comments must not fail the build.
+        failOnError = false
+        options.addStringOption('Xdoclint:none', '-quiet')
     }
 }
 
