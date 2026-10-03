@@ -24,7 +24,7 @@ through a consistent low-level compute API.
 Silicon is avilable on the official Brain4J [repository](https://repo.brain4j.org/).
 
 ```gradle
-def siliconVersion = "0.1.3"
+def siliconVersion = "0.2.0"
 
 repositories {
     mavenCentral()
