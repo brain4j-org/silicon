@@ -52,11 +52,6 @@ public record CudaContext(MemorySegment handle, CudaDevice device) implements Cu
     }
 
     @Override
-    public void syncThread() {
-        setCurrent();
-    }
-
-    @Override
     public BackendType backendType() {
         return BackendType.CUDA;
     }
