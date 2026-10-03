@@ -1,0 +1,7 @@
+dependencies {
+    implementation project(':silicon-api')
+}
+
+tasks.named("compileJava") {
+    dependsOn(":silicon-api:shadowJar")
+}
