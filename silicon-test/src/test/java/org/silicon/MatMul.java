@@ -1,7 +1,6 @@
 package org.silicon;
 
 import org.silicon.api.Silicon;
-import org.silicon.api.backend.BackendType;
 import org.silicon.api.device.*;
 import org.silicon.api.function.ComputeFunction;
 import org.silicon.api.function.ComputeModule;
@@ -48,7 +47,7 @@ public class MatMul {
         System.out.println("\n=== FP16 Tensor MatMul ===");
         
         ComputeModule module = compiler.compileFromResource("fp16/tensor_matmul_fp16.slang");
-        ComputeFunction function = module.getFunction("matmul");
+        ComputeFunction function = module.function("matmul");
         
         try (ComputeArena arena = context.createArena()) {
             ComputeBuffer A = arena.allocateArray(A_HOST);
@@ -71,7 +70,7 @@ public class MatMul {
         System.out.println("\n=== FP32 MatMul ===");
 
         ComputeModule module = compiler.compileFromResource("fp32/matmul_fp32.slang");
-        ComputeFunction function = module.getFunction("matmul");
+        ComputeFunction function = module.function("matmul");
 
         try (ComputeArena arena = context.createArena()) {
             ComputeBuffer A = arena.allocateArray(A_HOST);
@@ -96,7 +95,7 @@ public class MatMul {
         System.out.println("\n=== FP16 MatMul ===");
 
         ComputeModule module = compiler.compileFromResource("fp16/matmul_fp16.slang");
-        ComputeFunction function = module.getFunction("matmul");
+        ComputeFunction function = module.function("matmul");
 
         try (ComputeArena arena = context.createArena()) {
             ComputeBuffer A = arena.allocateHalf(A_HOST);

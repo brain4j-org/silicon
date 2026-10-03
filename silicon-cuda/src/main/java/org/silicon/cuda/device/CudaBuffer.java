@@ -9,7 +9,6 @@ import org.silicon.cuda.CudaObject;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 
 import static org.silicon.cuda.Bindings.*;
 
@@ -65,7 +64,7 @@ public class CudaBuffer implements CudaObject, ComputeBuffer, Freeable {
 
     @Override
     public void free() {
-        if (!isAlive()) return;
+        if (!alive()) return;
 
         try {
             int res = (int) CU_MEM_FREE.invokeExact(devicePtr);

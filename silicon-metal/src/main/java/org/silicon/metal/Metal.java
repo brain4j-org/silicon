@@ -31,7 +31,7 @@ public class Metal implements ComputeBackend {
     }
 
     @Override
-    public boolean isAvailable() {
+    public boolean available() {
         try {
             init();
             return Platform.isMacOS() && deviceCount() > 0;
@@ -64,7 +64,7 @@ public class Metal implements ComputeBackend {
     @Override
     public MetalDevice createDevice(int index) {
         try {
-            if (METAL_CREATE_SYSTEM_DEVICE == null || !isAvailable()) {
+            if (METAL_CREATE_SYSTEM_DEVICE == null || !available()) {
                 throw new IllegalStateException("This backend is not available on this platform: " + LOAD_FAILURES);
             }
 

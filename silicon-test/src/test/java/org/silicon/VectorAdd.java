@@ -44,7 +44,7 @@ public class VectorAdd {
         System.out.println("\n=== FP16 vector add ===");
         
         ComputeModule module = compiler.compileFromResource("fp16/vector_add_fp16.slang");
-        ComputeFunction function = module.getFunction("add");
+        ComputeFunction function = module.function("add");
         
         try (ComputeArena arena = context.createArena()) {
             ComputeBuffer a = arena.allocateHalf(A_HOST);
@@ -62,7 +62,7 @@ public class VectorAdd {
         System.out.println("\n=== FP32 vector add ===");
         
         ComputeModule module = compiler.compileFromResource("fp32/vector_add_fp32.slang");
-        ComputeFunction function = module.getFunction("add");
+        ComputeFunction function = module.function("add");
         
         try (ComputeArena arena = context.createArena()) {
             ComputeBuffer a = arena.allocateArray(A_HOST);

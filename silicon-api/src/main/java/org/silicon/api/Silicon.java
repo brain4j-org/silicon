@@ -34,7 +34,7 @@ public class Silicon {
                 continue;
             }
 
-            if (!backend.isAvailable()) {
+            if (!backend.available()) {
                 throw new SiliconException("Backend " + backend.type() + " is not available!");
             }
 
@@ -51,7 +51,7 @@ public class Silicon {
         ComputeBackend best = null;
 
         for (ComputeBackend backend : loader) {
-            if (!backend.isAvailable()) {
+            if (!backend.available()) {
                 continue;
             }
 

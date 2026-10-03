@@ -90,7 +90,7 @@ public class MetalBuffer implements MetalObject, ComputeBuffer {
 
     @Override
     public void free() {
-        if (!isAlive()) return;
+        if (!alive()) return;
 
         try {
             METAL_RELEASE_OBJECT.invokeExact(handle);

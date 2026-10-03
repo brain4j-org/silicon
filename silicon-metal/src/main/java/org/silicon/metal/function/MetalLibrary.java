@@ -21,7 +21,7 @@ public record MetalLibrary(MemorySegment handle) implements MetalObject, Compute
     );
 
     @Override
-    public MetalFunction getFunction(String name) {
+    public MetalFunction function(String name) {
         try (Arena arena = Arena.ofConfined()) {
             byte[] nameBytes = (name + "\0").getBytes(StandardCharsets.UTF_8);
             MemorySegment fnName = arena.allocate(nameBytes.length);

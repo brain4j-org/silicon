@@ -38,8 +38,8 @@ public class MetalEvent implements ComputeEvent {
     @Override
     public String toString() {
         return "MetalEvent{" +
-            "completed=" + isCompleted() +
-            ", failed=" + isFailed() +
+            "completed=" + done() +
+            ", failed=" + failed() +
             '}';
     }
 }

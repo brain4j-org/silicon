@@ -12,5 +12,5 @@ public interface ComputeModule {
      * @param name function name
      * @return compiled function handle
      */
-    ComputeFunction getFunction(String name);
+    ComputeFunction function(String name);
 }

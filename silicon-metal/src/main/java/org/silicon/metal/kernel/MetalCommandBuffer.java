@@ -88,7 +88,7 @@ public final class MetalCommandBuffer implements MetalObject, Freeable {
 
     @Override
     public void free() {
-        if (!isAlive()) return;
+        if (!alive()) return;
 
         try {
             METAL_RELEASE_OBJECT.invokeExact(handle);

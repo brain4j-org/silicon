@@ -9,9 +9,19 @@ package org.silicon.api.memory;
 public interface Freeable {
 
     /**
+     * @return current memory state
+     */
+    MemoryState state();
+
+    /**
+     * Releases the underlying resource.
+     */
+    void free();
+
+    /**
      * @return true if the resource is still alive
      */
-    default boolean isAlive() {
+    default boolean alive() {
         return state() == MemoryState.ALIVE;
     }
 
@@ -35,14 +45,4 @@ public interface Freeable {
 
         throw new IllegalStateException("Other " + freeable.getClass().getSimpleName() + " is not ALIVE! State: " + freeable.state());
     }
-
-    /**
-     * @return current memory state
-     */
-    MemoryState state();
-
-    /**
-     * Releases the underlying resource.
-     */
-    void free();
 }

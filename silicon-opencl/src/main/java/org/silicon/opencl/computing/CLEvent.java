@@ -27,7 +27,7 @@ public class CLEvent implements ComputeEvent {
     }
 
     @Override
-    public boolean isCompleted() {
+    public boolean done() {
         return callback.isDone();
     }
 
@@ -44,8 +44,8 @@ public class CLEvent implements ComputeEvent {
     @Override
     public String toString() {
         return "CLEvent{" +
-            "completed=" + isCompleted() +
-            ", failed=" + isFailed() +
+            "completed=" + done() +
+            ", failed=" + failed() +
             '}';
     }
 }

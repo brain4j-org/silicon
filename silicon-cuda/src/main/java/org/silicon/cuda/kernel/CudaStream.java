@@ -169,7 +169,7 @@ public final class CudaStream implements CudaObject, ComputeQueue, Freeable {
 
     @Override
     public void free() {
-        if (!isAlive()) return;
+        if (!alive()) return;
 
         try {
             int res = (int) CU_STREAM_DESTROY.invokeExact(handle);

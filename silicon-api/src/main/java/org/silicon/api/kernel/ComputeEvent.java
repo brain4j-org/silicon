@@ -11,14 +11,14 @@ public interface ComputeEvent {
     /**
      * @return true if the underlying future is completed
      */
-    default boolean isCompleted() {
+    default boolean done() {
         return future().isDone();
     }
 
     /**
      * @return true if the underlying future completed exceptionally
      */
-    default boolean isFailed() {
+    default boolean failed() {
         return future().isCompletedExceptionally();
     }
 

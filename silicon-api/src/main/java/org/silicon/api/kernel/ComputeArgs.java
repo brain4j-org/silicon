@@ -25,7 +25,7 @@ public class ComputeArgs {
             
             if (!(arg instanceof ComputeBuffer buffer)) continue;
             
-            if (!buffer.isAlive()) {
+            if (!buffer.alive()) {
                 throw new IllegalArgumentException("Buffer at %s is not alive".formatted(i));
             }
         }
@@ -60,7 +60,7 @@ public class ComputeArgs {
      * @return this, for chaining
      */
     public ComputeArgs buffer(ComputeBuffer buffer) {
-        if (!buffer.isAlive()) throw new IllegalArgumentException("Buffer is not alive");
+        if (!buffer.alive()) throw new IllegalArgumentException("Buffer is not alive");
 
         args.add(buffer);
         return this;

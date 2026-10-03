@@ -29,7 +29,7 @@ public class MemoryPool<K extends Record> {
         ArrayDeque<ComputeBuffer> q = free.get(key);
 
         ComputeBuffer value = (q != null && !q.isEmpty())
-            ? q.pollFirst() // if there is a match get it
+            ? q.pollFirst() // if there is a match, get it
             : allocator.get(); // allocate the new value
 
         return new Pooled(this, key, value);
@@ -49,6 +49,6 @@ public class MemoryPool<K extends Record> {
      * Frees all the buffers retained in this memory pool.
      */
     public void free() {
-        free.forEach((k, v) -> v.forEach(Freeable::free));
+        free.forEach((_, v) -> v.forEach(Freeable::free));
     }
 }

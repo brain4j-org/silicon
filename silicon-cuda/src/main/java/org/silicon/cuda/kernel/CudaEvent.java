@@ -105,8 +105,8 @@ public class CudaEvent implements ComputeEvent {
     @Override
     public String toString() {
         return "CudaEvent{" +
-            "completed=" + isCompleted() +
-            ", failed=" + isFailed() +
+            "completed=" + done() +
+            ", failed=" + failed() +
             '}';
     }
 }

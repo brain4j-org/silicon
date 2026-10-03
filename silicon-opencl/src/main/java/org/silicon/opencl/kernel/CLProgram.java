@@ -11,7 +11,7 @@ import java.nio.IntBuffer;
 public record CLProgram(long handle, long device) implements ComputeModule {
     
     @Override
-    public ComputeFunction getFunction(String name) {
+    public ComputeFunction function(String name) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer result = stack.mallocInt(1);
             

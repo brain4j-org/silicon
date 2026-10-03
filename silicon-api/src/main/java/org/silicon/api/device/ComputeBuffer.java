@@ -21,7 +21,7 @@ public interface ComputeBuffer extends Freeable {
 
     /**
      * Copies this buffer into another buffer.
-     * Both buffers must be {@link #isAlive() alive}.
+     * Both buffers must be {@link #alive() alive}.
      * @param other destination buffer
      * @return the destination buffer (for chaining)
      */
@@ -135,5 +135,17 @@ public interface ComputeBuffer extends Freeable {
         short[] tmp = new short[data.length];
         BitUtils.half2Float(get(tmp), data);
         return data;
+    }
+
+    /**
+     * Writes float data converting it to FP16 (half).
+     * <p>
+     * Internally converts via {@link BitUtils} into a short array and writes it.
+     * @param data source float array
+     */
+    default void writeHalf(float[] data) {
+        short[] tmp = new short[data.length];
+        BitUtils.float2Half(data, tmp);
+        write(tmp);
     }
 }

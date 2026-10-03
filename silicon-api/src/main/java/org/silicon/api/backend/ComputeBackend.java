@@ -16,7 +16,7 @@ public interface ComputeBackend {
     /**
      * @return true if this backend is available on the current system
      */
-    boolean isAvailable();
+    boolean available();
 
     /**
      * @return backend type

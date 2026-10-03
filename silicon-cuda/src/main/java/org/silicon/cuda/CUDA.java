@@ -34,7 +34,7 @@ public class CUDA implements ComputeBackend {
     }
     
     @Override
-    public boolean isAvailable() {
+    public boolean available() {
         if (Platform.isMacOS()) return false;
 
         try {

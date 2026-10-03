@@ -16,7 +16,7 @@ import static org.silicon.cuda.Bindings.*;
 public record CudaModule(MemorySegment handle, CudaContext context) implements CudaObject, ComputeModule {
 
     @Override
-    public CudaFunction getFunction(String name) {
+    public CudaFunction function(String name) {
         try (Arena arena = Arena.ofConfined()) {
             byte[] nameBytes = (name + "\0").getBytes(StandardCharsets.UTF_8);
             MemorySegment cName = arena.allocate(nameBytes.length);

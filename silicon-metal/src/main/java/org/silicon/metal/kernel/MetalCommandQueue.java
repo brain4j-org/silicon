@@ -254,7 +254,7 @@ public final class MetalCommandQueue implements MetalObject, ComputeQueue, Freea
 
     @Override
     public void free() {
-        if (!isAlive()) return;
+        if (!alive()) return;
 
         try {
             METAL_RELEASE_OBJECT.invokeExact(handle);

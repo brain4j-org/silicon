@@ -66,7 +66,7 @@ public class OpenCL implements ComputeBackend {
     }
     
     @Override
-    public boolean isAvailable() {
+    public boolean available() {
         return getPlatformCount() > 0;
     }
     
