@@ -48,15 +48,14 @@ public class Bindings {
 
         map.put("hipError_t", HIP_ERROR);
         map.put("hipDevice_t", HIP_DEVICE);
-        map.put("CUdeviceptr", HIP_DEVICE_PTR);
+        map.put("hipDeviceptr_t", HIP_DEVICE_PTR);
         map.put("hipDeviceAttribute_t", JAVA_INT);
-        map.put("CUfunction_attribute", JAVA_INT);
-
-        map.put("CUcontext", HIP_CONTEXT);
-        map.put("CUstream", HIP_STREAM);
-        map.put("CUmodule", HIP_MODULE);
-        map.put("CUfunction", HIP_FUNCTION);
-        map.put("CUevent", ADDRESS);
+        map.put("hipFunction_attribute", JAVA_INT);
+        map.put("hipCtx_t", HIP_CONTEXT);
+        map.put("hipStream_t", HIP_STREAM);
+        map.put("hipModule_t", HIP_MODULE);
+        map.put("hipFunction_t", HIP_FUNCTION);
+        map.put("hipEvent_t", ADDRESS);
 
         TYPES = Collections.unmodifiableMap(map);
     }
@@ -81,84 +80,86 @@ public class Bindings {
     public static final MethodHandle HIP_DEVICE_GET_NAME =
             fromHeader("hipError_t hipDeviceGetName(char *name, int len, hipDevice_t device)");
 
-    // TODO
-    public static final MethodHandle HIP_CTX_CREATE =
-            fromHeader("hipError_t cuCtxCreate_v2(CUcontext* pctx, unsigned int flags, CUdevice dev)");
-
     public static final MethodHandle HIP_DEVICE_TOTAL_MEM =
-            fromHeader("hipError_t cuDeviceTotalMem(size_t* bytes, CUdevice dev)");
+            fromHeader("hipError_t hipDeviceTotalMem(size_t* bytes, hipDevice_t dev)");
 
     public static final MethodHandle HIP_DEVICE_GET_ATTRIBUTE =
             fromHeader("hipError_t hipDeviceGetAttribute(int *pi, hipDeviceAttribute_t attr, int deviceId)");
 
+    public static final MethodHandle HIP_CTX_CREATE =
+            fromHeader("hipError_t hipCtxCreate(hipCtx_t *ctx, unsigned int flags, hipDevice_t device)");
+
     public static final MethodHandle HIP_CTX_SYNCHRONIZE =
-            fromHeader("hipError_t cuCtxSynchronize()");
+            fromHeader("hipError_t hipCtxSynchronize()");
 
     public static final MethodHandle HIP_CTX_SET_CURRENT =
-            fromHeader("hipError_t cuCtxSetCurrent(CUcontext ctx)");
+            fromHeader("hipError_t hipCtxSetCurrent(hipCtx_t ctx)");
 
     public static final MethodHandle HIP_STREAM_CREATE =
-            fromHeader("hipError_t cuStreamCreate(CUstream* phStream, unsigned int flags)");
+            fromHeader("hipError_t hipStreamCreate(hipStream_t *stream)");
 
     public static final MethodHandle HIP_STREAM_DESTROY =
-            fromHeader("hipError_t cuStreamDestroy_v2(CUstream stream)");
+            fromHeader("hipError_t hipStreamDestroy(hipStream_t stream)");
 
     public static final MethodHandle HIP_STREAM_SYNCHRONIZE =
-            fromHeader("hipError_t cuStreamSynchronize(CUstream stream)");
+            fromHeader("hipError_t hipStreamSynchronize(hipStream_t stream)");
 
     public static final MethodHandle HIP_MEM_ALLOC =
-            fromHeader("hipError_t cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize)");
+            fromHeader("hipError_t hipMalloc(void** ptr, size_t size)");
 
     public static final MethodHandle HIP_MEM_FREE =
-            fromHeader("hipError_t cuMemFree_v2(CUdeviceptr dptr)");
+            fromHeader("hipError_t hipFree(void* ptr)");
 
     public static final MethodHandle HIP_MEMCPY_HTOD =
-            fromHeader("hipError_t cuMemcpyHtoD_v2(CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount)");
+            fromHeader("hipError_t hipMemcpyHtoD(hipDeviceptr_t dst, const void *src, size_t sizeBytes)");
 
     public static final MethodHandle HIP_MEMCPY_DTOH =
-            fromHeader("hipError_t cuMemcpyDtoH_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount)");
+            fromHeader("hipError_t hipMemcpyDtoH(void *dst, hipDeviceptr_t src, size_t sizeBytes)");
 
     public static final MethodHandle HIP_MEMCPY_DTOD =
-            fromHeader("hipError_t cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount)");
+            fromHeader("hipError_t hipMemcpyDtoD(hipDeviceptr_t dst, hipDeviceptr_t src, size_t sizeBytes)");
 
     public static final MethodHandle HIP_MEMCPY_HTOD_ASYNC =
-            fromHeader("hipError_t cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount, CUstream hStream)");
+            fromHeader("hipError_t hipMemcpyHtoDAsync(hipDeviceptr_t dst, const void *src, size_t sizeBytes, hipStream_t stream)");
 
     public static final MethodHandle HIP_MEMCPY_DTOH_ASYNC =
-            fromHeader("hipError_t cuMemcpyDtoHAsync_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream)");
+            fromHeader("hipError_t hipMemcpyDtoHAsync(void *dst, hipDeviceptr_t src, size_t sizeBytes, hipStream_t stream)");
 
     public static final MethodHandle HIP_MEMCPY_DTOD_ASYNC =
-            fromHeader("hipError_t cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream)");
+            fromHeader("hipError_t hipMemcpyDtoDAsync(hipDeviceptr_t dst, hipDeviceptr_t src, size_t sizeBytes, hipStream_t stream)");
 
     public static final MethodHandle HIP_MODULE_LOAD =
-            fromHeader("hipError_t cuModuleLoad(CUmodule* module, const char* fname)");
+            fromHeader("hipError_t hipModuleLoad(hipModule_t* module, const char* fname)");
 
     public static final MethodHandle HIP_MODULE_LOAD_DATA =
-            fromHeader("hipError_t cuModuleLoadData(CUmodule* module, const void* image)");
+            fromHeader("hipError_t hipModuleLoadData(hipModule_t* module, const void* image)");
 
     public static final MethodHandle HIP_MODULE_GET_FUNCTION =
-            fromHeader("hipError_t cuModuleGetFunction(CUfunction* hfunc, CUmodule hmod, const char* name)");
+            fromHeader("hipError_t hipModuleGetFunction(hipFunction_t* function, hipModule_t module, const char* kname)");
 
     public static final MethodHandle HIP_FUNC_GET_ATTRIBUTE =
-            fromHeader("hipError_t cuFuncGetAttribute(int* pi, CUfunction_attribute attrib, CUfunction hfunc)");
+            fromHeader("hipError_t hipFuncGetAttribute(int* value, hipFunction_attribute attrib, hipFunction_t hfunc)");
 
     public static final MethodHandle HIP_EVENT_CREATE =
-            fromHeader("hipError_t cuEventCreate(CUevent* phEvent, unsigned int Flags)");
+            fromHeader("hipError_t hipEventCreate(hipEvent_t* event)");
+
+    public static final MethodHandle HIP_EVENT_CREATE_WITH_FLAGS =
+            fromHeader("hipError_t hipEventCreateWithFlags(hipEvent_t* event, unsigned int flags)");
 
     public static final MethodHandle HIP_EVENT_RECORD =
-            fromHeader("hipError_t cuEventRecord(CUevent hEvent, CUstream hStream)");
+            fromHeader("hipError_t hipEventRecord(hipEvent_t event, hipStream_t stream)");
 
     public static final MethodHandle HIP_EVENT_QUERY =
-            fromHeader("hipError_t cuEventQuery(CUevent hEvent)");
+            fromHeader("hipError_t hipEventQuery(hipEvent_t event)");
 
     public static final MethodHandle HIP_EVENT_SYNCHRONIZE =
-            fromHeader("hipError_t cuEventSynchronize(CUevent hEvent)");
+            fromHeader("hipError_t hipEventSynchronize(hipEvent_t event)");
 
     public static final MethodHandle HIP_EVENT_DESTROY =
-            fromHeader("hipError_t cuEventDestroy(CUevent hEvent)");
+            fromHeader("hipError_t hipEventDestroy(hipEvent_t event)");
 
     public static final MethodHandle HIP_LAUNCH_KERNEL =
-            fromHeader("hipError_t cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void** kernelParams, void** extra)");
+            fromHeader("hipError_t hipModuleLaunchKernel(hipFunction_t f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, hipStream_t stream, void** kernelParams, void** extra)");
 
     public static MethodHandle fromHeader(String header) {
         Matcher result = PROTOTYPE.matcher(header);
