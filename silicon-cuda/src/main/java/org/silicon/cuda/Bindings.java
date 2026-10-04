@@ -62,7 +62,7 @@ public class Bindings {
     }
 
     private static final Pattern PROTOTYPE = Pattern.compile(
-        "^\\s*(?<ret>.*?)\\s+(?:CUDAAPI\\s+)?(?<name>[A-Za-z_][A-Za-z0-9_]*)\\s*\\((?<params>.*)\\)\\s*;?\\s*$",
+        "\\s*(?<ret>.*?)\\s+(?<name>\\w+)\\s*\\((?<params>.*)\\)\\s*;?\\s*",
         Pattern.DOTALL
     );
 
